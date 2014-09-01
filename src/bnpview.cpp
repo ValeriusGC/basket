@@ -96,7 +96,7 @@
 
 const int BNPView::c_delayTooltipTime = 275;
 
-BNPView::BNPView(QWidget *parent, const char *name, KXMLGUIClient *aGUIClient,
+BNPView::BNPView(QWidget *parent, const char *name, QMainWindow *aGUIClient,
                  KActionCollection *actionCollection, BasketStatusBar *bar)
         : QSplitter(Qt::Horizontal, parent)
         , m_actLockBasket(0)
@@ -2007,36 +2007,37 @@ KMenu* BNPView::popupMenu(const QString &menuName)
     // When running in kontact and likeback Information message is shown
     // factory is 0. Don't show error then and don't crash either :-)
 
-    if (m_guiClient) {
-        KXMLGUIFactory* factory = m_guiClient->factory();
-        if (factory) {
-            menu = (KMenu *)factory->container(menuName, m_guiClient);
-        } else
+//    if (m_guiClient) {
+//        KXMLGUIFactory* factory = m_guiClient->factory();
+//        if (factory) {
+//            menu = (KMenu *)factory->container(menuName, m_guiClient);
+//        } else
             hack = isPart();
-    }
-    if (menu == 0) {
-        if (!hack) {
-            KStandardDirs stdDirs;
-            const KAboutData *aboutData = KGlobal::mainComponent().aboutData();
-            KMessageBox::error(this, i18n(
-                                   "<p><b>The file basketui.rc seems to not exist or is too old.<br>"
-                                   "%1 cannot run without it and will stop.</b></p>"
-                                   "<p>Please check your installation of %2.</p>"
-                                   "<p>If you do not have administrator access to install the application "
-                                   "system wide, you can copy the file basketui.rc from the installation "
-                                   "archive to the folder <a href='file://%3'>%4</a>.</p>"
-                                   "<p>As last ressort, if you are sure the application is correctly installed "
-                                   "but you had a preview version of it, try to remove the "
-                                   "file %5basketui.rc</p>",
-                                   aboutData->programName(), aboutData->programName(),
-                                   stdDirs.saveLocation("data", "basket/"), stdDirs.saveLocation("data", "basket/"), stdDirs.saveLocation("data", "basket/")),
-                               i18n("Resource not Found"), KMessageBox::AllowLink);
-        }
-        if (!isPart())
-            exit(1); // We SHOULD exit right now and abord everything because the caller except menu != 0 to not crash.
-        else
-            menu = new KMenu; // When running in kpart we cannot exit
-    }
+//    }
+//    if (menu == 0) {
+//        if (!hack) {
+//            KStandardDirs stdDirs;
+//            const KAboutData *aboutData = KGlobal::mainComponent().aboutData();
+//            KMessageBox::error(this, i18n(
+//                                   "<p><b>The file basketui.rc seems to not exist or is too old.<br>"
+//                                   "%1 cannot run without it and will stop.</b></p>"
+//                                   "<p>Please check your installation of %2.</p>"
+//                                   "<p>If you do not have administrator access to install the application "
+//                                   "system wide, you can copy the file basketui.rc from the installation "
+//                                   "archive to the folder <a href='file://%3'>%4</a>.</p>"
+//                                   "<p>As last ressort, if you are sure the application is correctly installed "
+//                                   "but you had a preview version of it, try to remove the "
+//                                   "file %5basketui.rc</p>",
+//                                   aboutData->programName(), aboutData->programName(),
+//                                   stdDirs.saveLocation("data", "basket/"), stdDirs.saveLocation("data", "basket/"), stdDirs.saveLocation("data", "basket/")),
+//                               i18n("Resource not Found"), KMessageBox::AllowLink);
+//        }
+//        if (!isPart())
+//            exit(1); // We SHOULD exit right now and abord everything because the caller except menu != 0 to not crash.
+//        else
+//            menu = new KMenu; // When running in kpart we cannot exit
+//    }
+            menu = new KMenu();
     return menu;
 }
 

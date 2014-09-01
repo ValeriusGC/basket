@@ -26,6 +26,7 @@
 #include <QtGui/QSplitter>
 
 #include <KDE/KXMLGUIClient>
+#include <QMainWindow>
 
 #include "global.h"
 #include "basket_export.h"
@@ -70,7 +71,7 @@ class BASKET_EXPORT BNPView : public QSplitter
     Q_CLASSINFO("D Bus Interface", "org.basket.dbus");
 public:
     /// CONSTRUCTOR AND DESTRUCTOR:
-    BNPView(QWidget *parent, const char *name, KXMLGUIClient *aGUIClient,
+    BNPView(QWidget *parent, const char *name, QMainWindow *aGUIClient,
             KActionCollection *actionCollection, BasketStatusBar *bar);
     ~BNPView();
     /// MANAGE CONFIGURATION EVENTS!:
@@ -382,7 +383,7 @@ private:
     NoteSelection *m_passiveDroppedSelection;
     static const int c_delayTooltipTime;
     KActionCollection *m_actionCollection;
-    KXMLGUIClient *m_guiClient;
+    QMainWindow *m_guiClient;
     BasketStatusBar *m_statusbar;
     QTimer             *m_tryHideTimer;
     QTimer             *m_hideTimer;

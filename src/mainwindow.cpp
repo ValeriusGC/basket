@@ -50,62 +50,64 @@
 /** Container */
 
 MainWindow::MainWindow(QWidget *parent)
-        : KXmlGuiWindow(parent), m_settings(0), m_quit(false)
+        : QMainWindow(parent), m_settings(0), m_quit(false)
 {
-    BasketStatusBar* bar = new BasketStatusBar(statusBar());
-    m_baskets = new BNPView(this, "BNPViewApp", this, actionCollection(), bar);
+    KStatusBar* statusbar = new KStatusBar(this);
+    BasketStatusBar* bar = new BasketStatusBar(statusbar);
+    ac = new KActionCollection(parent);
+    m_baskets = new BNPView(this, "BNPViewApp", this, ac, bar);
     setCentralWidget(m_baskets);
 
     setupActions();
-    statusBar()->show();
-    statusBar()->setSizeGripEnabled(true);
+//    statusBar()->show();
+//    statusBar()->setSizeGripEnabled(true);
 
-    setAutoSaveSettings(/*groupName=*/QString::fromLatin1("MainWindow"), /*saveWindowSize=*//*FIXME:false:Why was it false??*/true);
+//    setAutoSaveSettings(/*groupName=*/QString::fromLatin1("MainWindow"), /*saveWindowSize=*//*FIXME:false:Why was it false??*/true);
 
 //  m_actShowToolbar->setChecked(   toolBar()->isVisible()   );
     m_actShowStatusbar->setChecked(statusBar()->isVisible());
     connect(m_baskets,      SIGNAL(setWindowCaption(const QString &)), this, SLOT(setCaption(const QString &)));
 
 //  InlineEditors::instance()->richTextToolBar();
-    setStandardToolBarMenuEnabled(true);
+//    setStandardToolBarMenuEnabled(true);
 
-    createGUI("basketui.rc");
-    KConfigGroup group = KGlobal::config()->group(autoSaveGroup());
-    applyMainWindowSettings(group);
+//    createGUI("basketui.rc");
+//    KConfigGroup group = KGlobal::config()->group(autoSaveGroup());
+//    applyMainWindowSettings(group);
 }
 
 MainWindow::~MainWindow()
 {
-    KConfigGroup group = KGlobal::config()->group(autoSaveGroup());
-    saveMainWindowSettings(group);
+//    KConfigGroup group = KGlobal::config()->group(autoSaveGroup());
+//    saveMainWindowSettings(group);
     delete m_settings;
     delete m_baskets;
 }
 
 void MainWindow::setupActions()
 {
-    actQuit         = KStandardAction::quit(this, SLOT(quit()), actionCollection());
+    actQuit         = KStandardAction::quit(this, SLOT(quit()), ac);
     KAction *a = NULL;
-    a = actionCollection()->addAction("minimizeRestore", this,
+    a = ac->addAction("minimizeRestore", this,
                                       SLOT(minimizeRestore()));
     a->setText(i18n("Minimize"));
     a->setIcon(KIcon(""));
     a->setShortcut(0);
 
     /** Settings : ************************************************************/
-//  m_actShowToolbar   = KStandardAction::showToolbar(   this, SLOT(toggleToolBar()),   actionCollection());
-    m_actShowStatusbar = KStandardAction::showStatusbar(this, SLOT(toggleStatusBar()), actionCollection());
+//  m_actShowToolbar   = KStandardAction::showToolbar(   this, SLOT(toggleToolBar()),   ac);
+    m_actShowStatusbar = KStandardAction::showStatusbar(this, SLOT(toggleStatusBar()), ac);
 
 //  m_actShowToolbar->setCheckedState( KGuiItem(i18n("Hide &Toolbar")) );
 
-    (void) KStandardAction::keyBindings(this, SLOT(showShortcutsSettingsDialog()), actionCollection());
+    (void) KStandardAction::keyBindings(this, SLOT(showShortcutsSettingsDialog()), ac);
 
-    (void) KStandardAction::configureToolbars(this, SLOT(configureToolbars()), actionCollection());
+    (void) KStandardAction::configureToolbars(this, SLOT(configureToolbars()), ac);
 
-    //KAction *actCfgNotifs = KStandardAction::configureNotifications(this, SLOT(configureNotifications()), actionCollection() );
+    //KAction *actCfgNotifs = KStandardAction::configureNotifications(this, SLOT(configureNotifications()), ac );
     //actCfgNotifs->setEnabled(false); // Not yet implemented !
 
-    actAppConfig = KStandardAction::preferences(this, SLOT(showSettingsDialog()), actionCollection());
+    actAppConfig = KStandardAction::preferences(this, SLOT(showSettingsDialog()), ac);
 }
 
 /*void MainWindow::toggleToolBar()
@@ -125,16 +127,16 @@ void MainWindow::toggleStatusBar()
     else
         statusBar()->show();
 
-    KConfigGroup group = KGlobal::config()->group(autoSaveGroup());
-    saveMainWindowSettings(group);
+//    KConfigGroup group = KGlobal::config()->group(autoSaveGroup());
+//    saveMainWindowSettings(group);
 }
 
 void MainWindow::configureToolbars()
 {
-    KConfigGroup group = KGlobal::config()->group(autoSaveGroup());
-    saveMainWindowSettings(group);
+//    KConfigGroup group = KGlobal::config()->group(autoSaveGroup());
+//    saveMainWindowSettings(group);
 
-    KEditToolBar dlg(actionCollection());
+    KEditToolBar dlg(ac);
     connect(&dlg, SIGNAL(newToolbarConfig()), this, SLOT(slotNewToolbarConfig()));
     dlg.exec();
 }
@@ -149,13 +151,12 @@ void MainWindow::configureNotifications()
 void MainWindow::slotNewToolbarConfig() // This is called when OK or Apply is clicked
 {
     // ...if you use any action list, use plugActionList on each here...
-    createGUI("basketui.rc"); // TODO: Reconnect tags menu aboutToShow() ??
     if (!Global::bnpView->isPart())
         Global::bnpView->connectTagsMenu(); // The Tags menu was created again!
     // TODO: Does this do anything?
-    plugActionList(QString::fromLatin1("go_baskets_list"), actBasketsList);
-    KConfigGroup group = KGlobal::config()->group(autoSaveGroup());
-    applyMainWindowSettings(group);
+//    plugActionList(QString::fromLatin1("go_baskets_list"), actBasketsList);
+//    KConfigGroup group = KGlobal::config()->group(autoSaveGroup());
+//    applyMainWindowSettings(group);
 }
 
 void MainWindow::showSettingsDialog()
@@ -172,7 +173,7 @@ void MainWindow::showSettingsDialog()
 
 void MainWindow::showShortcutsSettingsDialog()
 {
-    KShortcutsDialog::configure(actionCollection());
+    KShortcutsDialog::configure(ac);
     //.setCaption(..)
     //actionCollection()->writeSettings();
 }
@@ -199,8 +200,6 @@ void MainWindow::ensurePolished()
         //resize(Settings::mainWindowSize());
     }
 
-    KXmlGuiWindow::ensurePolished();
-
     if (shouldSave) {
 //      kDebug() << "Main Window Position: Save size and position in show(x="
 //                << pos().x() << ", y=" << pos().y()
@@ -221,7 +220,7 @@ void MainWindow::resizeEvent(QResizeEvent *event)
 
     // Added to make it work (previous lines do not work):
     //saveMainWindowSettings( KGlobal::config(), autoSaveGroup() );
-    KXmlGuiWindow::resizeEvent(event);
+    QMainWindow::resizeEvent(event);
 }
 
 void MainWindow::moveEvent(QMoveEvent *event)
@@ -232,7 +231,7 @@ void MainWindow::moveEvent(QMoveEvent *event)
 
     // Added to make it work (previous lines do not work):
     //saveMainWindowSettings( KGlobal::config(), autoSaveGroup() );
-    KXmlGuiWindow::moveEvent(event);
+    QMainWindow::moveEvent(event);
 }
 
 bool MainWindow::queryExit()
