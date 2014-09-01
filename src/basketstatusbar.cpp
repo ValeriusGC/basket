@@ -21,8 +21,7 @@
 #include "basketstatusbar.h"
 
 #include <KDE/KLocale>
-#include <KDE/KStatusBar>
-#include <KParts/StatusBarExtension>
+#include <QStatusBar>
 
 #include <QtCore/QObject>
 #include <QtGui/QLabel>
@@ -34,13 +33,8 @@
 #include "basketscene.h"
 #include "tools.h"
 
-BasketStatusBar::BasketStatusBar(KStatusBar *bar)
-        : m_bar(bar), m_extension(0), m_selectionStatus(0), m_lockStatus(0), m_basketStatus(0), m_savedStatus(0)
-{
-}
-
-BasketStatusBar::BasketStatusBar(KParts::StatusBarExtension *extension)
-        : m_bar(0), m_extension(extension), m_selectionStatus(0), m_lockStatus(0), m_basketStatus(0), m_savedStatus(0)
+BasketStatusBar::BasketStatusBar(QStatusBar *bar)
+        : m_bar(bar), m_selectionStatus(0), m_lockStatus(0), m_basketStatus(0), m_savedStatus(0)
 {
 }
 
@@ -49,19 +43,14 @@ BasketStatusBar::~BasketStatusBar()
     //delete m_extension;
 }
 
-KStatusBar *BasketStatusBar::statusBar() const
+QStatusBar *BasketStatusBar::statusBar() const
 {
-    if (m_extension)
-        return m_extension->statusBar();
-    else
-        return m_bar;
+    return m_bar;
 }
 
 void BasketStatusBar::addWidget(QWidget * widget, int stretch, bool permanent)
 {
-    if (m_extension)
-        m_extension->addStatusBarItem(widget, stretch, permanent);
-    else if (permanent)
+    if (permanent)
         m_bar->addPermanentWidget(widget, stretch);
     else
         m_bar->addWidget(widget, stretch);

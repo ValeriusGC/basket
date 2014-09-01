@@ -20,16 +20,17 @@
 
 #include "mainwindow.h"
 
-#include <QtGui/QMoveEvent>
-#include <QtGui/QResizeEvent>
+#include <QMoveEvent>
+#include <QResizeEvent>
+#include <QToolBar>
 
 #include <KDE/KAction>
 #include <KDE/KApplication>
-#include <KDE/KLocale>
+#include <QLocale>
 #include <KDE/KEditToolBar>
-#include <KDE/KStatusBar>
+#include <QStatusBar>
 #include <KDE/KDebug>
-#include <KDE/KMessageBox>
+#include <QMessageBox>
 #include <KDE/KConfig>
 #include <KDE/KAboutData>
 #include <KDE/KShortcutsDialog>
@@ -52,26 +53,26 @@
 MainWindow::MainWindow(QWidget *parent)
         : QMainWindow(parent), m_settings(0), m_quit(false)
 {
-    KStatusBar* statusbar = new KStatusBar(this);
-    BasketStatusBar* bar = new BasketStatusBar(statusbar);
+    BasketStatusBar* bar = new BasketStatusBar(statusBar());
+    m_mainToolBar = addToolBar("Main");
+    m_editToolBar = addToolBar("Edit");
     ac = new KActionCollection(parent);
-    m_baskets = new BNPView(this, "BNPViewApp", this, ac, bar);
+    m_baskets = new BNPView(this, "BNPViewApp", this, ac, bar, m_mainToolBar, m_editToolBar);
     setCentralWidget(m_baskets);
 
     setupActions();
-//    statusBar()->show();
-//    statusBar()->setSizeGripEnabled(true);
+    statusBar()->show();
+    statusBar()->setSizeGripEnabled(true);
 
 //    setAutoSaveSettings(/*groupName=*/QString::fromLatin1("MainWindow"), /*saveWindowSize=*//*FIXME:false:Why was it false??*/true);
 
-//  m_actShowToolbar->setChecked(   toolBar()->isVisible()   );
-    m_actShowStatusbar->setChecked(statusBar()->isVisible());
+//    m_actShowToolbar->setChecked(m_mainToolBar->isVisible());
+//    m_actShowStatusbar->setChecked(statusBar()->isVisible());
     connect(m_baskets,      SIGNAL(setWindowCaption(const QString &)), this, SLOT(setCaption(const QString &)));
 
 //  InlineEditors::instance()->richTextToolBar();
 //    setStandardToolBarMenuEnabled(true);
 
-//    createGUI("basketui.rc");
 //    KConfigGroup group = KGlobal::config()->group(autoSaveGroup());
 //    applyMainWindowSettings(group);
 }
@@ -90,15 +91,15 @@ void MainWindow::setupActions()
     KAction *a = NULL;
     a = ac->addAction("minimizeRestore", this,
                                       SLOT(minimizeRestore()));
-    a->setText(i18n("Minimize"));
+    a->setText(tr("Minimize"));
     a->setIcon(KIcon(""));
     a->setShortcut(0);
 
     /** Settings : ************************************************************/
-//  m_actShowToolbar   = KStandardAction::showToolbar(   this, SLOT(toggleToolBar()),   ac);
-    m_actShowStatusbar = KStandardAction::showStatusbar(this, SLOT(toggleStatusBar()), ac);
+//    m_actShowToolbar   = KStandardAction::showToolbar(   this, SLOT(toggleToolBar()),   ac);
+//    m_actShowStatusbar = KStandardAction::showStatusbar(this, SLOT(toggleStatusBar()), ac);
 
-//  m_actShowToolbar->setCheckedState( KGuiItem(i18n("Hide &Toolbar")) );
+//    m_actShowToolbar->setCheckedState( KGuiItem(tr("Hide &Toolbar")) );
 
     (void) KStandardAction::keyBindings(this, SLOT(showShortcutsSettingsDialog()), ac);
 
@@ -110,15 +111,15 @@ void MainWindow::setupActions()
     actAppConfig = KStandardAction::preferences(this, SLOT(showSettingsDialog()), ac);
 }
 
-/*void MainWindow::toggleToolBar()
+void MainWindow::toggleToolBar()
 {
-    if (toolBar()->isVisible())
-        toolBar()->hide();
+    if (m_mainToolBar->isVisible())
+        m_mainToolBar->hide();
     else
-        toolBar()->show();
+        m_mainToolBar->show();
 
-    saveMainWindowSettings( KGlobal::config(), autoSaveGroup() );
-}*/
+//    saveMainWindowSettings( KGlobal::config(), autoSaveGroup() );
+}
 
 void MainWindow::toggleStatusBar()
 {
@@ -268,18 +269,15 @@ bool MainWindow::queryClose()
 
 bool MainWindow::askForQuit()
 {
-    QString message = i18n("<p>Do you really want to quit %1?</p>", KGlobal::mainComponent().aboutData()->programName());
+    QString message = tr("<p>Do you really want to quit %1?</p>").arg(KGlobal::mainComponent().aboutData()->programName());
     if (Settings::useSystray())
-        message += i18n("<p>Notice that you do not have to quit the application before ending your KDE session. "
+        message += tr("<p>Notice that you do not have to quit the application before ending your KDE session. "
                         "If you end your session while the application is still running, the application will be reloaded the next time you log in.</p>");
 
-    int really = KMessageBox::warningContinueCancel(this, message,
-                 i18n("Quit Confirm"),
-                 KStandardGuiItem::quit(),
-                 KStandardGuiItem::cancel(),
-                 "confirmQuitAsking");
+    int really = QMessageBox::warning(this, tr("Quit Confirm"), message,
+                                      QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Cancel);
 
-    if (really == KMessageBox::Cancel) {
+    if (really == QMessageBox::Cancel) {
         m_quit = false;
         return false;
     }
