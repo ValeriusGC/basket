@@ -490,9 +490,9 @@ void BNPView::setupActions()
     /** Note : ****************************************************************/
     m_tagsMenu = m_guiClient->menuBar()->addMenu("&Tags");
 
-
     /** Insert : **************************************************************/
     m1 = m_guiClient->menuBar()->addMenu("&Insert");
+    m_insertMenu = m1;
 
     QSignalMapper *insertEmptyMapper  = new QSignalMapper(this);
     QSignalMapper *insertWizardMapper = new QSignalMapper(this);
@@ -641,7 +641,7 @@ void BNPView::slotContextMenu(const QPoint &pos)
         setNewBasketPopup();
     }
 
-    KMenu *menu = popupMenu(menuName);
+    QMenu *menu = popupMenu(menuName);
     connect(menu, SIGNAL(aboutToHide()),  this, SLOT(aboutToHideNewBasketPopup()));
     menu->exec(m_tree->mapToGlobal(pos));
 }
@@ -1666,45 +1666,12 @@ void BNPView::slotConvertTexts()
         KMessageBox::information(this, i18n("There are no plain text notes to convert."), i18n("Conversion Finished"));
 }
 
-KMenu* BNPView::popupMenu(const QString &menuName)
+QMenu* BNPView::popupMenu(const QString &menuName)
 {
-    KMenu *menu = 0;
-    bool hack = false; // TODO fix this
-    // When running in kontact and likeback Information message is shown
-    // factory is 0. Don't show error then and don't crash either :-)
-
-//    if (m_guiClient) {
-//        KXMLGUIFactory* factory = m_guiClient->factory();
-//        if (factory) {
-//            menu = (KMenu *)factory->container(menuName, m_guiClient);
-//        } else
-            hack = isPart();
-//    }
-//    if (menu == 0) {
-//        if (!hack) {
-//            KStandardDirs stdDirs;
-//            const KAboutData *aboutData = KGlobal::mainComponent().aboutData();
-//            KMessageBox::error(this, i18n(
-//                                   "<p><b>The file basketui.rc seems to not exist or is too old.<br>"
-//                                   "%1 cannot run without it and will stop.</b></p>"
-//                                   "<p>Please check your installation of %2.</p>"
-//                                   "<p>If you do not have administrator access to install the application "
-//                                   "system wide, you can copy the file basketui.rc from the installation "
-//                                   "archive to the folder <a href='file://%3'>%4</a>.</p>"
-//                                   "<p>As last ressort, if you are sure the application is correctly installed "
-//                                   "but you had a preview version of it, try to remove the "
-//                                   "file %5basketui.rc</p>",
-//                                   aboutData->programName(), aboutData->programName(),
-//                                   stdDirs.saveLocation("data", "basket/"), stdDirs.saveLocation("data", "basket/"), stdDirs.saveLocation("data", "basket/")),
-//                               i18n("Resource not Found"), KMessageBox::AllowLink);
-//        }
-//        if (!isPart())
-//            exit(1); // We SHOULD exit right now and abord everything because the caller except menu != 0 to not crash.
-//        else
-//            menu = new KMenu; // When running in kpart we cannot exit
-//    }
-            menu = new KMenu();
-    return menu;
+//    if (menuName == "tags")
+//        return m_tagsMenu;
+// TODO fix
+    return new QMenu();
 }
 
 void BNPView::showHideFilterBar(bool show, bool switchFocus)
@@ -2550,7 +2517,7 @@ void BNPView::showMainWindow()
 
 void BNPView::populateTagsMenu()
 {
-    KMenu *menu = (KMenu*)(popupMenu("tags"));
+    QMenu *menu = popupMenu("tags");
     if (menu == 0 || currentBasket() == 0) // TODO: Display a messagebox. [menu is 0, surely because on first launch, the XMLGUI does not work!]
         return;
     menu->clear();
@@ -2567,7 +2534,7 @@ void BNPView::populateTagsMenu()
 //  connect( menu, SIGNAL(aboutToHide()), this, SLOT(disconnectTagsMenu()) );
 }
 
-void BNPView::populateTagsMenu(KMenu &menu, Note *referenceNote)
+void BNPView::populateTagsMenu(QMenu &menu, Note *referenceNote)
 {
     if (currentBasket() == 0)
         return;

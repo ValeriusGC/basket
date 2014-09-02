@@ -1431,7 +1431,7 @@ void BasketScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
             clicked->setSelected(true);
         }
         m_startOfShiftSelectionNote = (clicked->isGroup() ? clicked->firstRealChild() : clicked);
-        KMenu* menu = Global::bnpView->popupMenu("note_popup");
+        QMenu* menu = Global::bnpView->popupMenu("note_popup");
         connect(menu, SIGNAL(aboutToHide()),  this, SLOT(unlockHovering()));
         connect(menu, SIGNAL(aboutToHide()),  this, SLOT(disableNextClick()));
         doHoverEffects(clicked, zone); // In the case where another popup menu was open, we should do that manually!
@@ -1504,7 +1504,7 @@ void BasketScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 {
     if (event->reason() == QGraphicsSceneContextMenuEvent::Keyboard) {
         if (countFounds/*countShown*/() == 0) { // TODO: Count shown!!
-            KMenu *menu = Global::bnpView->popupMenu("insert_popup");
+            QMenu *menu = Global::bnpView->popupMenu("insert_popup");
             setInsertPopupMenu();
             connect(menu, SIGNAL(aboutToHide()),  this, SLOT(delayedCancelInsertPopupMenu()));
             connect(menu, SIGNAL(aboutToHide()),  this, SLOT(unlockHovering()));
@@ -1518,7 +1518,7 @@ void BasketScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
             setFocusedNote(m_focusedNote); /// /// ///
             m_startOfShiftSelectionNote = (m_focusedNote->isGroup() ? m_focusedNote->firstRealChild() : m_focusedNote);
             // Popup at bottom (or top) of the focused note, if visible :
-            KMenu *menu = Global::bnpView->popupMenu("note_popup");
+            QMenu *menu = Global::bnpView->popupMenu("note_popup");
             connect(menu, SIGNAL(aboutToHide()),  this, SLOT(unlockHovering()));
             connect(menu, SIGNAL(aboutToHide()),  this, SLOT(disableNextClick()));
             doHoverEffects(m_focusedNote, Note::Content); // In the case where another popup menu was open, we should do that manually!
@@ -2212,7 +2212,7 @@ void BasketScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
                 // TODO: ask confirmation: "Do you really want to delete the welcome baskets?\n You can re-add them at any time in the Help menu."
                 Global::bnpView->doBasketDeletion(this);
             } else if (link == "basket-internal-import") {
-                KMenu *menu = Global::bnpView->popupMenu("fileimport");
+                QMenu *menu = Global::bnpView->popupMenu("fileimport");
                 menu->exec(event->screenPos());
             } else if (link.startsWith("basket://")) {
                 emit crossReference(link);

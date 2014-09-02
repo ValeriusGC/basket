@@ -29,12 +29,6 @@ class QMoveEvent;
 class QWidget;
 class BNPView;
 
-namespace KSettings
-{
-class Dialog;
-};
-
-
 /** The window that contain baskets, organized by tabs.
   * @author Sébastien Laoût
   */

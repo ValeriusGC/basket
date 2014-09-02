@@ -40,6 +40,7 @@ class QTimer;
 class QTreeWidget;
 class QTreeWidgetItem;
 class QUndoStack;
+class QMenu;
 
 class QEvent;
 class QHideEvent;
@@ -48,7 +49,6 @@ class QShowEvent;
 class QAction;
 class KAction;
 class KToggleAction;
-class KMenu;
 class KTar;
 
 class DesktopColorPicker;
@@ -308,13 +308,14 @@ public:
 
     BasketScene* basketForFolderName(const QString &folderName);
     Note* noteForFileName(const QString &fileName, BasketScene &basket, Note* note = 0);
-    KMenu* popupMenu(const QString &menuName);
+    QMenu* popupMenu(const QString &menuName);
     bool isPart();
     bool isMainWindowActive();
     void showMainWindow();
     QToolBar    *m_mainbar;
     QToolBar    *m_editbar; // TODO private
     QMenu       *m_tagsMenu;
+    QMenu       *m_insertMenu;
 
     // TODO: dcop calls -- dbus these
 public Q_SLOTS:
@@ -337,7 +338,7 @@ public slots:
     void setActive(bool active = true);
 
     void populateTagsMenu();
-    void populateTagsMenu(KMenu &menu, Note *referenceNote);
+    void populateTagsMenu(QMenu &menu, Note *referenceNote);
     void connectTagsMenu();
     void disconnectTagsMenu();
     void disconnectTagsMenuDelayed();
@@ -345,7 +346,7 @@ protected:
     void showEvent(QShowEvent*);
     void hideEvent(QHideEvent*);
 private:
-    KMenu *m_lastOpenedTagsMenu;
+    QMenu *m_lastOpenedTagsMenu;
 
 private slots:
     void slotPressed(QTreeWidgetItem *item, int column);
