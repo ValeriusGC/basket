@@ -33,7 +33,6 @@
 #include <QMessageBox>
 #include <KDE/KConfig>
 #include <KDE/KAboutData>
-#include <KDE/KShortcutsDialog>
 #include <KDE/KActionCollection>
 #include <KDE/KToggleAction>
 
@@ -56,8 +55,7 @@ MainWindow::MainWindow(QWidget *parent)
     BasketStatusBar* bar = new BasketStatusBar(statusBar());
     m_mainToolBar = addToolBar("Main");
     m_editToolBar = addToolBar("Edit");
-    ac = new KActionCollection(parent);
-    m_baskets = new BNPView(this, "BNPViewApp", this, ac, bar, m_mainToolBar, m_editToolBar);
+    m_baskets = new BNPView(this, "BNPViewApp", this, bar, m_mainToolBar, m_editToolBar);
     setCentralWidget(m_baskets);
 
     setupActions();
@@ -87,13 +85,136 @@ MainWindow::~MainWindow()
 
 void MainWindow::setupActions()
 {
-    actQuit         = KStandardAction::quit(this, SLOT(quit()), ac);
-    KAction *a = NULL;
-    a = ac->addAction("minimizeRestore", this,
-                                      SLOT(minimizeRestore()));
-    a->setText(tr("Minimize"));
-    a->setIcon(KIcon(""));
-    a->setShortcut(0);
+    //////////////////////////////////////////////////////////////////////////
+    /** GLOBAL SHORTCUTS : **************************************************/
+    //////////////////////////////////////////////////////////////////////////
+    QAction *a = NULL;
+
+    // Ctrl+Shift+W only works when started standalone:
+    QWidget *basketMainWindow =
+        qobject_cast<QMainWindow *>(Global::bnpView->parent());
+
+    int modifier = Qt::CTRL + Qt::ALT + Qt::SHIFT;
+
+    if (basketMainWindow) {
+        a = new QAction(this->parent());
+        connect(a, SIGNAL(triggered()), Global::systemTray, SLOT(toggleActive()));
+        a->setText(tr("Show/hide main window"));
+        a->setStatusTip(
+            tr("Allows you to show main Window if it is hidden, and to hide "
+                 "it if it is shown."));
+        a->setShortcut(QKeySequence(modifier + Qt::Key_W));
+        a->setShortcutContext(Qt::ApplicationShortcut);
+    }
+
+    a = new QAction(this->parent());
+    connect(a, SIGNAL(triggered()), Global::bnpView, SLOT(globalPasteInCurrentBasket()));
+    a->setText(tr("Paste clipboard contents in current basket"));
+    a->setStatusTip(
+        tr("Allows you to paste clipboard contents in the current basket "
+             "without having to open the main window."));
+    a->setShortcut(QKeySequence(modifier + Qt::Key_V));
+    a->setShortcutContext(Qt::ApplicationShortcut);
+
+    a = new QAction(this->parent());
+    connect(a, SIGNAL(triggered(bool)), Global::bnpView, SLOT(showPassiveContent(bool)));
+    a->setText(tr("Show current basket name"));
+    a->setStatusTip(tr("Allows you to know basket is current without opening "
+                         "the main window."));
+    a->setShortcutContext(Qt::ApplicationShortcut);
+
+    a = new QAction(this->parent());
+    connect(a, SIGNAL(triggered()), Global::bnpView, SLOT(pasteInCurrentBasket()));
+    a->setText(tr("Paste selection in current basket"));
+    a->setStatusTip(
+        tr("Allows you to paste clipboard selection in the current basket "
+             "without having to open the main window."));
+    a->setShortcut(QKeySequence(Qt::CTRL + Qt::ALT + Qt::SHIFT + Qt::Key_S));
+    a->setShortcutContext(Qt::ApplicationShortcut);
+
+    a = new QAction(this->parent());
+    connect(a, SIGNAL(triggered()), Global::bnpView, SLOT(askNewBasket()));
+    a->setText(tr("Create a new basket"));
+    a->setStatusTip(
+        tr("Allows you to create a new basket without having to open the "
+             "main window (you then can use the other global shortcuts to add "
+             "a note, paste clipboard or paste selection in this new basket).")
+    );
+    a->setShortcutContext(Qt::ApplicationShortcut);
+
+    a = new QAction(this->parent());
+    connect(a, SIGNAL(triggered()), Global::bnpView, SLOT(goToPreviousBasket()));
+    a->setText(tr("Go to previous basket"));
+    a->setStatusTip(
+        tr("Allows you to change current basket to the previous one without "
+             "having to open the main window."));
+    a->setShortcutContext(Qt::ApplicationShortcut);
+
+    a = new QAction(this->parent());
+    connect(a, SIGNAL(triggered()), Global::bnpView, SLOT(goToNextBasket()));
+    a->setText(tr("Go to next basket"));
+    a->setStatusTip(tr("Allows you to change current basket to the next one "
+                         "without having to open the main window."));
+    a->setShortcutContext(Qt::ApplicationShortcut);
+
+    a = new QAction(this->parent());
+    connect(a, SIGNAL(triggered()), Global::bnpView, SLOT(addNoteHtml()));
+    a->setText(tr("Insert text note"));
+    a->setStatusTip(
+        tr("Add a text note to the current basket without having to open "
+             "the main window."));
+    a->setShortcut(QKeySequence(modifier + Qt::Key_T));
+    a->setShortcutContext(Qt::ApplicationShortcut);
+
+    a = new QAction(this->parent());
+    connect(a, SIGNAL(triggered()), Global::bnpView, SLOT(addNoteImage()));
+    a->setText(tr("Insert image note"));
+    a->setStatusTip(
+        tr("Add an image note to the current basket without having to open "
+             "the main window."));
+
+    a = new QAction(this->parent());
+    connect(a, SIGNAL(triggered()), Global::bnpView, SLOT(addNoteLink()));
+    a->setText(tr("Insert link note"));
+    a->setStatusTip(
+        tr("Add a link note to the current basket without having "
+             "to open the main window."));
+
+    a = new QAction(this->parent());
+    connect(a, SIGNAL(triggered()), Global::bnpView, SLOT(addNoteColor()));
+    a->setText(tr("Insert color note"));
+    a->setStatusTip(
+        tr("Add a color note to the current basket without having to open "
+             "the main window."));
+
+    a = new QAction(this->parent());
+    connect(a, SIGNAL(triggered()), Global::bnpView, SLOT(slotColorFromScreenGlobal()));
+    a->setText(tr("Pick color from screen"));
+    a->setStatusTip(
+        tr("Add a color note picked from one pixel on screen to the current "
+             "basket without " "having to open the main window."));
+
+    a = new QAction(this->parent());
+    connect(a, SIGNAL(triggered()), Global::bnpView, SLOT(grabScreenshotGlobal()));
+    a->setText(tr("Grab screen zone"));
+    a->setStatusTip(
+        tr("Grab a screen zone as an image in the current basket without "
+             "having to open the main window."));
+
+
+
+
+
+
+
+//    actQuit         = KStandardAction::quit(this, SLOT(quit()), ac);
+
+//    KAction *a = NULL;
+//    a = ac->addAction("minimizeRestore", this,
+//                                      SLOT(minimizeRestore()));
+//    a->setText(tr("Minimize"));
+//    a->setIcon(KIcon(""));
+//    a->setShortcut(0);
 
     /** Settings : ************************************************************/
 //    m_actShowToolbar   = KStandardAction::showToolbar(   this, SLOT(toggleToolBar()),   ac);
@@ -174,9 +295,6 @@ void MainWindow::showSettingsDialog()
 
 void MainWindow::showShortcutsSettingsDialog()
 {
-    KShortcutsDialog::configure(ac);
-    //.setCaption(..)
-    //actionCollection()->writeSettings();
 }
 
 void MainWindow::ensurePolished()

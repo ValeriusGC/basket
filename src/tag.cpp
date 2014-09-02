@@ -29,6 +29,7 @@
 #include <QtCore/QTextStream>
 #include <QtGui/QFont>
 #include <QtXml/QDomDocument>
+#include <QMenu>
 
 #include "xmlwork.h"
 #include "global.h"
@@ -226,13 +227,9 @@ Tag::Tag()
     ++tagNumber;
     QString sAction = "tag_shortcut_number_" + QString::number(tagNumber);
 
-    KActionCollection *ac = Global::bnpView->actionCollection();
-    m_action = ac->addAction(sAction, Global::bnpView,
+    QMenu *ac = Global::bnpView->m_tagsMenu;
+    m_action = ac->addAction(KIcon("FAKE ICON"), "FAKE TEXT", Global::bnpView,
                              SLOT(activatedTagShortcut()));
-    m_action->setText("FAKE TEXT");
-    m_action->setIcon(KIcon("FAKE ICON"));
-
-    m_action->setShortcutConfigurable(false); // We do it in the tag properties dialog
 
     m_inheritedBySiblings = false;
 }
@@ -301,7 +298,7 @@ QMap<QString, QString> Tag::loadTags(const QString &path/* = QString()*//*, bool
             QString shortcut  = XMLWork::getElementText(element, "shortcut");
             QString inherited = XMLWork::getElementText(element, "inherited", "false");
             tag->setName(name);
-            tag->setShortcut(KShortcut(shortcut));
+            tag->setShortcut(QKeySequence(shortcut));
             tag->setInheritedBySiblings(XMLWork::trueOrFalse(inherited));
             // Load states:
             QDomNode subNode = element.firstChild();
@@ -470,7 +467,7 @@ void Tag::saveTagsTo(QList<Tag*> &list, const QString &fullPath)
         root.appendChild(tagNode);
         // Save tag properties:
         XMLWork::addElement(document, tagNode, "name",      tag->name());
-        XMLWork::addElement(document, tagNode, "shortcut", tag->shortcut().primary().toString());
+        XMLWork::addElement(document, tagNode, "shortcut", tag->shortcut().toString());
         XMLWork::addElement(document, tagNode, "inherited", XMLWork::trueOrFalse(tag->inheritedBySiblings()));
         // Save all states:
         for (State::List::iterator it2 = (*it)->states().begin(); it2 != (*it)->states().end(); ++it2) {
@@ -733,9 +730,10 @@ void Tag::createDefaultTagsSet(const QString &fullPath)
 }
 
 // StateAction
-StateAction::StateAction(State *state, const KShortcut &shortcut, QWidget* parent, bool withTagName)
+StateAction::StateAction(State *state, const QKeySequence &shortcut, QWidget* parent, bool withTagName)
         : KToggleAction(parent)
         , m_state(state)
+        , m_shortcut(shortcut)
 {
     setText(m_state->name());
 
@@ -752,7 +750,6 @@ StateAction::StateAction(State *state, const KShortcut &shortcut, QWidget* paren
                                            )
            );
 
-    setShortcut(shortcut);
 }
 
 StateAction::~StateAction()

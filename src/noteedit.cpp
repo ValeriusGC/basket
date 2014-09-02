@@ -28,6 +28,7 @@
 #include <QtGui/QGridLayout>
 #include <QtGui/QScrollBar>
 #include <QtGui/QFontComboBox>
+#include <QToolBar>
 
 #include <KDE/KApplication>
 #include <KDE/KLineEdit>
@@ -1101,12 +1102,20 @@ InlineEditors* InlineEditors::instance()
     return instance;
 }
 
-void InlineEditors::initToolBars(KActionCollection *ac)
+void InlineEditors::initToolBars(QToolBar *editbar)
 {
     QFont defaultFont;
     QColor textColor = (Global::bnpView && Global::bnpView->currentBasket() ?
                         Global::bnpView->currentBasket()->textColor() :
                         palette().color(QPalette::Text));
+
+    richTextUndo = editbar->addAction(KIcon("edit-undo"), tr("Undo"));
+    richTextUndo->setCheckable(true);
+
+    richTextRedo = editbar->addAction(KIcon("edit-redo"), tr("Redo"));
+    richTextRedo->setCheckable(true);
+
+    editbar->addSeparator();
 
     // Init the RichTextEditor Toolbar:
     richTextFont = new QFontComboBox(Global::mainWindow());
@@ -1114,47 +1123,36 @@ void InlineEditors::initToolBars(KActionCollection *ac)
     richTextFont->setFixedWidth(richTextFont->sizeHint().width() * 2 / 3);
     richTextFont->setCurrentFont(defaultFont.family());
 
-    KAction *action = ac->addAction("richtext_font");
-    action->setDefaultWidget(richTextFont);
-    action->setText(i18n("Font"));
-    action->setShortcut(Qt::Key_F6);
+    QAction *a = editbar->addWidget(richTextFont);
+    a->setText(tr("Font"));
+    a->setShortcut(Qt::Key_F6);
 
     richTextFontSize = new FontSizeCombo(/*rw=*/true, Global::mainWindow());
     richTextFontSize->setFontSize(defaultFont.pointSize());
-    action = ac->addAction("richtext_font_size");
-    action->setDefaultWidget(richTextFontSize);
-    action->setText(i18n("Font Size"));
-    action->setShortcut(Qt::Key_F7);
+    a = editbar->addWidget(richTextFontSize);
+    a->setText(tr("Font Size"));
+    a->setShortcut(Qt::Key_F7);
 
     richTextColor = new KColorCombo(Global::mainWindow());
     richTextColor->installEventFilter(focusWidgetFilter);
     richTextColor->setFixedWidth(richTextColor->sizeHint().height() * 2);
     richTextColor->setColor(textColor);
-    action = ac->addAction("richtext_color");
-    action->setDefaultWidget(richTextColor);
-    action->setText(i18n("Color"));
+    a = editbar->addWidget(richTextColor);
+    a->setText(tr("Color"));
 
-    KToggleAction *ta = NULL;
-    ta = new KToggleAction(ac);
-    ac->addAction("richtext_bold", ta);
-    ta->setText(i18n("Bold"));
-    ta->setIcon(KIcon("format-text-bold"));
-    ta->setShortcut(KShortcut("Ctrl+B"));
-    richTextBold = ta;
+    editbar->addSeparator();
 
-    ta = new KToggleAction(ac);
-    ac->addAction("richtext_italic", ta);
-    ta->setText(i18n("Italic"));
-    ta->setIcon(KIcon("format-text-italic"));
-    ta->setShortcut(KShortcut("Ctrl+I"));
-    richTextItalic = ta;
+    richTextBold = editbar->addAction(KIcon("format-text-bold"), tr("Bold"));
+    richTextBold->setCheckable(true);
+    richTextBold->setShortcut(QKeySequence("Ctrl+B"));
 
-    ta = new KToggleAction(ac);
-    ac->addAction("richtext_underline", ta);
-    ta->setText(i18n("Underline"));
-    ta->setIcon(KIcon("format-text-underline"));
-    ta->setShortcut(KShortcut("Ctrl+U"));
-    richTextUnderline = ta;
+    richTextItalic = editbar->addAction(KIcon("format-text-italic"), tr("Italic"));
+    richTextItalic->setCheckable(true);
+    richTextItalic->setShortcut(QKeySequence("Ctrl+I"));
+
+    richTextUnderline = editbar->addAction(KIcon("format-text-underline"), tr("Underline"));
+    richTextUnderline->setCheckable(true);
+    richTextUnderline->setShortcut(QKeySequence("Ctrl+U"));
 
 #if 0
     ta = new KToggleAction(ac);
@@ -1170,58 +1168,21 @@ void InlineEditors::initToolBars(KActionCollection *ac)
     richTextSub = ta;
 #endif
 
-    ta = new KToggleAction(ac);
-    ac->addAction("richtext_left", ta);
-    ta->setText(i18n("Align Left"));
-    ta->setIcon(KIcon("format-justify-left"));
-    richTextLeft = ta;
+    editbar->addSeparator();
 
-    ta = new KToggleAction(ac);
-    ac->addAction("richtext_center", ta);
-    ta->setText(i18n("Centered"));
-    ta->setIcon(KIcon("format-justify-center"));
-    richTextCenter = ta;
+    richTextLeft = editbar->addAction(KIcon("format-justify-left"), tr("Align Left"));
+    richTextLeft->setCheckable(true);
 
-    ta = new KToggleAction(ac);
-    ac->addAction("richtext_right", ta);
-    ta->setText(i18n("Align Right"));
-    ta->setIcon(KIcon("format-justify-right"));
-    richTextRight = ta;
+    richTextCenter = editbar->addAction(KIcon("format-justify-center"), tr("Centered"));
+    richTextCenter->setCheckable(true);
 
-    ta = new KToggleAction(ac);
-    ac->addAction("richtext_block", ta);
-    ta->setText(i18n("Justified"));
-    ta->setIcon(KIcon("format-justify-fill"));
-    richTextJustified = ta;
+    richTextRight = editbar->addAction(KIcon("format-justify-right"), tr("Align Right"));
+    richTextRight->setCheckable(true);
 
-    QActionGroup *alignmentGroup = new QActionGroup(this);
-    alignmentGroup->addAction(richTextLeft);
-    alignmentGroup->addAction(richTextCenter);
-    alignmentGroup->addAction(richTextRight);
-    alignmentGroup->addAction(richTextJustified);
-
-    ta = new KToggleAction(ac);
-    ac->addAction("richtext_undo", ta);
-    ta->setText(i18n("Undo"));
-    ta->setIcon(KIcon("edit-undo"));
-    richTextUndo = ta;
-
-    ta = new KToggleAction(ac);
-    ac->addAction("richtext_redo", ta);
-    ta->setText(i18n("Redo"));
-    ta->setIcon(KIcon("edit-redo"));
-    richTextRedo = ta;
+    richTextJustified = editbar->addAction(KIcon("format-justify-fill"), tr("Justified"));
+    richTextJustified->setCheckable(true);
 
     disableRichTextToolBar();
-}
-
-KToolBar* InlineEditors::richTextToolBar()
-{
-    if (Global::mainWindow()) {
-        Global::mainWindow()->toolBar(); // Make sure we create the main toolbar FIRST, so it will be on top of the edit toolbar!
-        return Global::mainWindow()->toolBar("richTextEditToolBar");
-    } else
-        return 0;
 }
 
 void InlineEditors::enableRichTextToolBar()

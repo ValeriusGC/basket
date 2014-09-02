@@ -42,8 +42,6 @@ class QMouseEvent;
 
 class KIconButton;
 class KPushButton;
-class KShortcut;
-class KShortcutWidget;
 
 class FontSizeCombo;
 class KColorCombo2;
@@ -148,8 +146,6 @@ private slots:
     void moveDown();
     void deleteTag();
     void renameIt();
-    void capturedShortcut(const KShortcut &shortcut);
-    void removeShortcut();
     void removeEmblem();
     void modified();
     void currentItemChanged(QTreeWidgetItem *item, QTreeWidgetItem* next = 0);
@@ -172,8 +168,6 @@ private:
     KPushButton   *m_moveDown;
     KPushButton   *m_deleteTag;
     KLineEdit     *m_tagName;
-    KShortcutWidget *m_shortcut;
-    QPushButton   *m_removeShortcut;
     QCheckBox     *m_inherit;
     QGroupBox     *m_tagBox;
     QHBoxLayout   *m_tagBoxLayout;

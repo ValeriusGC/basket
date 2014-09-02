@@ -35,8 +35,6 @@ class QString;
 
 class KComboBox;
 class KIntNumInput;
-class KShortcutWidget;
-class KShortcut;
 class KColorCombo2;
 
 class BasketScene;
@@ -56,7 +54,6 @@ public slots:
     void applyChanges();
 
 protected slots:
-    void capturedShortcut(const KShortcut &shortcut);
     void selectColumnsLayout();
 
 private:

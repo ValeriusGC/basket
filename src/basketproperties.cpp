@@ -38,7 +38,6 @@
 #include <KDE/KApplication>
 #include <KDE/KIconLoader>
 #include <KDE/KIconDialog>
-#include <kshortcutwidget.h>
 
 #include "basketscene.h"
 #include "kcolorcombo2.h"
@@ -131,36 +130,6 @@ BasketPropertiesDialog::BasketPropertiesDialog(BasketScene *basket, QWidget *par
 
     mindMap->hide();
 
-    // Keyboard Shortcut:
-    shortcut->setShortcut(m_basket->shortcut());
-
-    HelpLabel *helpLabel = new HelpLabel(i18n("Learn some tips..."), i18n(
-                                             "<p><strong>Easily Remember your Shortcuts</strong>:<br>"
-                                             "With the first option, giving the basket a shortcut of the form <strong>Alt+Letter</strong> will underline that letter in the basket tree.<br>"
-                                             "For instance, if you are assigning the shortcut <i>Alt+T</i> to a basket named <i>Tips</i>, the basket will be displayed as <i><u>T</u>ips</i> in the tree. "
-                                             "It helps you visualize the shortcuts to remember them more quickly.</p>"
-                                             "<p><strong>Local vs Global</strong>:<br>"
-                                             "The first option allows to show the basket while the main window is active. "
-                                             "Global shortcuts are valid from anywhere, even if the window is hidden.</p>"
-                                             "<p><strong>Show vs Switch</strong>:<br>"
-                                             "The last option makes this basket the current one without opening the main window. "
-                                             "It is useful in addition to the configurable global shortcuts, eg. to paste the clipboard or the selection into the current basket from anywhere.</p>"), 0);
-
-    shortcutLayout->addWidget(helpLabel);
-    connect(shortcut, SIGNAL(shortcutChanged(const KShortcut&)), this, SLOT(capturedShortcut(const KShortcut&)));
-
-    setTabOrder(columnCount, shortcut);
-    setTabOrder(shortcut, helpLabel);
-    setTabOrder(helpLabel, showBasket);
-
-    switch (m_basket->shortcutAction()) {
-        default:
-        case 0: showBasket->setChecked(true); break;
-        case 1: globalButton->setChecked(true); break;
-        case 2: switchButton->setChecked(true); break;
-    }
-
-
     // Connect the Ok and Apply buttons to actually apply the changes
     connect(this, SIGNAL(okClicked()), SLOT(applyChanges()));
     connect(this, SIGNAL(applyClicked()), SLOT(applyChanges()));
@@ -186,23 +155,9 @@ void BasketPropertiesDialog::applyChanges()
         m_basket->setDisposition(2, columnCount->value());
     }
 
-    if (showBasket->isChecked()) {
-        m_basket->setShortcut(shortcut->shortcut(), 0);
-    } else if (globalButton->isChecked()) {
-        m_basket->setShortcut(shortcut->shortcut(), 1);
-    } else if (switchButton->isChecked()) {
-        m_basket->setShortcut(shortcut->shortcut(), 2);
-    }
-
     // Should be called LAST, because it will emit the propertiesChanged() signal and the tree will be able to show the newly set Alt+Letter shortcut:
     m_basket->setAppearance(icon->icon(), name->text(), m_backgroundImagesMap[backgroundImage->currentIndex()], m_backgroundColor->color(), m_textColor->color());
     m_basket->save();
-}
-
-void BasketPropertiesDialog::capturedShortcut(const KShortcut &sc)
-{
-    // TODO: Validate it!
-    shortcut->setShortcut(sc);
 }
 
 void BasketPropertiesDialog::selectColumnsLayout()

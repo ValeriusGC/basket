@@ -86,16 +86,6 @@ QString BasketListViewItem::escapedName(const QString &string)
     // Underlining the Alt+Letter shortcut (and escape all other '&' characters), if any:
     QString basketName = string;
     basketName.replace('&', "&&"); // First escape all the amperstamp
-    QString letter;
-    QRegExp letterExp("^Alt\\+(?:Shift\\+)?(.)$");
-
-    QString basketShortcut = m_basket->shortcut().primary().toString();
-    if (letterExp.indexIn(basketShortcut) != -1) {
-        int index;
-        letter = letterExp.cap(1);
-        if ((index = basketName.indexOf(letter)) != -1)
-            basketName.insert(index, '&');
-    }
 
     return basketName;
 }

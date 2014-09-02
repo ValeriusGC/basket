@@ -32,6 +32,7 @@ class QPushButton;
 class QKeyEvent;
 class QFontComboBox;
 class QTextCharFormat;
+class QToolBar;
 
 class KIconButton;
 class KUrlRequester;
@@ -318,29 +319,28 @@ class InlineEditors : public QObject
 public:
     InlineEditors();
     ~InlineEditors();
-    void initToolBars(KActionCollection *ac);
+    void initToolBars(QToolBar *editbar);
     static InlineEditors* instance();
 
 public:
     // Rich Text ToolBar:
-    KToolBar* richTextToolBar();
     void enableRichTextToolBar();
     void disableRichTextToolBar();
     QPalette palette() const;
     QFontComboBox     *richTextFont;
     FontSizeCombo     *richTextFontSize;
     KColorCombo       *richTextColor;
-    KToggleAction     *richTextBold;
-    KToggleAction     *richTextItalic;
-    KToggleAction     *richTextUnderline;
+    QAction     *richTextBold;
+    QAction     *richTextItalic;
+    QAction     *richTextUnderline;
 //  KToggleAction     *richTextSuper;
 //  KToggleAction     *richTextSub;
-    KToggleAction     *richTextLeft;
-    KToggleAction     *richTextCenter;
-    KToggleAction     *richTextRight;
-    KToggleAction     *richTextJustified;
-    KAction   *richTextUndo;
-    KAction   *richTextRedo;
+    QAction     *richTextLeft;
+    QAction     *richTextCenter;
+    QAction     *richTextRight;
+    QAction     *richTextJustified;
+    QAction   *richTextUndo;
+    QAction   *richTextRedo;
     FocusWidgetFilter *focusWidgetFilter;
 };
 

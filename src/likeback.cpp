@@ -57,6 +57,7 @@
 #include <QtGui/QAction>
 #include <QtGui/QValidator>
 #include <QtGui/QDesktopWidget>
+#include <QMenuBar>
 
 /****************************************/
 /********** class LikeBackBar: **********/
@@ -377,13 +378,10 @@ KConfig* LikeBack::config()
     return d->config;
 }
 
-KAction* LikeBack::sendACommentAction(KActionCollection *parent)
+QAction* LikeBack::sendACommentAction(QMenu *parent)
 {
     if (d->action == 0) {
-        d->action = parent->addAction("likeback_send_a_comment", this,
-                                      SLOT(execCommentDialog()));
-        d->action->setText(i18n("&Send a Comment to Developers"));
-        d->action->setIcon(KIcon("mail-message-new"));
+        d->action = parent->addAction(KIcon("mail-message-new"), tr("&Send a Comment to Developers"), this, SLOT(execCommentDialog()));
     }
 
     return d->action;

@@ -53,7 +53,6 @@ class QWheelEvent;
 
 class KAction;
 class KDirWatch;
-class KShortcut;
 class KUrl;
 
 namespace KIO { 
@@ -317,22 +316,6 @@ public:
     void unbufferizeAll();
     void subscribeBackgroundImages();
     void unsubscribeBackgroundImages();
-
-/// KEYBOARD SHORTCUT:
-public:
-    KAction *m_action;
-private:
-    int      m_shortcutAction;
-private slots:
-    void activatedShortcut();
-public:
-    KShortcut shortcut() {
-        return m_action->shortcut();
-    }
-    int shortcutAction() {
-        return m_shortcutAction;
-    }
-    void setShortcut(KShortcut shortcut, int action);
 
 /// USER INTERACTION:
 private:

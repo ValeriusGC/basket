@@ -72,8 +72,7 @@ class BASKET_EXPORT BNPView : public QSplitter
 public:
     /// CONSTRUCTOR AND DESTRUCTOR:
     BNPView(QWidget *parent, const char *name, QMainWindow *aGUIClient,
-            KActionCollection *actionCollection, BasketStatusBar *bar,
-            QToolBar *mainbar, QToolBar *editbar);
+            BasketStatusBar *bar, QToolBar *mainbar, QToolBar *editbar);
     ~BNPView();
     /// MANAGE CONFIGURATION EVENTS!:
     void setTreePlacement(bool onLeft);
@@ -281,7 +280,6 @@ private:
     QAction       *m_actUnselectAll;
     QAction       *m_actInvertSelection;
     // Insert actions :
-//      KAction       *m_actInsertText;
     QAction       *m_actInsertHtml;
     QAction       *m_actInsertLink;
     QAction       *m_actInsertCrossReference;
@@ -300,10 +298,8 @@ private:
     QAction       *m_actNextBasket;
     QAction       *m_actFoldBasket;
     QAction       *m_actExpandBasket;
-//      KAction       *m_convertTexts; // FOR_BETA_PURPOSE
 
     void setupActions();
-    void setupGlobalShortcuts();
     DecoratedBasket* currentDecoratedBasket();
 
 public:
@@ -316,6 +312,9 @@ public:
     bool isPart();
     bool isMainWindowActive();
     void showMainWindow();
+    QToolBar    *m_mainbar;
+    QToolBar    *m_editbar; // TODO private
+    QMenu       *m_tagsMenu;
 
     // TODO: dcop calls -- dbus these
 public Q_SLOTS:
@@ -336,9 +335,6 @@ public slots:
     void setStatusBarHint(const QString&);
     void setUnsavedStatus(bool isUnsaved);
     void setActive(bool active = true);
-    KActionCollection *actionCollection() {
-        return m_actionCollection;
-    };
 
     void populateTagsMenu();
     void populateTagsMenu(KMenu &menu, Note *referenceNote);
@@ -383,11 +379,8 @@ private:
     QString m_passiveDroppedTitle;
     NoteSelection *m_passiveDroppedSelection;
     static const int c_delayTooltipTime;
-    KActionCollection *m_actionCollection;
     QMainWindow *m_guiClient;
     BasketStatusBar *m_statusbar;
-    QToolBar    *m_mainbar;
-    QToolBar    *m_editbar;
     QTimer             *m_tryHideTimer;
     QTimer             *m_hideTimer;
 

@@ -30,8 +30,6 @@ class QFont;
 class QPainter;
 class QString;
 
-class KShortcut;
-
 class Tag;
 
 /**
@@ -193,7 +191,7 @@ public:
     ~Tag();
     /// SET PROPERTIES:
     void setName(const QString &name);
-    void setShortcut(const KShortcut &shortcut) {
+    void setShortcut(const QKeySequence &shortcut) {
         m_action->setShortcut(shortcut);
     }
     void setInheritedBySiblings(bool inherited) {
@@ -209,7 +207,7 @@ public:
     QString      name()                const {
         return m_name;
     }
-    KShortcut    shortcut()            const {
+    QKeySequence shortcut()            const {
         return m_action->shortcut();
     }
     bool         inheritedBySiblings() const {
@@ -225,7 +223,7 @@ public:
 private:
     /// PROPERTIES:
     QString      m_name;
-    KAction     *m_action;
+    QAction     *m_action;
     bool         m_inheritedBySiblings;
     State::List  m_states;
 };
@@ -246,7 +244,7 @@ class StateAction : public KToggleAction
     Q_DISABLE_COPY(StateAction);
 public:
     StateAction(State *state,
-                const KShortcut &shortcut,
+                const QKeySequence &shortcut,
                 QWidget * parent,
                 bool withTagName = false);
 
@@ -254,7 +252,7 @@ public:
 private:
     State   *m_state;
     QString  m_name;
-    QString  m_shortcut;
+    QKeySequence  m_shortcut;
 };
 
 #endif // TAG_H

@@ -96,8 +96,7 @@
 const int BNPView::c_delayTooltipTime = 275;
 
 BNPView::BNPView(QWidget *parent, const char *name, QMainWindow *aGUIClient,
-                 KActionCollection *actionCollection, BasketStatusBar *bar,
-                 QToolBar *mainbar, QToolBar *editbar)
+                 BasketStatusBar *bar, QToolBar *mainbar, QToolBar *editbar)
         : QSplitter(Qt::Horizontal, parent)
         , m_actLockBasket(0)
         , m_actPassBasket(0)
@@ -106,7 +105,6 @@ BNPView::BNPView(QWidget *parent, const char *name, QMainWindow *aGUIClient,
         , m_firstShow(true)
         , m_regionGrabber(0)
         , m_passiveDroppedSelection(0)
-        , m_actionCollection(actionCollection)
         , m_guiClient(aGUIClient)
         , m_statusbar(bar)
         , m_mainbar(mainbar)
@@ -128,7 +126,6 @@ BNPView::BNPView(QWidget *parent, const char *name, QMainWindow *aGUIClient,
     // Needed when loading the baskets:
     Global::backgroundManager = new BackgroundManager();
 
-    setupGlobalShortcuts();
     m_history = new QUndoStack(this);
     initialize();
     QTimer::singleShot(0, this, SLOT(lateInit()));
@@ -304,118 +301,6 @@ void BNPView::onFirstShow()
     setSizes(splitterSizes);
 }
 
-void BNPView::setupGlobalShortcuts()
-{
-    KActionCollection *ac = new KActionCollection(this);
-    KAction *a = NULL;
-
-    // Ctrl+Shift+W only works when started standalone:
-    QWidget *basketMainWindow =
-        qobject_cast<QMainWindow *>(Global::bnpView->parent());
-
-    int modifier = Qt::CTRL + Qt::ALT + Qt::SHIFT;
-
-    if (basketMainWindow) {
-        a = ac->addAction("global_show_hide_main_window", Global::systemTray,
-                          SLOT(toggleActive()));
-        a->setText(i18n("Show/hide main window"));
-        a->setStatusTip(
-            i18n("Allows you to show main Window if it is hidden, and to hide "
-                 "it if it is shown."));
-        a->setGlobalShortcut(KShortcut(modifier + Qt::Key_W));
-    }
-
-    a = ac->addAction("global_paste", Global::bnpView,
-                      SLOT(globalPasteInCurrentBasket()));
-    a->setText(i18n("Paste clipboard contents in current basket"));
-    a->setStatusTip(
-        i18n("Allows you to paste clipboard contents in the current basket "
-             "without having to open the main window."));
-    a->setGlobalShortcut(KShortcut(modifier + Qt::Key_V));
-
-
-
-    a = ac->addAction("global_show_current_basket", Global::bnpView,
-                      SLOT(showPassiveContentForced()));
-    a->setText(i18n("Show current basket name"));
-    a->setStatusTip(i18n("Allows you to know basket is current without opening "
-                         "the main window."));
-
-
-    a = ac->addAction("global_paste_selection", Global::bnpView,
-                      SLOT(pasteSelInCurrentBasket()));
-    a->setText(i18n("Paste selection in current basket"));
-    a->setStatusTip(
-        i18n("Allows you to paste clipboard selection in the current basket "
-             "without having to open the main window."));
-    a->setGlobalShortcut(KShortcut(Qt::CTRL + Qt::ALT + Qt::SHIFT + Qt::Key_S));
-
-    a = ac->addAction("global_new_basket", Global::bnpView,
-                      SLOT(askNewBasket()));
-    a->setText(i18n("Create a new basket"));
-    a->setStatusTip(
-        i18n("Allows you to create a new basket without having to open the "
-             "main window (you then can use the other global shortcuts to add "
-             "a note, paste clipboard or paste selection in this new basket).")
-    );
-
-    a = ac->addAction("global_previous_basket", Global::bnpView,
-                      SLOT(goToPreviousBasket()));
-    a->setText(i18n("Go to previous basket"));
-    a->setStatusTip(
-        i18n("Allows you to change current basket to the previous one without "
-             "having to open the main window."));
-
-    a = ac->addAction("global_next_basket", Global::bnpView,
-                      SLOT(goToNextBasket()));
-    a->setText(i18n("Go to next basket"));
-    a->setStatusTip(i18n("Allows you to change current basket to the next one "
-                         "without having to open the main window."));
-
-    a = ac->addAction("global_note_add_html", Global::bnpView,
-                      SLOT(addNoteHtml()));
-    a->setText(i18n("Insert text note"));
-    a->setStatusTip(
-        i18n("Add a text note to the current basket without having to open "
-             "the main window."));
-    a->setGlobalShortcut(KShortcut(modifier + Qt::Key_T));
-
-    a = ac->addAction("global_note_add_image", Global::bnpView,
-                      SLOT(addNoteImage()));
-    a->setText(i18n("Insert image note"));
-    a->setStatusTip(
-        i18n("Add an image note to the current basket without having to open "
-             "the main window."));
-
-    a = ac->addAction("global_note_add_link", Global::bnpView,
-                      SLOT(addNoteLink()));
-    a->setText(i18n("Insert link note"));
-    a->setStatusTip(
-        i18n("Add a link note to the current basket without having "
-             "to open the main window."));
-
-    a = ac->addAction("global_note_add_color", Global::bnpView,
-                      SLOT(addNoteColor()));
-    a->setText(i18n("Insert color note"));
-    a->setStatusTip(
-        i18n("Add a color note to the current basket without having to open "
-             "the main window."));
-
-    a = ac->addAction("global_note_pick_color", Global::bnpView,
-                      SLOT(slotColorFromScreenGlobal()));
-    a->setText(i18n("Pick color from screen"));
-    a->setStatusTip(
-        i18n("Add a color note picked from one pixel on screen to the current "
-             "basket without " "having to open the main window."));
-
-    a = ac->addAction("global_note_grab_screenshot", Global::bnpView,
-                      SLOT(grabScreenshotGlobal()));
-    a->setText(i18n("Grab screen zone"));
-    a->setStatusTip(
-        i18n("Grab a screen zone as an image in the current basket without "
-             "having to open the main window."));
-}
-
 void BNPView::initialize()
 {
     /// Configure the List View Columns:
@@ -461,17 +346,6 @@ void BNPView::initialize()
     connect(m_history, SIGNAL(canRedoChanged(bool)), this, SLOT(canUndoRedoChanged()));
     connect(m_history, SIGNAL(canUndoChanged(bool)), this, SLOT(canUndoRedoChanged()));
 
-    /* LikeBack */
-    Global::likeBack = new LikeBack(LikeBack::AllButtons, /*showBarByDefault=*/false, Global::config(), Global::about());
-    Global::likeBack->setServer("basket.linux62.org", "/likeback/send.php");
-
-// There are too much comments, and people reading comments are more and more international, so we accept only English:
-//  Global::likeBack->setAcceptedLanguages(QStringList::split(";", "en;fr"), i18n("Please write in English or French."));
-
-//  if (isPart())
-//      Global::likeBack->disableBar(); // See BNPView::shown() and BNPView::hide().
-
-    Global::likeBack->sendACommentAction(actionCollection()); // Just create it!
     setupActions();
 
     /// What's This Help for the tree:
@@ -487,10 +361,8 @@ void BNPView::initialize()
 
 void BNPView::setupActions()
 {
-    KAction *a = NULL;
     QAction *a1 = NULL;
     QMenu *m1, *m2 = NULL;
-    KActionCollection *ac = actionCollection();
 
     /** Basket : **************************************************************/
     m1 = m_guiClient->menuBar()->addMenu("&Basket");
@@ -615,6 +487,10 @@ void BNPView::setupActions()
     m_actMoveNoteDown = m1->addAction(KIcon("arrow-down"), tr("Move &Down"), this, SLOT(moveNoteDown()), QKeySequence("Ctrl+Shift+Down"));
     m_actMoveOnBottom = m1->addAction(KIcon("arrow-down-double"), tr("Move on &Bottom"), this, SLOT(moveOnBottom()), QKeySequence("Ctrl+Shift+End"));
 
+    /** Note : ****************************************************************/
+    m_tagsMenu = m_guiClient->menuBar()->addMenu("&Tags");
+
+
     /** Insert : **************************************************************/
     m1 = m_guiClient->menuBar()->addMenu("&Insert");
 
@@ -696,6 +572,18 @@ void BNPView::setupActions()
 
     m1->addAction(tr("&Welcome Baskets"), this, SLOT(addWelcomeBaskets()));
 
+    /* LikeBack */
+    Global::likeBack = new LikeBack(LikeBack::AllButtons, /*showBarByDefault=*/false, Global::config(), Global::about());
+    Global::likeBack->setServer("basket.linux62.org", "/likeback/send.php");
+
+// There are too much comments, and people reading comments are more and more international, so we accept only English:
+//  Global::likeBack->setAcceptedLanguages(QStringList::split(";", "en;fr"), i18n("Please write in English or French."));
+
+//  if (isPart())
+//      Global::likeBack->disableBar(); // See BNPView::shown() and BNPView::hide().
+
+    Global::likeBack->sendACommentAction(m1); // Just create it!
+
     /** Main toolbar : ********************************************************/
     m_mainbar->addAction(actNewBasket);
     m_mainbar->addAction(m_actPropBasket);
@@ -717,7 +605,7 @@ void BNPView::setupActions()
     m_mainbar->addAction(m_actShowFilter);
     m_mainbar->addAction(m_actFilterAllBaskets);
 
-    InlineEditors::instance()->initToolBars(actionCollection());
+    InlineEditors::instance()->initToolBars(m_editbar);
 }
 
 BasketListViewItem* BNPView::topLevelItem(int i)
@@ -2040,8 +1928,6 @@ void BNPView::doBasketDeletion(BasketScene *basket)
     DecoratedBasket *decoBasket = basket->decoration();
     basket->deleteFiles();
     removeBasket(basket);
-    // Remove the action to avoir keyboard-shortcut clashes:
-    delete basket->m_action; // FIXME: It's quick&dirty. In the future, the Basket should be deleted, and then the KAction deleted in the Basket destructor.
     delete decoBasket;
 //  delete basket;
 }
@@ -2701,9 +2587,9 @@ void BNPView::populateTagsMenu(KMenu &menu, Note *referenceNote)
 
         QKeySequence sequence;
         if (!currentTag->shortcut().isEmpty())
-            sequence = currentTag->shortcut().primary();
+            sequence = currentTag->shortcut();
 
-        StateAction *mi = new StateAction(currentState, KShortcut(sequence), this, true);
+        StateAction *mi = new StateAction(currentState, sequence, this, true);
 
         // The previously set ID will be set in the actions themselves as data.
         mi->setData(i);

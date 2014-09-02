@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>568</width>
-    <height>310</height>
+    <height>172</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -30,7 +30,16 @@
       <string>Appearance</string>
      </property>
      <layout class="QGridLayout" name="appearanceLayout">
-      <property name="margin">
+      <property name="leftMargin">
+       <number>4</number>
+      </property>
+      <property name="topMargin">
+       <number>4</number>
+      </property>
+      <property name="rightMargin">
+       <number>4</number>
+      </property>
+      <property name="bottomMargin">
        <number>4</number>
       </property>
       <item row="0" column="2">
@@ -84,7 +93,7 @@
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="KIntNumInput" name="columnCount"/>
+       <widget class="KIntNumInput" name="columnCount" native="true"/>
       </item>
       <item row="1" column="1">
        <spacer name="horizontalSpacer">
@@ -112,50 +121,6 @@
      </layout>
     </widget>
    </item>
-   <item row="2" column="0" colspan="2">
-    <widget class="QGroupBox" name="shortcutGroup">
-     <property name="title">
-      <string>Keyboard Shortcut</string>
-     </property>
-     <layout class="QVBoxLayout" name="verticalLayout_7">
-      <property name="margin">
-       <number>4</number>
-      </property>
-      <item>
-       <layout class="QHBoxLayout" name="shortcutLayout">
-        <item>
-         <widget class="KShortcutWidget" name="shortcut"/>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QVBoxLayout" name="verticalLayout_6">
-        <item>
-         <widget class="QRadioButton" name="showBasket">
-          <property name="text">
-           <string>S&amp;how this basket</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QRadioButton" name="globalButton">
-          <property name="text">
-           <string>Show this basket (&amp;global shortcut)</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QRadioButton" name="switchButton">
-          <property name="text">
-           <string>S&amp;witch to this basket (global shortcut)</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-     </layout>
-    </widget>
-   </item>
   </layout>
  </widget>
  <customwidgets>
@@ -163,11 +128,6 @@
    <class>KIconButton</class>
    <extends>QPushButton</extends>
    <header>kicondialog.h</header>
-  </customwidget>
-  <customwidget>
-   <class>KShortcutWidget</class>
-   <extends>QWidget</extends>
-   <header>kshortcutwidget.h</header>
   </customwidget>
   <customwidget>
    <class>KIntNumInput</class>
@@ -183,9 +143,6 @@
   <tabstop>freeForm</tabstop>
   <tabstop>mindMap</tabstop>
   <tabstop>columnCount</tabstop>
-  <tabstop>showBasket</tabstop>
-  <tabstop>globalButton</tabstop>
-  <tabstop>switchButton</tabstop>
  </tabstops>
  <resources/>
  <connections/>

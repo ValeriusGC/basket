@@ -27,6 +27,8 @@ class KConfig;
 class KAboutData;
 class KAction;
 class KActionCollection;
+class QAction;
+class QMenu;
 
 class LikeBackPrivate;
 
@@ -217,7 +219,7 @@ public:
      *       <Action name="likeback_send_a_comment" />
      * @endcode
      */
-    KAction* sendACommentAction(KActionCollection *parent = 0);
+    QAction* sendACommentAction(QMenu *parent = 0);
 
     /**
      * @Returns The path of the currently active window. Each windows are separated with "~~".

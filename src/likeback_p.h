@@ -57,7 +57,7 @@ public:
     bool                     showBar;
     int                      disabledCount;
     QString                  fetchedEmail;
-    KAction                 *action;
+    QAction                 *action;
 };
 
 class LikeBackBar : public QWidget

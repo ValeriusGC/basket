@@ -44,7 +44,6 @@
 #include <KDE/KMessageBox>
 #include <KDE/KPushButton>
 #include <KDE/KSeparator>
-#include <kshortcutwidget.h>
 
 #include "tag.h"
 #include "kcolorcombo2.h"
@@ -221,9 +220,6 @@ void TagListViewItem::setup()
     QString text = (m_tagCopy ? m_tagCopy->newTag->name() : m_stateCopy->newState->name());
     State *state = (m_tagCopy ? m_tagCopy->stateCopies[0]->newState : m_stateCopy->newState);
 
-    if (m_tagCopy && !m_tagCopy->newTag->shortcut().isEmpty())
-        text = i18nc("Tag name (shortcut)", "%1 (%2)", text, m_tagCopy->newTag->shortcut().toString());
-
     QFont font = state->font(treeWidget()->font());
 
     QRect textRect = QFontMetrics(font).boundingRect(0, 0, /*width=*/1, 500000, Qt::AlignLeft | Qt::AlignTop, text);
@@ -383,13 +379,6 @@ TagsEditDialog::TagsEditDialog(QWidget *parent, State *stateToEdit, bool addNewT
     QLabel *tagNameLabel = new QLabel(i18n("&Name:"), tagWidget);
     tagNameLabel->setBuddy(m_tagName);
 
-    m_shortcut = new KShortcutWidget(tagWidget);
-    m_removeShortcut = new QPushButton(i18nc("Remove tag shortcut", "&Remove"), tagWidget);
-    QLabel *shortcutLabel = new QLabel(i18n("S&hortcut:"), tagWidget);
-    shortcutLabel->setBuddy(m_shortcut);
-    //connect( m_shortcut,       SIGNAL(shortcutChanged(const KShortcut&)), this, SLOT(capturedShortcut(const KShortcut&)) );
-    connect(m_removeShortcut, SIGNAL(clicked()),                          this, SLOT(removeShortcut()));
-
     m_inherit = new QCheckBox(i18n("&Inherited by new sibling notes"), tagWidget);
 
     m_allowCrossRefernce = new QCheckBox(i18n("Allow Cross Reference Links"), tagWidget);
@@ -405,9 +394,6 @@ TagsEditDialog::TagsEditDialog(QWidget *parent, State *stateToEdit, bool addNewT
     QGridLayout *tagGrid = new QGridLayout(tagWidget);
     tagGrid->addWidget(tagNameLabel, 0, 0);
     tagGrid->addWidget(m_tagName, 0, 1, 1, 3);
-    tagGrid->addWidget(shortcutLabel, 1, 0);
-    tagGrid->addWidget(m_shortcut, 1, 1);
-    tagGrid->addWidget(m_removeShortcut, 1, 2);
     tagGrid->addWidget(m_inherit, 2, 0, 1, 4);
     tagGrid->addWidget(m_allowCrossRefernce, 3, 0);
     tagGrid->addWidget(allowCrossReferenceHelp, 3, 1);
@@ -574,7 +560,6 @@ TagsEditDialog::TagsEditDialog(QWidget *parent, State *stateToEdit, bool addNewT
 
     // Equalize the width of the first column of the two grids:
     int maxWidth = tagNameLabel->sizeHint().width();
-    maxWidth = qMax(maxWidth, shortcutLabel->sizeHint().width());
     maxWidth = qMax(maxWidth, m_stateNameLabel->sizeHint().width());
     maxWidth = qMax(maxWidth, emblemLabel->sizeHint().width());
     maxWidth = qMax(maxWidth, textLabel->sizeHint().width());
@@ -618,7 +603,6 @@ TagsEditDialog::TagsEditDialog(QWidget *parent, State *stateToEdit, bool addNewT
 
     // Connect Signals:
     connect(m_tagName,         SIGNAL(editTextChanged(const QString&)),        this, SLOT(modified()));
-    connect(m_shortcut,        SIGNAL(shortcutChanged(const KShortcut&)), this, SLOT(modified()));
     connect(m_inherit,         SIGNAL(stateChanged(int)),                  this, SLOT(modified()));
     connect(m_allowCrossRefernce, SIGNAL(clicked(bool)),                   this, SLOT(modified()));
     connect(m_stateName,       SIGNAL(editTextChanged(const QString&)),        this, SLOT(modified()));
@@ -1038,19 +1022,6 @@ void TagsEditDialog::renameIt()
         m_stateName->setFocus();
 }
 
-void TagsEditDialog::capturedShortcut(const KShortcut &shortcut)
-{
-    Q_UNUSED(shortcut);
-    // TODO: Validate it!
-    //m_shortcut->setShortcut(shortcut);
-}
-
-void TagsEditDialog::removeShortcut()
-{
-    //m_shortcut->setShortcut(KShortcut());
-    modified();
-}
-
 void TagsEditDialog::removeEmblem()
 {
     m_emblem->resetIcon();
@@ -1082,7 +1053,6 @@ void TagsEditDialog::modified()
     if (m_tags->currentItem()->parent())
         m_tags->currentItem()->parent()->setup();
 
-    m_removeShortcut->setEnabled(!m_shortcut->shortcut().isEmpty());
     m_removeEmblem->setEnabled(!m_emblem->icon().isEmpty() && !m_tags->currentItem()->isEmblemObligatory());
     m_onEveryLines->setEnabled(!m_textEquivalent->text().isEmpty());
 }
@@ -1201,8 +1171,6 @@ void TagsEditDialog::loadStateFrom(State *state)
 void TagsEditDialog::loadTagFrom(Tag *tag)
 {
     m_tagName->setText(tag->name());
-    m_shortcut->setShortcut(tag->shortcut());
-    m_removeShortcut->setEnabled(!tag->shortcut().isEmpty());
     m_inherit->setChecked(tag->inheritedBySiblings());
 }
 
@@ -1236,7 +1204,6 @@ void TagsEditDialog::saveStateTo(State *state)
 void TagsEditDialog::saveTagTo(Tag *tag)
 {
     tag->setName(m_tagName->text());
-    tag->setShortcut(m_shortcut->shortcut());
     tag->setInheritedBySiblings(m_inherit->isChecked());
 }
 

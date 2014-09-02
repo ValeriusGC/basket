@@ -641,24 +641,12 @@ void BasketScene::loadProperties(const QDomElement &properties)
     int  columnCount =                       disposition.attribute("columnCount", QString::number(this->columnsCount())).toInt();
     bool mindMap     = XMLWork::trueOrFalse(disposition.attribute("mindMap",     XMLWork::trueOrFalse(isMindMap())));
 
-    QDomElement shortcut = XMLWork::getElement(properties, "shortcut");
-    QString actionStrings[] = { "show", "globalShow", "globalSwitch" };
-    KShortcut combination  = KShortcut(shortcut.attribute(
-                                           "combination",
-                                           m_action->shortcut().primary().toString()));
-    QString   actionString =            shortcut.attribute("action");
-    int action = shortcutAction();
-    if (actionString == actionStrings[0]) action = 0;
-    if (actionString == actionStrings[1]) action = 1;
-    if (actionString == actionStrings[2]) action = 2;
-
     QDomElement protection = XMLWork::getElement(properties, "protection");
     m_encryptionType = protection.attribute("type").toInt();
     m_encryptionKey = protection.attribute("key");
 
     // Apply the Properties:
     setDisposition((free ? (mindMap ? 2 : 1) : 0), columnCount);
-    setShortcut(combination, action);
     setAppearance(icon, name, backgroundImage, backgroundColor, textColor); // Will emit propertiesChanged(this)
 }
 
@@ -678,12 +666,6 @@ void BasketScene::saveProperties(QDomDocument &document, QDomElement &properties
     disposition.setAttribute("free",        XMLWork::trueOrFalse(isFreeLayout()));
     disposition.setAttribute("columnCount", QString::number(columnsCount()));
     disposition.setAttribute("mindMap",     XMLWork::trueOrFalse(isMindMap()));
-
-    QDomElement shortcut = document.createElement("shortcut");
-    properties.appendChild(shortcut);
-    QString actionStrings[] = { "show", "globalShow", "globalSwitch" };
-    shortcut.setAttribute("combination", m_action->shortcut().primary().toString());
-    shortcut.setAttribute("action",      actionStrings[shortcutAction()]);
 
     QDomElement protection = document.createElement("protection");
     properties.appendChild(protection);
@@ -725,9 +707,6 @@ void BasketScene::setAppearance(const QString &icon, const QString &name, const 
     m_backgroundImageName    = backgroundImage;
     m_backgroundColorSetting = backgroundColor;
     m_textColorSetting       = textColor;
-
-    // Where is this shown?
-    m_action->setText("BASKET SHORTCUT: " + name);
 
     // Basket should ALWAYS have an icon (the "basket" icon by default):
     QPixmap iconTest = KIconLoader::global()->loadIcon(
@@ -1098,27 +1077,6 @@ QString BasketScene::fullPathForFileName(const QString &fileName)
     return Global::basketsFolder() + folderName;
 }
 
-
-void BasketScene::setShortcut(KShortcut shortcut, int action)
-{
-    if (action > 0) {
-        m_action->setGlobalShortcut(
-            shortcut,
-            KAction::ActiveShortcut | KAction::DefaultShortcut,
-            KAction::NoAutoloading
-        );
-    }
-    m_shortcutAction = action;
-}
-
-void BasketScene::activatedShortcut()
-{
-    Global::bnpView->setCurrentBasket(this);
-
-    if (m_shortcutAction == 1)
-        Global::bnpView->setActive(true);
-}
-
 void BasketScene::signalCountsChanged()
 {
     if (!m_timerCountsChanged.isActive()) {
@@ -1166,8 +1124,6 @@ BasketScene::BasketScene(QWidget *parent, const QString &folderName)
         , m_backgroundPixmap(0)
         , m_opaqueBackgroundPixmap(0)
         , m_selectedBackgroundPixmap(0)
-        , m_action(0)
-        , m_shortcutAction(0)
         , m_hoveredNote(0)
         , m_hoveredZone(Note::None)
         , m_lockedHovering(false)
@@ -1201,14 +1157,6 @@ BasketScene::BasketScene(QWidget *parent, const QString &folderName)
     m_view = new BasketView(this);
     m_view->setFocusPolicy(Qt::StrongFocus);
     m_view->setAlignment(Qt::AlignLeft|Qt::AlignTop);
-
-    m_action = new KAction(this);
-    connect(m_action, SIGNAL(triggered()), this, SLOT(activatedShortcut()));
-    m_action->setObjectName(folderName);
-    m_action->setGlobalShortcut(KShortcut());
-    // We do this in the basket properties dialog (and keep it in sync with the
-    // global one)
-    m_action->setShortcutConfigurable(false);
 
     if (!m_folderName.endsWith("/"))
         m_folderName += "/";
@@ -3268,7 +3216,7 @@ void BasketScene::popupEmblemMenu(Note *note, int emblemNumber)
     Tag *tag = state->parentTag();
     m_tagPopup = tag;
 
-    QKeySequence sequence = tag->shortcut().primary();
+    QKeySequence sequence = tag->shortcut();
     bool sequenceOnDelete = (nextState == 0 && !tag->shortcut().isEmpty());
 
     KMenu menu(m_view);
@@ -3300,9 +3248,9 @@ void BasketScene::popupEmblemMenu(Note *note, int emblemNumber)
             currentState = *it;
             QKeySequence sequence;
             if (currentState == nextState && !tag->shortcut().isEmpty())
-                sequence = tag->shortcut().primary();
+                sequence = tag->shortcut();
 
-            StateAction *sa = new StateAction(currentState, KShortcut(sequence), 0, false);
+            StateAction *sa = new StateAction(currentState, sequence, 0, false);
             sa->setChecked(state == currentState);
             sa->setActionGroup(emblemGroup);
             sa->setData(i);
