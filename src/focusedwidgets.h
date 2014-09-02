@@ -21,15 +21,13 @@
 #ifndef FOCUSEDWIDGETS_H
 #define FOCUSEDWIDGETS_H
 
-#include <KDE/KTextEdit>
+#include <QTextEdit>
 
 class QEvent;
 class QKeyEvent;
 class QWheelEvent;
 
-class KMenu;
-
-class FocusedTextEdit : public KTextEdit
+class FocusedTextEdit : public QTextEdit
 {
     Q_OBJECT
 public:

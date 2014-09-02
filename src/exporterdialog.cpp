@@ -22,9 +22,9 @@
 
 #include <KDE/KUrlRequester>
 #include <KDE/KFileDialog>
-#include <KDE/KLineEdit>
 #include <KDE/KLocale>
 #include <KDE/KVBox>
+#include <KDE/KLineEdit>
 
 #include <QtCore/QDir>
 #include <QtGui/QCheckBox>

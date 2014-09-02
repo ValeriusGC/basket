@@ -24,12 +24,12 @@
 #include <QtGui/QLabel>
 #include <QtGui/QHBoxLayout>
 #include <QtGui/QPixmap>
+#include <QLineEdit>
 
 #include <KDE/KDialog>
 #include <QComboBox>
 #include <KDE/KIconLoader>
 #include <KDE/KLocale>
-#include <KDE/KLineEdit>
 
 #include "global.h"
 #include "tools.h"
@@ -56,7 +56,7 @@ FilterBar::FilterBar(QWidget *parent)
     m_resetButton->setText(i18n("Reset Filter"));//, /*groupText=*/"", this, SLOT(reset()), 0);
     m_resetButton->setAutoRaise(true);
     //new KToolBarButton("locationbar_erase", /*id=*/1230, this, /*name=*/0, i18n("Reset Filter"));
-    m_lineEdit = new KLineEdit(this);
+    m_lineEdit = new QLineEdit(this);
     QLabel *label = new QLabel(this);
     label->setText(i18n("&Filter: "));
     label->setBuddy(m_lineEdit);
@@ -78,7 +78,7 @@ FilterBar::FilterBar(QWidget *parent)
 //  Global::bnpView->toggleFilterAllBaskets(true);
 
 //  m_lineEdit->setMaximumWidth(150);
-    m_lineEdit->setClearButtonShown(true);
+//    m_lineEdit->setClearButtonShown(true);
 
     // Layout all those widgets:
 //  hBox->addStretch();

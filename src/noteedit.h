@@ -22,7 +22,7 @@
 #define NOTEEDIT_H
 
 #include <KDE/KDialog>
-#include <KDE/KLineEdit>
+#include <QLineEdit>
 
 #include "notecontent.h"
 
@@ -34,10 +34,10 @@ class QFontComboBox;
 class QTextCharFormat;
 class QToolBar;
 class QComboBox;
+class QTextEdit;
 
 class KIconButton;
 class KUrlRequester;
-class KTextEdit;
 class KToggleAction;
 class KToolBar;
 class KAction;
@@ -83,10 +83,10 @@ public:
     QGraphicsProxyWidget*    graphicsWidget()   {
         return m_widget;
     }
-    KTextEdit*  textEdit() {
+    QTextEdit*  textEdit() {
         return m_textEdit;
     }
-    KLineEdit*  lineEdit() {
+    QLineEdit*  lineEdit() {
         return m_lineEdit;
     }
 
@@ -101,8 +101,8 @@ private:
     bool         m_isEmpty;
     bool         m_canceled;
     QGraphicsProxyWidget     *m_widget;
-    KTextEdit   *m_textEdit;
-    KLineEdit   *m_lineEdit;
+    QTextEdit   *m_textEdit;
+    QLineEdit   *m_lineEdit;
     NoteContent *m_noteContent;
 
 public:
@@ -225,12 +225,12 @@ public:
     UnknownEditor(UnknownContent *unknownContent, QWidget *parent);
 };
 
-/** KLineEdit behavior:
-  * Create a new KLineEdit with a text, then the user select a part of it and press ONE letter key.
+/** QLineEdit behavior:
+  * Create a new QLineEdit with a text, then the user select a part of it and press ONE letter key.
   * The signal editTextChanged() is not emitted!
   * This class correct that!
   */
-class DebuggedLineEdit : public KLineEdit
+class DebuggedLineEdit : public QLineEdit
 {
     Q_OBJECT
 public:
@@ -262,7 +262,7 @@ private:
     LinkContent   *m_noteContent;
     bool           m_isAutoModified;
     KUrlRequester *m_url;
-    KLineEdit     *m_title;
+    QLineEdit     *m_title;
     KIconButton   *m_icon;
     QPushButton   *m_autoTitle;
     QPushButton   *m_autoIcon;
@@ -304,7 +304,7 @@ protected slots:
 private:
     LauncherContent     *m_noteContent;
     RunCommandRequester *m_command;
-    KLineEdit           *m_name;
+    QLineEdit           *m_name;
     KIconButton         *m_icon;
 };
 

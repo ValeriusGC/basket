@@ -26,7 +26,6 @@
 #include <KDE/KActionCollection>
 #include <KDE/KIcon>
 #include <KDE/KLocale>
-#include <KDE/KTextEdit>
 
 #include <KDE/KPushButton>
 #include <KDE/KGuiItem>
@@ -57,6 +56,8 @@
 #include <QMessageBox>
 #include <QDebug>
 #include <QSettings>
+#include <QTextEdit>
+
 
 /****************************************/
 /********** class LikeBackBar: **********/
@@ -677,7 +678,7 @@ LikeBackDialog::LikeBackDialog(LikeBack::Button reason, const QString &initialCo
     }
 
     // The comment text box:
-    m_comment = new KTextEdit(box);
+    m_comment = new QTextEdit(box);
     boxLayout->addWidget(m_comment);
     m_comment->setTabChangesFocus(true);
     m_comment->setPlainText(initialComment);

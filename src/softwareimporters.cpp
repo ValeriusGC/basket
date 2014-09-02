@@ -30,11 +30,11 @@
 #include <QtGui/QRadioButton>
 #include <QtXml/QDomDocument>
 #include <QMessageBox>
+#include <QTextEdit>
 
 #include <KDE/KStandardDirs>
 #include <KDE/KLocale>
 #include <KDE/KFileDialog>
-#include <KDE/KTextEdit>
 
 #include "basketscene.h"
 #include "basketfactory.h"
@@ -131,7 +131,7 @@ TextFileImportDialog::TextFileImportDialog(QWidget *parent)
 
     QHBoxLayout *hLayout = new QHBoxLayout(indentedTextEdit);
     hLayout->addSpacing(20);
-    m_customSeparator = new KTextEdit(indentedTextEdit);
+    m_customSeparator = new QTextEdit(indentedTextEdit);
     hLayout->addWidget(m_customSeparator);
 
     m_all_in_one_choice = new QRadioButton(i18n("&All in one note"),                  m_choices);

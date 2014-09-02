@@ -55,8 +55,8 @@
 #include <QtXml/QDomDocument>
 #include <QMessageBox>
 #include <QDebug>
+#include <QTextEdit>
 
-#include <KDE/KTextEdit>
 #include <KDE/KStyle>
 #include <KDE/KApplication>
 #include <KDE/KColorScheme> // for KStatefulBrush
@@ -65,7 +65,6 @@
 #include <KDE/KLocale>
 #include <KDE/KFileDialog>
 #include <KDE/KAboutData>
-#include <KDE/KLineEdit>
 #include <KDE/KSaveFile>
 #include <KDE/KAuthorized>
 #include <KDE/KMenu>
@@ -1301,7 +1300,7 @@ void BasketScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 		
                // Saving where we were editing, because during a drag, the mouse can fly over the text edit and move the cursor position:
                  if (m_editor && m_editor->textEdit()) {
-                     KTextEdit *editor = m_editor->textEdit();
+                     QTextEdit *editor = m_editor->textEdit();
                      m_textCursor = editor->textCursor();
                  }
             }
@@ -1798,7 +1797,7 @@ void BasketScene::dropEvent(QGraphicsSceneDragDropEvent *event)
     // This is because during a drag, the mouse can fly over the text edit and move the cursor position, and even HIDE the cursor.
     // So we re-show the cursor, and re-position it at the right place:
     if (m_editor && m_editor->textEdit()) {
-        KTextEdit *editor = m_editor->textEdit();
+        QTextEdit *editor = m_editor->textEdit();
         editor->setTextCursor(m_textCursor);
     }
 }
@@ -3616,7 +3615,7 @@ void BasketScene::placeEditor(bool /*andEnsureVisible*/ /*= false*/)
         return;
 
     QFrame    *editorQFrame = dynamic_cast<QFrame*>(m_editor->graphicsWidget()->widget());
-    KTextEdit *textEdit     = m_editor->textEdit();
+    QTextEdit *textEdit     = m_editor->textEdit();
     Note      *note         = m_editor->note();
 
     qreal frameWidth = (editorQFrame ? editorQFrame->frameWidth() : 0);

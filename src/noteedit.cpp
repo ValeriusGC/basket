@@ -31,9 +31,9 @@
 #include <QToolBar>
 #include <QMessageBox>
 #include <QDebug>
+#include <QLineEdit>
 
 #include <KDE/KApplication>
-#include <KDE/KLineEdit>
 #include <KDE/KUrlRequester>
 #include <KDE/KColorDialog>
 #include <KDE/KColorCombo>
@@ -46,6 +46,7 @@
 #include <KDE/KIconButton>
 #include <KDE/KToggleAction>
 #include <KDE/KDesktopFile>
+#include <KDE/KLineEdit>
 
 #include "notecontent.h"
 #include "notefactory.h"
@@ -206,14 +207,14 @@ void NoteEditor::setInlineEditor(QWidget *inlineEditor)
 
     m_textEdit = 0;
     m_lineEdit = 0;
-    KTextEdit *textEdit = dynamic_cast<KTextEdit*>(inlineEditor);
+    QTextEdit *textEdit = dynamic_cast<QTextEdit*>(inlineEditor);
     if (textEdit)
     {
         m_textEdit = textEdit;
     }
     else 
     {
-        KLineEdit *lineEdit = dynamic_cast<KLineEdit*>(inlineEditor);
+        QLineEdit *lineEdit = dynamic_cast<QLineEdit*>(inlineEditor);
         if (lineEdit)
 	{
 	  m_lineEdit = lineEdit;
@@ -238,8 +239,8 @@ TextEditor::TextEditor(TextContent *textContent, QWidget *parent)
     textEdit->setFont(note()->font());
     textEdit->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-    if (Settings::spellCheckTextNotes())
-        textEdit->setCheckSpellingEnabled(true);
+//    if (Settings::spellCheckTextNotes()) TODO spell check
+//        textEdit->setCheckSpellingEnabled(true);
     textEdit->setPlainText(m_textContent->text());
 
     // Not sure if the following comment is still true
@@ -262,34 +263,34 @@ TextEditor::~TextEditor()
 
 void TextEditor::autoSave(bool toFileToo)
 {
-    bool autoSpellCheck = true;
-    if (toFileToo) {
-        if (Settings::spellCheckTextNotes() != textEdit()->checkSpellingEnabled()) {
-            Settings::setSpellCheckTextNotes(textEdit()->checkSpellingEnabled());
-            Settings::saveConfig();
-        }
+//    bool autoSpellCheck = true; TODO spell checking
+//    if (toFileToo) {
+//        if (Settings::spellCheckTextNotes() != textEdit()->checkSpellingEnabled()) {
+//            Settings::setSpellCheckTextNotes(textEdit()->checkSpellingEnabled());
+//            Settings::saveConfig();
+//        }
 
-        autoSpellCheck = textEdit()->checkSpellingEnabled();
-        textEdit()->setCheckSpellingEnabled(false);
-    }
+//        autoSpellCheck = textEdit()->checkSpellingEnabled();
+//        textEdit()->setCheckSpellingEnabled(false);
+//    }
 
     m_textContent->setText(textEdit()->toPlainText());
 
     if (toFileToo) {
         m_textContent->saveToFile();
         m_textContent->setEdited();
-        textEdit()->setCheckSpellingEnabled(autoSpellCheck);
+//        textEdit()->setCheckSpellingEnabled(autoSpellCheck);
     }
 }
 
 void TextEditor::validate()
 {
-    if (Settings::spellCheckTextNotes() != textEdit()->checkSpellingEnabled()) {
-        Settings::setSpellCheckTextNotes(textEdit()->checkSpellingEnabled());
-        Settings::saveConfig();
-    }
+//    if (Settings::spellCheckTextNotes() != textEdit()->checkSpellingEnabled()) {
+//        Settings::setSpellCheckTextNotes(textEdit()->checkSpellingEnabled());
+//        Settings::saveConfig();
+//    } TODO
 
-    textEdit()->setCheckSpellingEnabled(false);
+//    textEdit()->setCheckSpellingEnabled(false);
     if (textEdit()->document()->isEmpty())
         setEmpty();
     m_textContent->setText(textEdit()->toPlainText());
@@ -527,7 +528,7 @@ AnimationEditor::AnimationEditor(AnimationContent *animationContent, QWidget *pa
 FileEditor::FileEditor(FileContent *fileContent, QWidget *parent)
         : NoteEditor(fileContent), m_fileContent(fileContent)
 {
-    KLineEdit *lineEdit = new KLineEdit(parent);
+    QLineEdit *lineEdit = new QLineEdit(parent);
     FocusWidgetFilter *filter = new FocusWidgetFilter(lineEdit);
 
     QPalette palette;
@@ -643,7 +644,7 @@ UnknownEditor::UnknownEditor(UnknownContent *unknownContent, QWidget *parent)
 /** class DebuggedLineEdit: */
 
 DebuggedLineEdit::DebuggedLineEdit(const QString &text, QWidget *parent)
-        : KLineEdit(text, parent)
+        : QLineEdit(text, parent)
 {
 }
 
@@ -654,7 +655,7 @@ DebuggedLineEdit::~DebuggedLineEdit()
 void DebuggedLineEdit::keyPressEvent(QKeyEvent *event)
 {
     QString oldText = text();
-    KLineEdit::keyPressEvent(event);
+    QLineEdit::keyPressEvent(event);
     if (oldText != text())
         emit textChanged(text());
 }
@@ -985,7 +986,7 @@ LauncherEditDialog::LauncherEditDialog(LauncherContent *contentNote, QWidget *pa
     KService service(contentNote->fullPath());
 
     m_command = new RunCommandRequester(service.exec(), i18n("Choose a command to run:"), page);
-    m_name    = new KLineEdit(service.name(), page);
+    m_name    = new QLineEdit(service.name(), page);
 
     QWidget *wid = new QWidget(page);
     QHBoxLayout *hLay = new QHBoxLayout(wid);

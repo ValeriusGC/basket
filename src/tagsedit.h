@@ -34,7 +34,7 @@ class QFontComboBox;
 class QGroupBox;
 class QHBoxLayout;
 class QLabel;
-class KLineEdit;
+class QLineEdit;
 class QTreeWidget;
 
 class QKeyEvent;
@@ -167,14 +167,14 @@ private:
     KPushButton   *m_moveUp;
     KPushButton   *m_moveDown;
     KPushButton   *m_deleteTag;
-    KLineEdit     *m_tagName;
+    QLineEdit     *m_tagName;
     QCheckBox     *m_inherit;
     QGroupBox     *m_tagBox;
     QHBoxLayout   *m_tagBoxLayout;
     QGroupBox     *m_stateBox;
     QHBoxLayout   *m_stateBoxLayout;
     QLabel        *m_stateNameLabel;
-    KLineEdit     *m_stateName;
+    QLineEdit     *m_stateName;
     KIconButton   *m_emblem;
     QPushButton   *m_removeEmblem;
     QPushButton   *m_bold;
@@ -185,7 +185,7 @@ private:
     QFontComboBox *m_font;
     FontSizeCombo *m_fontSize;
     KColorCombo2  *m_backgroundColor;
-    KLineEdit     *m_textEquivalent;
+    QLineEdit     *m_textEquivalent;
     QCheckBox     *m_onEveryLines;
     QCheckBox     *m_allowCrossRefernce;
 

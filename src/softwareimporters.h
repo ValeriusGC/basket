@@ -27,7 +27,7 @@ class QString;
 class QGroupBox;
 class QDomElement;
 class QRadioButton;
-class KTextEdit;
+class QTextEdit;
 class QVBoxLayout;
 
 class BasketScene;
@@ -72,7 +72,7 @@ private:
     QRadioButton  *m_star_choice;
     QRadioButton  *m_all_in_one_choice;
     QRadioButton  *m_anotherSeparator;
-    KTextEdit     *m_customSeparator;
+    QTextEdit     *m_customSeparator;
 };
 
 /** Functions that import data from other softwares.

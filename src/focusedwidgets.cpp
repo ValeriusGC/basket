@@ -38,7 +38,7 @@
 
 FocusedTextEdit::FocusedTextEdit(bool disableUpdatesOnKeyPress,
                                  QWidget *parent)
-        : KTextEdit(parent),
+        : QTextEdit(parent),
         m_disableUpdatesOnKeyPress(disableUpdatesOnKeyPress)
 {
     // pass
@@ -58,7 +58,7 @@ void FocusedTextEdit::keyPressEvent(QKeyEvent *event)
     if (m_disableUpdatesOnKeyPress)
         setUpdatesEnabled(false);
 
-    KTextEdit::keyPressEvent(event);
+    QTextEdit::keyPressEvent(event);
 
     // Workaround (for ensuring the cursor to be visible): signal not emitted when pressing those keys:
     if (event->key() == Qt::Key_Home
@@ -82,7 +82,7 @@ void FocusedTextEdit::wheelEvent(QWheelEvent *event)
     QScrollBar *sb = verticalScrollBar();
     if ((event->delta() > 0 && sb->value() > sb->minimum())
             || (event->delta() < 0 && sb->value() < sb->maximum()))
-        KTextEdit::wheelEvent(event);
+        QTextEdit::wheelEvent(event);
     //else
     //    Global::bnpView->currentBasket()->graphicsView()->wheelEvent(event);
 }
@@ -90,7 +90,7 @@ void FocusedTextEdit::wheelEvent(QWheelEvent *event)
 void FocusedTextEdit::enterEvent(QEvent *event)
 {
     emit mouseEntered();
-    KTextEdit::enterEvent(event);
+    QTextEdit::enterEvent(event);
 }
 
 /** class FocusWidgetFilter */
