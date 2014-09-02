@@ -30,10 +30,12 @@
 #include <QtGui/QVBoxLayout>
 #include <QtCore/QDate>
 #include <QDialogButtonBox>
+#include <QComboBox>
 
 #include <KDE/KLineEdit>
 #include <KDE/KNumInput>
 #include <KDE/KConfig>
+#include <KDE/KConfigGroup>
 #include <KDE/KGlobal>
 #include <KDE/KLocale>
 #include <KDE/KAboutData>
@@ -390,9 +392,9 @@ GeneralPage::GeneralPage(QWidget * parent)
     gl->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding), 0, 2);
 
     // Basket Tree Position:
-    m_treeOnLeft = new KComboBox(this);
-    m_treeOnLeft->addItem(i18n("On left"));
-    m_treeOnLeft->addItem(i18n("On right"));
+    m_treeOnLeft = new QComboBox(this);
+    m_treeOnLeft->addItem(tr("On left"));
+    m_treeOnLeft->addItem(tr("On right"));
 
     label = new QLabel(this);
     label->setText(i18n("&Basket tree position:"));
@@ -403,9 +405,9 @@ GeneralPage::GeneralPage(QWidget * parent)
     connect(m_treeOnLeft, SIGNAL(activated(int)), this, SLOT(changed()));
 
     // Filter Bar Position:
-    m_filterOnTop = new KComboBox(this);
-    m_filterOnTop->addItem(i18n("On top"));
-    m_filterOnTop->addItem(i18n("On bottom"));
+    m_filterOnTop = new QComboBox(this);
+    m_filterOnTop->addItem(tr("On top"));
+    m_filterOnTop->addItem(tr("On bottom"));
 
     label = new QLabel(this);
     label->setText(i18n("&Filter bar position:"));
@@ -614,19 +616,19 @@ BasketsPage::BasketsPage(QWidget * parent)
     QGridLayout *ga = new QGridLayout(widget);
     ga->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding), 0, 3);
 
-    m_middleAction = new KComboBox(widget);
-    m_middleAction->addItem(i18n("Do nothing"));
-    m_middleAction->addItem(i18n("Paste clipboard"));
-    m_middleAction->addItem(i18n("Insert image note"));
-    m_middleAction->addItem(i18n("Insert link note"));
-    m_middleAction->addItem(i18n("Insert cross reference"));
-    m_middleAction->addItem(i18n("Insert launcher note"));
-    m_middleAction->addItem(i18n("Insert color note"));
-    m_middleAction->addItem(i18n("Grab screen zone"));
-    m_middleAction->addItem(i18n("Insert color from screen"));
-    m_middleAction->addItem(i18n("Load note from file"));
-    m_middleAction->addItem(i18n("Import Launcher from KDE Menu"));
-    m_middleAction->addItem(i18n("Import icon"));
+    m_middleAction = new QComboBox(widget);
+    m_middleAction->addItem(tr("Do nothing"));
+    m_middleAction->addItem(tr("Paste clipboard"));
+    m_middleAction->addItem(tr("Insert image note"));
+    m_middleAction->addItem(tr("Insert link note"));
+    m_middleAction->addItem(tr("Insert cross reference"));
+    m_middleAction->addItem(tr("Insert launcher note"));
+    m_middleAction->addItem(tr("Insert color note"));
+    m_middleAction->addItem(tr("Grab screen zone"));
+    m_middleAction->addItem(tr("Insert color from screen"));
+    m_middleAction->addItem(tr("Load note from file"));
+    m_middleAction->addItem(tr("Import Launcher from KDE Menu"));
+    m_middleAction->addItem(tr("Import icon"));
 
     QLabel *labelM = new QLabel(widget);
     labelM->setText(i18n("&Shift+middle-click anywhere:"));
@@ -739,7 +741,7 @@ NewNotesPage::NewNotesPage(QWidget * parent)
     // Place of New Notes:
 
     hLay = new QHBoxLayout;
-    m_newNotesPlace = new KComboBox(this);
+    m_newNotesPlace = new QComboBox(this);
 
     label = new QLabel(this);
     label->setText(i18n("&Place of new notes:"));
@@ -974,8 +976,6 @@ ApplicationsPage::ApplicationsPage(QWidget * parent)
     layout->addItem(hLayA);
     layout->addWidget(m_soundUseProg);
     layout->addItem(hLayS);
-
-    layout->addSpacing(KDialog::spacingHint());
 
     QHBoxLayout *hLay = new QHBoxLayout;
     HelpLabel *hl1 = new HelpLabel(

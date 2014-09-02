@@ -33,7 +33,7 @@ class QVBoxLayout;
 class QRadioButton;
 class QString;
 
-class KComboBox;
+class QComboBox;
 class KIntNumInput;
 class KColorCombo2;
 
@@ -60,7 +60,7 @@ private:
     BasketScene   *m_basket;
     KIconButton   *m_icon;
     KLineEdit     *m_name;
-    KComboBox     *m_backgroundImage;
+    QComboBox     *m_backgroundImage;
     KColorCombo2  *m_backgroundColor;
     KColorCombo2  *m_textColor;
 

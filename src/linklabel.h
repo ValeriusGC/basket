@@ -33,8 +33,8 @@ class QSpacerItem;
 class QPushButton;
 class QCheckBox;
 class QEvent;
+class QComboBox;
 
-class KComboBox;
 class KColorCombo2;
 class IconSizeCombo;
 
@@ -225,11 +225,11 @@ protected:
     LinkLook      *m_look;
     QCheckBox     *m_italic;
     QCheckBox     *m_bold;
-    KComboBox     *m_underlining;
+    QComboBox     *m_underlining;
     KColorCombo2  *m_color;
     KColorCombo2  *m_hoverColor;
     IconSizeCombo *m_iconSize;
-    KComboBox     *m_preview;
+    QComboBox     *m_preview;
     LinkLook      *m_exLook;
     LinkLabel     *m_example;
     QString        m_exTitle;

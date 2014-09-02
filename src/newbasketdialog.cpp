@@ -25,8 +25,8 @@
 #include <QtGui/QVBoxLayout>
 #include <QtGui/QLabel>
 #include <QtGui/QPainter>
+#include <QComboBox>
 
-#include <KDE/KComboBox>
 #include <KDE/KLocale>
 #include <KDE/KPushButton>
 #include <KDE/KLineEdit>
@@ -208,7 +208,7 @@ NewBasketDialog::NewBasketDialog(BasketScene *parentBasket, const NewBasketDefau
     topLayout->addWidget(m_templates);
 
     layout = new QHBoxLayout;
-    m_createIn = new KComboBox(page);
+    m_createIn = new QComboBox(page);
     m_createIn->addItem(i18n("(Baskets)"));
     label = new QLabel(page);
     label->setText(i18n("C&reate in:"));

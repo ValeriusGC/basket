@@ -21,7 +21,7 @@
 #ifndef KCOLORCOMBO2_H
 #define KCOLORCOMBO2_H
 
-#include <KDE/KComboBox>
+#include <QComboBox>
 
 class QColor;
 class QPixmap;
@@ -80,7 +80,7 @@ class KColorPopup;
  *
  * @image html commoncolorselector.png "Common Color Selector ComboBox"
  */
-class KColorCombo2 : public KComboBox
+class KColorCombo2 : public QComboBox
 {
     Q_OBJECT
     Q_PROPERTY(QColor color        READ color        WRITE setColor)
@@ -268,7 +268,7 @@ protected:
 private:
     /**
      * Initialization routine common to every constructors.\n
-     * Constructors just have to initialize the KComboBox, m_color and m_defaultColor
+     * Constructors just have to initialize the QComboBox, m_color and m_defaultColor
      * and this function do the rest to complete the creation of this widget.
      */
     void init();

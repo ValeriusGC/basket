@@ -32,7 +32,7 @@
 #include "systemtray.h"
 
 class KIntNumInput;
-class KComboBox;
+class QComboBox;
 
 class QDialogButtonBox;
 class QString;
@@ -40,6 +40,7 @@ class QCheckBox;
 class QPushButton;
 class QPoint;
 class QSize;
+class QComboBox;
 
 class LinkLook;
 class LinkLookEditWidget;
@@ -69,8 +70,8 @@ public:
 
 private:
     // General
-    KComboBox           *m_treeOnLeft;
-    KComboBox           *m_filterOnTop;
+    QComboBox           *m_treeOnLeft;
+    QComboBox           *m_filterOnTop;
     QCheckBox           *m_usePassivePopup;
 
     // System Tray Icon
@@ -105,7 +106,7 @@ private:
     QCheckBox           *m_exportTextTags;
     QWidget             *m_groupOnInsertionLineWidget;
     QCheckBox           *m_groupOnInsertionLine;
-    KComboBox           *m_middleAction;
+    QComboBox           *m_middleAction;
 
     // Protection
     QCheckBox           *m_useGnuPGAgent;
@@ -133,7 +134,7 @@ private:
     QPushButton         *m_pushVisualize;
 
     // Note Addition
-    KComboBox           *m_newNotesPlace;
+    QComboBox           *m_newNotesPlace;
     QCheckBox           *m_viewTextFileContent;
     QCheckBox           *m_viewHtmlFileContent;
     QCheckBox           *m_viewImageFileContent;

@@ -29,7 +29,7 @@
 class KIconButton;
 class KLineEdit;
 class QMimeData;
-class KComboBox;
+class QComboBox;
 class QTreeWidgetItem;
 
 class BasketScene;
@@ -95,7 +95,7 @@ private:
     KLineEdit                  *m_name;
     KColorCombo2               *m_backgroundColor;
     QListWidget                 *m_templates;
-    KComboBox                  *m_createIn;
+    QComboBox                  *m_createIn;
     QMap<int, BasketScene*>     m_basketsMap;
 };
 

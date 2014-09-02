@@ -21,18 +21,17 @@
 #ifndef VARIOUSWIDGETS_H
 #define VARIOUSWIDGETS_H
 
-#include <QtGui/QWidget>
-#include <QtGui/QDialog>
+#include <QWidget>
+#include <QDialog>
+#include <QComboBox>
+#include <QLabel>
 
-#include <KDE/KDialog>
-#include <KDE/KComboBox>
-#include <KDE/KUrlLabel>
-
-class KLineEdit;
+class QLineEdit;
 class QListWidgetItem;
 class QResizeEvent;
 class QString;
 class QKeyEvent;
+class QDialogButtonBox;
 
 /** A widget to select a command to run,
   * with a KLineEdit and a QPushButton.
@@ -46,20 +45,20 @@ public:
     ~RunCommandRequester();
     QString runCommand();
     void setRunCommand(const QString &runCommand);
-    KLineEdit *lineEdit() {
+    QLineEdit *lineEdit() {
         return m_runCommand;
     }
 private slots:
     void slotSelCommand();
 private:
-    KLineEdit *m_runCommand;
+    QLineEdit *m_runCommand;
     QString    m_message;
 };
 
-/** KComboBox to ask icon size
+/** QComboBox to ask icon size
   * @author Sébastien Laoût
   */
-class IconSizeCombo : public KComboBox
+class IconSizeCombo : public QComboBox
 {
     Q_OBJECT
 public:
@@ -87,7 +86,7 @@ private:
 /** A label displaying a link that, once clicked, offer a What's This messageBox to help users.
   * @author Sébastien Laoût
   */
-class HelpLabel : public KUrlLabel
+class HelpLabel : public QLabel
 {
     Q_OBJECT
 public:
@@ -108,7 +107,7 @@ private:
 /** A dialog to choose the size of an icon.
   * @author Sébastien Laoût
   */
-class IconSizeDialog : public KDialog
+class IconSizeDialog : public QDialog
 {
     Q_OBJECT
 public:
@@ -128,13 +127,14 @@ private:
     QListWidgetItem *m_size48;
     QListWidgetItem *m_size64;
     QListWidgetItem *m_size128;
+    QDialogButtonBox *m_buttonbox;
     int m_iconSize;
 };
 
 /**
  * A missing class from KDE (and Qt): a combobox to select a font size!
  */
-class FontSizeCombo : public KComboBox
+class FontSizeCombo : public QComboBox
 {
     Q_OBJECT
 public:

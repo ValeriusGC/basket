@@ -26,7 +26,7 @@
 #include <QtGui/QPixmap>
 
 #include <KDE/KDialog>
-#include <KDE/KComboBox>
+#include <QComboBox>
 #include <KDE/KIconLoader>
 #include <KDE/KLocale>
 #include <KDE/KLineEdit>
@@ -60,7 +60,7 @@ FilterBar::FilterBar(QWidget *parent)
     QLabel *label = new QLabel(this);
     label->setText(i18n("&Filter: "));
     label->setBuddy(m_lineEdit);
-    m_tagsBox = new KComboBox(this);
+    m_tagsBox = new QComboBox(this);
     QLabel *label2 = new QLabel(this);
     label2->setText(i18n("T&ag: "));
     label2->setBuddy(m_tagsBox);

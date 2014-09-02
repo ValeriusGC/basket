@@ -33,6 +33,7 @@ class QKeyEvent;
 class QFontComboBox;
 class QTextCharFormat;
 class QToolBar;
+class QComboBox;
 
 class KIconButton;
 class KUrlRequester;
@@ -41,7 +42,6 @@ class KToggleAction;
 class KToolBar;
 class KAction;
 class KActionCollection;
-class KComboBox;
 class KColorCombo;
 
 class FontSizeCombo;
@@ -282,10 +282,10 @@ protected slots:
     void slotOk();
     void urlChanged(const int index);
 protected:
-    void generateBasketList(KComboBox *targetList, BasketListViewItem *item = 0, int indent = 0);
+    void generateBasketList(QComboBox *targetList, BasketListViewItem *item = 0, int indent = 0);
 private:
     CrossReferenceContent   *m_noteContent;
-    KComboBox     *m_targetBasket;
+    QComboBox     *m_targetBasket;
 };
 
 /** The dialog to edit Launcher Note content.

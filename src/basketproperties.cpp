@@ -30,8 +30,8 @@
 #include <QtGui/QGroupBox>
 #include <QtGui/QButtonGroup>
 #include <QtGui/QStyle>
+#include <QComboBox>
 
-#include <KDE/KComboBox>
 #include <KDE/KLineEdit>
 #include <KDE/KLocale>
 #include <KDE/KNumInput>

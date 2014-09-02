@@ -880,7 +880,7 @@ CrossReferenceEditDialog::CrossReferenceEditDialog(CrossReferenceContent *conten
 
     QGridLayout *layout = new QGridLayout(page);
 
-    m_targetBasket = new KComboBox(wid);
+    m_targetBasket = new QComboBox(wid);
     this->generateBasketList(m_targetBasket);
 
     if(m_noteContent->url().isEmpty()){
@@ -933,7 +933,7 @@ void CrossReferenceEditDialog::slotOk()
     m_noteContent->setEdited();
 }
 
-void CrossReferenceEditDialog::generateBasketList(KComboBox *targetList, BasketListViewItem *item, int indent)
+void CrossReferenceEditDialog::generateBasketList(QComboBox *targetList, BasketListViewItem *item, int indent)
 {
     if(!item) { // include ALL top level items and their children.
         for(int i = 0; i < Global::bnpView->topLevelItemCount(); ++i)

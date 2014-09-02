@@ -27,7 +27,7 @@
 class QToolButton;
 
 class KLineEdit;
-class KComboBox;
+class QComboBox;
 
 class Tag;
 class State;
@@ -86,7 +86,7 @@ private:
     FilterData      *m_data;
     KLineEdit *m_lineEdit;
     QToolButton     *m_resetButton;
-    KComboBox *m_tagsBox;
+    QComboBox *m_tagsBox;
     QToolButton     *m_inAllBasketsButton;
 
     QMap<int, Tag*>   m_tagsMap;
