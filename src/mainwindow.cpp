@@ -259,8 +259,7 @@ bool MainWindow::queryClose()
     }
 
     if (Settings::useSystray()
-            && !m_quit
-            && Global::systemTray->parentWidgetTrayClose()) {
+            && !m_quit ) {
         hide();
         return false;
     } else

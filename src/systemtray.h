@@ -21,13 +21,15 @@
 #ifndef SYSTEMTRAY_H
 #define SYSTEMTRAY_H
 
-#include <KDE/KSystemTrayIcon>
+#include <QSystemTrayIcon>
+
+class QMenu;
 
 /** A thin wrapper around KSystemTrayIcon until the old SystemTray is ported.
  * As things are ported, items should
  * @author Kelvie Wong
  */
-class SystemTray : public KSystemTrayIcon
+class SystemTray : public QSystemTrayIcon
 {
     Q_OBJECT
     Q_DISABLE_COPY(SystemTray);
@@ -38,6 +40,7 @@ public:
 
 public slots:
     void updateDisplay();
+    void toggleActive();
 
 signals:
     void showPart();
@@ -46,37 +49,7 @@ private:
     QSize m_iconSize;
     QIcon m_icon;
     QIcon m_lockedIcon;
+    QMenu *m_popupmenu;
 };
 
-#ifdef USE_OLD_SYSTRAY
-
-/** This class provide a personalized system tray icon.
-  * @author Sébastien Laoût
-  */
-class SystemTray2 : public SystemTray
-{
-    Q_OBJECT
-public:
-    explicit SystemTray2(QWidget *parent = 0, const char *name = 0);
-    ~SystemTray2();
-protected:
-    void mousePressEvent(QMouseEvent *event);
-    void mouseMoveEvent(QMouseEvent *event);
-    void mouseReleaseEvent(QMouseEvent *event);
-    virtual void dragEnterEvent(QDragEnterEvent *event);
-    virtual void dragMoveEvent(QDragMoveEvent* event);
-    virtual void dragLeaveEvent(QDragLeaveEvent*);
-    virtual void dropEvent(QDropEvent *event);
-    void wheelEvent(QWheelEvent *event);
-    void enterEvent(QEvent*);
-    void leaveEvent(QEvent*);
-
-private:
-    QTimer    *m_showTimer;
-    QTimer    *m_autoShowTimer;
-    bool       m_canDrag;
-    QPoint     m_pressPos;
-};
-#endif // USE_OLD_SYSTRAY
-
-#endif // SYSTEMTRAY_H
+#endif SYSTEMTRAY_H

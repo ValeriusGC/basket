@@ -22,13 +22,10 @@
 #include "systemtray.h"
 
 // Qt
-#include <QtGui/QImage>
-#include <QtGui/QPixmap>
-
-// KDE
-#include <KDE/KLocale>
-#include <KDE/KIconEffect>  //Port to Blitz/Quasar?
-#include <KDE/KDialog>
+#include <QImage>
+#include <QPixmap>
+#include <QPainter>
+#include <QMenu>
 
 // Local
 #include "basketscene.h"
@@ -36,67 +33,28 @@
 #include "global.h"
 #include "tools.h"
 
-
-/* This function comes directly from JuK: */
-
-/*
- * This function copies the entirety of src into dest, starting in
- * dest at x and y.  This function exists because I was unable to find
- * a function like it in either QImage or kdefx
- */
-static bool copyImage(QImage &dest, QImage &src, int x, int y)
-{
-    if (dest.depth() != src.depth())
-        return false;
-    if ((x + src.width()) >= dest.width())
-        return false;
-    if ((y + src.height()) >= dest.height())
-        return false;
-
-    // We want to use KIconEffect::overlay to do this, since it handles
-    // alpha, but the images need to be the same size.  We can handle that.
-
-    QImage large_src(dest);
-
-    // It would perhaps be better to create large_src based on a size, but
-    // this is the easiest way to make a new image with the same depth, size,
-    // etc.
-
-    large_src.detach();
-
-    // However, we do have to specifically ensure that setAlphaBuffer is set
-    // to false
-
-    //large_src.setAlphaBuffer(false);
-    large_src.fill(0); // All transparent pixels
-    //large_src.setAlphaBuffer(true);
-
-    int w = src.width();
-    int h = src.height();
-    for (int dx = 0; dx < w; dx++)
-        for (int dy = 0; dy < h; dy++)
-            large_src.setPixel(dx + x, dy + y, src.pixel(dx, dy));
-
-    // Apply effect to image
-
-    KIconEffect::overlay(dest, large_src);
-
-    return true;
-}
-
-
 /** Constructor */
 SystemTray::SystemTray(QWidget *parent)
-        : KSystemTrayIcon(parent)
+        : QSystemTrayIcon(parent)
 {
     // Create pixmaps for the icon:
     m_iconSize = QSize(geometry().width(), geometry().height());
-    m_icon = loadIcon("basket");
-    QImage lockedIconImage = m_icon.pixmap(m_iconSize).toImage();
-    QImage lockOverlay = loadIcon("object-locked").pixmap(m_iconSize).toImage();
-    KIconEffect::overlay(lockedIconImage, lockOverlay);
-    m_lockedIcon = QIcon(QPixmap::fromImage(lockedIconImage));
+    m_icon = KIcon("basket");
+    QPixmap lockedIconImage = m_icon.pixmap(m_iconSize);
+    QPixmap lockOverlay = QIcon("://images/hi32-status-object-locked.png").pixmap(m_iconSize);
+    lockedIconImage.fill(QColor(0, 0, 0, 0)); // force alpha channel
+    {
+        QPainter painter(&lockedIconImage);
+        painter.drawPixmap(0, 0, m_icon.pixmap(22, 22));
+        painter.drawPixmap(0, 0, lockOverlay);
+    }
+    m_lockedIcon = QIcon(lockedIconImage);
 
+    m_popupmenu = new QMenu(parent);
+    m_popupmenu->setTitle("Basket"); // TODO use qApp here, add actions when converted from KAction
+    m_popupmenu->setIcon(SmallIcon("basket"));
+    
+    setContextMenu(m_popupmenu);
     updateDisplay();
 }
 
@@ -120,31 +78,41 @@ void SystemTray::updateDisplay()
         setIcon(basket->isLocked() ? m_lockedIcon : m_icon);
     else {
         // Code that comes from JuK:
-        QPixmap bgPix = loadIcon("basket").pixmap(22);
-        QPixmap fgPix = loadIcon(basket->icon()).pixmap(16);
-
-        QImage bgImage = bgPix.toImage(); // Probably 22x22
-        QImage fgImage = fgPix.toImage(); // Should be 16x16
-
-        KIconEffect::semiTransparent(bgImage);
-        copyImage(bgImage, fgImage, (bgImage.width() - fgImage.width()) / 2,
-                  (bgImage.height() - fgImage.height()) / 2);
+        QPixmap bgPix = QIcon("://images/hi32-status-object-locked.png").pixmap(22);
+        QPixmap fgPix = QIcon(basket->icon()).pixmap(16);
+	
+	QPixmap Pix = QPixmap(22,22);
+	{
+	    QPainter painter(&Pix);
+	    painter.setOpacity(0.5);
+	    painter.drawPixmap(0, 0, bgPix);
+	    painter.setOpacity(1);
+	    painter.drawPixmap((bgPix.width() - fgPix.width()) / 2, (bgPix.height() - fgPix.height()) / 2, fgPix);
+	}
 
         if (basket->isLocked()) {
-            QImage lockOverlay = loadIcon("object-locked").pixmap(m_iconSize).toImage();
-            KIconEffect::overlay(bgImage, lockOverlay);
+            QImage lockOverlay = QIcon("://images/hi32-status-object-locked.png").pixmap(m_iconSize).toImage();
+	    {
+		QPainter painter(&bgPix);
+		painter.drawPixmap(0, 0, m_icon.pixmap(22, 22));
+		painter.drawImage(0, 0, lockOverlay);
+	    }
         }
 
-        setIcon(QPixmap::fromImage(bgImage));
+        setIcon(bgPix);
     }
     // update the tooltip
     QString tip = "<p><nobr>";
     QString basketName = "%1";
     if (basket->isLocked())
-        basketName += i18n(" (Locked)");
-    tip += KDialog::makeStandardCaption(basketName);
+        basketName += tr(" (Locked)");
     tip = tip.arg(Tools::textToHTMLWithoutP(basket->basketName()));
     setToolTip(tip);
+}
+
+void SystemTray::toggleActive()
+{
+    setVisible(!isVisible());
 }
 
 #ifdef USE_OLD_SYSTRAY
