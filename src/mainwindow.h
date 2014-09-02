@@ -27,10 +27,7 @@ class QResizeEvent;
 class QVBoxLayout;
 class QMoveEvent;
 class QWidget;
-class KAction;
-class KToggleAction;
 class BNPView;
-class KActionCollection;
 
 namespace KSettings
 {
@@ -55,7 +52,6 @@ public slots:
     /** Settings **/
     void toggleToolBar();
     void toggleStatusBar();
-    void showShortcutsSettingsDialog();
     void configureToolbars();
     void configureNotifications();
     void showSettingsDialog();
@@ -76,19 +72,17 @@ private:
     // Settings actions :
 //    KToggleAction *m_actShowToolbar;
 //    KToggleAction *m_actShowStatusbar;
-    KAction       *actQuit;
-    KAction       *actAppConfig;
+    QAction       *actQuit;
+    QAction       *actAppConfig;
     QList<QAction *> actBasketsList;
 
 private:
     QVBoxLayout        *m_layout;
     BNPView            *m_baskets;
     bool                m_startDocked;
-    KSettings::Dialog  *m_settings;
     bool                m_quit;
 
 private:
-    KActionCollection *ac;
     QToolBar *m_mainToolBar;
     QToolBar *m_editToolBar;
 };

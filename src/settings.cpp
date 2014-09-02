@@ -20,6 +20,7 @@
 
 #include "settings.h"
 
+#include <QApplication>
 #include <QtGui/QCheckBox>
 #include <QtGui/QGroupBox>
 #include <QtGui/QLabel>
@@ -28,6 +29,7 @@
 #include <QtGui/QGridLayout>
 #include <QtGui/QVBoxLayout>
 #include <QtCore/QDate>
+#include <QDialogButtonBox>
 
 #include <KDE/KLineEdit>
 #include <KDE/KNumInput>
@@ -36,7 +38,6 @@
 #include <KDE/KLocale>
 #include <KDE/KAboutData>
 #include <KDE/KMimeType>
-#include <KDE/KComponentData>
 #include <KDE/KTabWidget>
 
 #include "kgpgme.h"
@@ -347,9 +348,37 @@ void Settings::setAutoBullet(bool yes)
 }
 
 /** GeneralPage */
+SettingsDialog::SettingsDialog(QWidget *parent)
+    : QDialog(parent)
+{
+    tabWidget = new QTabWidget;
+    tabWidget->addTab(new GeneralPage(), tr("General"));
+    tabWidget->addTab(new BasketsPage(), tr("Baskets"));
+    tabWidget->addTab(new NewNotesPage(), tr("Notes"));
+    tabWidget->addTab(new NotesAppearancePage(), tr("Appearance"));
+    tabWidget->addTab(new ApplicationsPage(), tr("Application"));
 
-GeneralPage::GeneralPage(QWidget * parent, const char * name)
-        : KCModule(KComponentData(name), parent)
+
+    buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok
+                                     | QDialogButtonBox::Cancel
+                                     | QDialogButtonBox::Apply);
+
+    connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
+    connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
+
+    QVBoxLayout *mainLayout = new QVBoxLayout;
+    mainLayout->setSizeConstraint(QLayout::SetNoConstraint);
+    mainLayout->addWidget(tabWidget);
+    mainLayout->addWidget(buttonBox);
+    setLayout(mainLayout);
+
+    setWindowTitle(tr("Settings"));
+}
+
+/** GeneralPage */
+
+GeneralPage::GeneralPage(QWidget * parent)
+        : QWidget(parent)
 {
     QVBoxLayout *layout = new QVBoxLayout(this);
     QHBoxLayout *hLay;
@@ -391,12 +420,12 @@ GeneralPage::GeneralPage(QWidget * parent, const char * name)
     m_usePassivePopup = new QCheckBox(i18n("&Use balloons to report results of global actions"), this);
     connect(m_usePassivePopup, SIGNAL(stateChanged(int)), this, SLOT(changed()));
     hLabel = new HelpLabel(
-        i18n("What are global actions?"),
-        ("<p>" + i18n("You can configure global shortcuts to do some actions without having to show the main window. For instance, you can paste the clipboard content, take a color from "
+        tr("What are global actions?"),
+        ("<p>" + tr("You can configure global shortcuts to do some actions without having to show the main window. For instance, you can paste the clipboard content, take a color from "
                       "a point of the screen, etc. You can also use the mouse scroll wheel over the system tray icon to change the current basket. Or use the middle mouse button "
                       "on that icon to paste the current selection.") + "</p>" +
-         "<p>" + i18n("When doing so, %1 pops up a little balloon message to inform you the action has been successfully done. You can disable that balloon.", KGlobal::mainComponent().aboutData()->programName()) + "</p>" +
-         "<p>" + i18n("Note that those messages are smart enough to not appear if the main window is visible. This is because you already see the result of your actions in the main window.") + "</p>"),
+         "<p>" + tr("When doing so, %1 pops up a little balloon message to inform you the action has been successfully done. You can disable that balloon.").arg(qApp->applicationName()) + "</p>" +
+         "<p>" + tr("Note that those messages are smart enough to not appear if the main window is visible. This is because you already see the result of your actions in the main window.") + "</p>"),
         this);
     hLay->addWidget(m_usePassivePopup);
     hLay->addWidget(hLabel);
@@ -503,8 +532,8 @@ void GeneralPage::defaults()
 
 /** BasketsPage */
 
-BasketsPage::BasketsPage(QWidget * parent, const char * name)
-        : KCModule(KComponentData(name), parent)
+BasketsPage::BasketsPage(QWidget * parent)
+        : QWidget(parent)
 {
     QVBoxLayout *layout = new QVBoxLayout(this);
     QHBoxLayout *hLay;
@@ -700,8 +729,8 @@ void BasketsPage::defaults()
 
 /** class NewNotesPage: */
 
-NewNotesPage::NewNotesPage(QWidget * parent, const char * name)
-        : KCModule(KComponentData(name), parent)
+NewNotesPage::NewNotesPage(QWidget * parent)
+        : QWidget(parent)
 {
     QVBoxLayout *layout = new QVBoxLayout(this);
     QHBoxLayout *hLay;
@@ -829,19 +858,19 @@ void NewNotesPage::visualize()
 
 /** class NotesAppearancePage: */
 
-NotesAppearancePage::NotesAppearancePage(QWidget * parent, const char * name)
-        : KCModule(KComponentData(name), parent)
+NotesAppearancePage::NotesAppearancePage(QWidget * parent)
+        : QWidget(parent)
 {
     QVBoxLayout *layout = new QVBoxLayout(this);
     KTabWidget *tabs = new KTabWidget(this);
     layout->addWidget(tabs);
 
-    m_soundLook       = new LinkLookEditWidget(this, i18n("Conference audio record"),                         "folder-sound",       tabs);
-    m_fileLook        = new LinkLookEditWidget(this, i18n("Annual report"),                                   "folder-documents",    tabs);
-    m_localLinkLook   = new LinkLookEditWidget(this, i18n("Home folder"),                                     "user-home", tabs);
+    m_soundLook       = new LinkLookEditWidget(this, tr("Conference audio record"),                         "folder-sound",       tabs);
+    m_fileLook        = new LinkLookEditWidget(this, tr("Annual report"),                                   "folder-documents",    tabs);
+    m_localLinkLook   = new LinkLookEditWidget(this, tr("Home folder"),                                     "user-home", tabs);
     m_networkLinkLook = new LinkLookEditWidget(this, "www.kde.org",             KMimeType::iconNameForUrl(KUrl("http://www.kde.org")), tabs);
-    m_launcherLook    = new LinkLookEditWidget(this, i18n("Launch %1").arg(KGlobal::mainComponent().aboutData()->programName()), "basket",      tabs);
-    m_crossReferenceLook=new LinkLookEditWidget(this, i18n("Another basket"), "basket", tabs);
+    m_launcherLook    = new LinkLookEditWidget(this, tr("Launch %1").arg(qApp->applicationName()), "basket",      tabs);
+    m_crossReferenceLook=new LinkLookEditWidget(this, tr("Another basket"), "basket", tabs);
 
     tabs->addTab(m_soundLook,       i18n("&Sounds"));
     tabs->addTab(m_fileLook,        i18n("&Files"));
@@ -881,8 +910,8 @@ void NotesAppearancePage::defaults()
 
 /** class ApplicationsPage: */
 
-ApplicationsPage::ApplicationsPage(QWidget * parent, const char * name)
-        : KCModule(KComponentData(name), parent)
+ApplicationsPage::ApplicationsPage(QWidget * parent)
+        : QWidget(parent)
 {
     /* Applications page */
     QVBoxLayout *layout = new QVBoxLayout(this);

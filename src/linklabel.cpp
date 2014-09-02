@@ -41,7 +41,6 @@
 #include <KDE/KLocale>
 #include <KDE/KIconLoader>
 #include <KDE/KUrl>
-#include <KDE/KCModule>
 
 #include "variouswidgets.h"
 #include "tools.h"
@@ -571,7 +570,7 @@ QString LinkDisplay::toHtml(HTMLExporter *exporter, const KUrl &url, const QStri
 
 /** LinkLookEditWidget **/
 
-LinkLookEditWidget::LinkLookEditWidget(KCModule *module, const QString exTitle, const QString exIcon,
+LinkLookEditWidget::LinkLookEditWidget(QWidget *module, const QString exTitle, const QString exIcon,
                                        QWidget *parent, Qt::WFlags fl)
         : QWidget(parent, fl)
 {

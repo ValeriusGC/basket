@@ -40,7 +40,6 @@ class IconSizeCombo;
 
 class HTMLExporter;
 class HelpLabel;
-class KCModule;
 
 /** Store the style of links
   * @author Sébastien Laoût
@@ -214,7 +213,7 @@ class LinkLookEditWidget : public QWidget
 {
     Q_OBJECT
 public:
-    LinkLookEditWidget(KCModule* module, const QString exTitle, const QString exIcon,
+    LinkLookEditWidget(QWidget* module, const QString exTitle, const QString exIcon,
                        QWidget *parent = 0, Qt::WFlags fl = 0);
     ~LinkLookEditWidget();
     void saveChanges();

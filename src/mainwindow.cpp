@@ -20,20 +20,17 @@
 
 #include "mainwindow.h"
 
+#include <QApplication>
+#include <QLocale>
 #include <QMoveEvent>
 #include <QResizeEvent>
-#include <QToolBar>
-
-#include <KDE/KAction>
-#include <KDE/KApplication>
-#include <QLocale>
-#include <KDE/KEditToolBar>
 #include <QStatusBar>
-#include <KDE/KDebug>
+#include <QToolBar>
+#include <QMenuBar>
+
 #include <QMessageBox>
 #include <KDE/KConfig>
 #include <KDE/KAboutData>
-#include <KDE/KActionCollection>
 #include <KDE/KToggleAction>
 
 #include <KDE/KSettings/Dialog>
@@ -50,7 +47,7 @@
 /** Container */
 
 MainWindow::MainWindow(QWidget *parent)
-        : QMainWindow(parent), m_settings(0), m_quit(false)
+        : QMainWindow(parent), m_quit(false)
 {
     BasketStatusBar* bar = new BasketStatusBar(statusBar());
     m_mainToolBar = addToolBar("Main");
@@ -73,13 +70,15 @@ MainWindow::MainWindow(QWidget *parent)
 
 //    KConfigGroup group = KGlobal::config()->group(autoSaveGroup());
 //    applyMainWindowSettings(group);
+
+    // Temp, settings
+    menuBar()->addAction("Settings", this, SLOT(showSettingsDialog()));
 }
 
 MainWindow::~MainWindow()
 {
 //    KConfigGroup group = KGlobal::config()->group(autoSaveGroup());
 //    saveMainWindowSettings(group);
-    delete m_settings;
     delete m_baskets;
 }
 
@@ -222,14 +221,14 @@ void MainWindow::setupActions()
 
 //    m_actShowToolbar->setCheckedState( KGuiItem(tr("Hide &Toolbar")) );
 
-    (void) KStandardAction::keyBindings(this, SLOT(showShortcutsSettingsDialog()), ac);
+//    (void) KStandardAction::keyBindings(this, SLOT(showShortcutsSettingsDialog()), ac);
 
-    (void) KStandardAction::configureToolbars(this, SLOT(configureToolbars()), ac);
+//    (void) KStandardAction::configureToolbars(this, SLOT(configureToolbars()), ac);
 
     //KAction *actCfgNotifs = KStandardAction::configureNotifications(this, SLOT(configureNotifications()), ac );
     //actCfgNotifs->setEnabled(false); // Not yet implemented !
 
-    actAppConfig = KStandardAction::preferences(this, SLOT(showSettingsDialog()), ac);
+//    actAppConfig = KStandardAction::preferences(this, SLOT(showSettingsDialog()), ac);
 }
 
 void MainWindow::toggleToolBar()
@@ -257,10 +256,6 @@ void MainWindow::configureToolbars()
 {
 //    KConfigGroup group = KGlobal::config()->group(autoSaveGroup());
 //    saveMainWindowSettings(group);
-
-    KEditToolBar dlg(ac);
-    connect(&dlg, SIGNAL(newToolbarConfig()), this, SLOT(slotNewToolbarConfig()));
-    dlg.exec();
 }
 
 void MainWindow::configureNotifications()
@@ -283,18 +278,8 @@ void MainWindow::slotNewToolbarConfig() // This is called when OK or Apply is cl
 
 void MainWindow::showSettingsDialog()
 {
-    if (m_settings == 0)
-        m_settings = new KSettings::Dialog(kapp->activeWindow());
-    if (Global::mainWindow()) {
-        m_settings->showButton(KDialog::Help,    false); // Not implemented!
-        m_settings->showButton(KDialog::Default, false); // Not implemented!
-        m_settings->exec();
-    } else
-        m_settings->show();
-}
-
-void MainWindow::showShortcutsSettingsDialog()
-{
+    SettingsDialog s;
+    s.exec();
 }
 
 void MainWindow::ensurePolished()
@@ -306,8 +291,8 @@ void MainWindow::ensurePolished()
     //  - Keep the window manager placing the window where it want and save this
     if (Settings::mainWindowSize().isEmpty()) {
 //      kDebug() << "Main Window Position: Initial Set in show()";
-        int defaultWidth  = kapp->desktop()->width()  * 5 / 6;
-        int defaultHeight = kapp->desktop()->height() * 5 / 6;
+        int defaultWidth  = qApp->desktop()->width()  * 5 / 6;
+        int defaultHeight = qApp->desktop()->height() * 5 / 6;
         resize(defaultWidth, defaultHeight); // sizeHint() is bad (too small) and we want the user to have a good default area size
         shouldSave = true;
     } else {
@@ -370,18 +355,15 @@ bool MainWindow::queryClose()
     /*  if (m_shuttingDown) // Set in askForQuit(): we don't have to ask again
         return true;*/
 
-    if (kapp->sessionSaving()) {
-        Settings::setStartDocked(false); // If queryClose() is called it's because the window is shown
-        Settings::saveConfig();
-        return true;
-    }
-
     if (Settings::useSystray()
             && !m_quit ) {
         hide();
         return false;
     } else
+    {
+        Settings::saveConfig();
         return askForQuit();
+    }
 }
 
 bool MainWindow::askForQuit()

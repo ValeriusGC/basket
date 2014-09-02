@@ -18,14 +18,11 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <KDE/KCmdLineArgs>
 #include <QApplication>
 
-#include <kconfig.h> // TMP IN ALPHA 1
 #include <config.h>
 #include "basket_options.h"
 
-#include "application.h"
 #include "mainwindow.h"
 #include "settings.h"
 #include "global.h"
@@ -43,7 +40,28 @@ int main(int argc, char *argv[])
 //    KCmdLineArgs::addCmdLineOptions(opts);
 
 //    KUniqueApplication::addCmdLineOptions();
-//    Application app;
+//    // Open the basket archive or template file supplied as argument:
+//    KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
+//    if (args && args->count() >= 1) {
+//        QString fileName = args->arg(args->count() - 1);
+
+//        if (QFile::exists(fileName)) {
+//            QFileInfo fileInfo(fileName);
+//            if (fileInfo.absoluteFilePath().contains(Global::basketsFolder())) {
+//                QString folder = fileInfo.absolutePath().split("/").last();
+//                folder.append("/");
+//                BNPView::s_basketToOpen = folder;
+//                QTimer::singleShot(100, Global::bnpView, SLOT(delayedOpenBasket()));
+//            } else if (!fileInfo.isDir()) { // Do not mis-interpret data-folder param!
+//                // Tags are not loaded until Global::bnpView::lateInit() is called.
+//                // It is called 0ms after the application start.
+//                BNPView::s_fileToOpen = fileName;
+//                QTimer::singleShot(100, Global::bnpView, SLOT(delayedOpenArchive()));
+////              Global::bnpView->openArchive(fileName);
+//                args->clear();
+//            }
+//        }
+//    }
 
     // Initialize the config file
     Global::basketConfig = KSharedConfig::openConfig("basketrc");

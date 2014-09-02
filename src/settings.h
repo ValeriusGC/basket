@@ -21,11 +21,11 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
-#include <KDE/KCModule>
 #include <KDE/KAction>          //For UseSysTray
 #include <KDE/KMainWindow>      //For Global::mainWindow()
 
 #include <QtCore/QDate>
+#include <QDialog>
 
 #include "basket_export.h"
 #include "bnpview.h"
@@ -34,6 +34,7 @@
 class KIntNumInput;
 class KComboBox;
 
+class QDialogButtonBox;
 class QString;
 class QCheckBox;
 class QPushButton;
@@ -44,11 +45,22 @@ class LinkLook;
 class LinkLookEditWidget;
 class RunCommandRequester;
 
-class BASKET_EXPORT GeneralPage : public KCModule
+class BASKET_EXPORT SettingsDialog : public QDialog
 {
     Q_OBJECT
 public:
-    explicit GeneralPage(QWidget * parent = 0, const char * name = 0);
+    SettingsDialog(QWidget *parent = 0);
+
+private:
+    QTabWidget *tabWidget;
+    QDialogButtonBox *buttonBox;
+};
+
+class BASKET_EXPORT GeneralPage : public QWidget
+{
+    Q_OBJECT
+public:
+    explicit GeneralPage(QWidget * parent = 0);
     virtual ~GeneralPage() {}
 
     virtual void load();
@@ -71,11 +83,11 @@ private:
     KIntNumInput        *m_timeToShowOnMouseIn;
 };
 
-class BASKET_EXPORT BasketsPage : public KCModule
+class BASKET_EXPORT BasketsPage : public QWidget
 {
     Q_OBJECT
 public:
-    explicit BasketsPage(QWidget * parent = 0, const char * name = 0);
+    explicit BasketsPage(QWidget * parent = 0);
 
     virtual void load();
     virtual void save();
@@ -101,11 +113,11 @@ private:
     KIntNumInput        *m_reLockTimeoutMinutes;
 };
 
-class BASKET_EXPORT NewNotesPage : public KCModule
+class BASKET_EXPORT NewNotesPage : public QWidget
 {
     Q_OBJECT
 public:
-    explicit NewNotesPage(QWidget * parent = 0, const char * name = 0);
+    explicit NewNotesPage(QWidget * parent = 0);
 
     virtual void load();
     virtual void save();
@@ -128,11 +140,11 @@ private:
     QCheckBox           *m_viewSoundFileContent;
 };
 
-class BASKET_EXPORT NotesAppearancePage : public KCModule
+class BASKET_EXPORT NotesAppearancePage : public QWidget
 {
     Q_OBJECT
 public:
-    explicit NotesAppearancePage(QWidget * parent = 0, const char * name = 0);
+    explicit NotesAppearancePage(QWidget * parent = 0);
 
     virtual void load();
     virtual void save();
@@ -148,11 +160,11 @@ private:
     LinkLookEditWidget  *m_crossReferenceLook;
 };
 
-class BASKET_EXPORT ApplicationsPage : public KCModule
+class BASKET_EXPORT ApplicationsPage : public QWidget
 {
     Q_OBJECT
 public:
-    explicit ApplicationsPage(QWidget * parent = 0, const char * name = 0);
+    explicit ApplicationsPage(QWidget * parent = 0);
 
     virtual void load();
     virtual void save();

@@ -80,7 +80,7 @@ install(TARGETS basketcommon DESTINATION ${LIB_INSTALL_DIR})
 
 ########### next target ###############
 
-set(basket_SRCS main.cpp mainwindow.cpp application.cpp)
+set(basket_SRCS main.cpp mainwindow.cpp)
 
 kde4_add_executable(basket ${basket_SRCS})
 target_link_libraries(basket
@@ -93,14 +93,6 @@ target_link_libraries(basket
 install(TARGETS basket DESTINATION ${BIN_INSTALL_DIR})
 
 ########### next target ###############
-
-set(kcm_basket_PART_SRCS kcm_basket.cpp)
-
-kde4_add_plugin(kcm_basket ${kcm_basket_PART_SRCS})
-
-target_link_libraries(kcm_basket ${QT_QT3SUPPORT_LIBRARY} ${KDE4_KDECORE_LIBS} ${KDE4_KDEUI_LIBS} basketcommon)
-
-install(TARGETS kcm_basket DESTINATION ${PLUGIN_INSTALL_DIR})
 
 if(BUILD_KPARTS)
 
