@@ -573,7 +573,7 @@ void BNPView::setupActions()
     m1->addAction(tr("&Welcome Baskets"), this, SLOT(addWelcomeBaskets()));
 
     /* LikeBack */
-    Global::likeBack = new LikeBack(LikeBack::AllButtons, /*showBarByDefault=*/false, Global::config());
+    Global::likeBack = new LikeBack(LikeBack::AllButtons, /*showBarByDefault=*/false);
     Global::likeBack->setServer("basket.linux62.org", "/likeback/send.php");
 
 // There are too much comments, and people reading comments are more and more international, so we accept only English:
@@ -1918,8 +1918,8 @@ void BNPView::saveAsArchive()
 
     QDir dir;
 
-    KConfigGroup config = KGlobal::config()->group("Basket Archive");
-    QString folder = config.readEntry("lastFolder", QDir::homePath()) + "/";
+    QSettings settings;
+    QString folder = settings.value("basketarchive/lastFolder", QDir::homePath()).toString() + "/";
     QString url = folder + QString(basket->basketName()).replace("/", "_") + ".baskets";
 
     QString filter = "*.baskets|" + i18n("Basket Archives") + "\n*|" + i18n("All Files");
@@ -1942,8 +1942,7 @@ void BNPView::saveAsArchive()
     }
     bool withSubBaskets = true;//KMessageBox::questionYesNo(this, i18n("Do you want to export sub-baskets too?"), i18n("Save as Basket Archive")) == KMessageBox::Yes;
 
-    config.writeEntry("lastFolder", KUrl(destination).directory());
-    config.sync();
+    settings.setValue("basketarchive/lastFolder", KUrl(destination).directory());
 
     Archive::save(basket, withSubBaskets, destination);
 }

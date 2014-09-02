@@ -17,7 +17,7 @@
    <item row="0" column="0" colspan="2">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="KIconButton" name="icon"/>
+      <widget class="QPushButton" name="icon"/>
      </item>
      <item>
       <widget class="QLineEdit" name="name"/>
@@ -123,13 +123,6 @@
    </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>KIconButton</class>
-   <extends>QPushButton</extends>
-   <header>kicondialog.h</header>
-  </customwidget>
- </customwidgets>
  <tabstops>
   <tabstop>icon</tabstop>
   <tabstop>name</tabstop>

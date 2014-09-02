@@ -35,13 +35,13 @@
 #include <QtGui/QGroupBox>
 #include <QtGui/QProgressBar>
 #include <QMessageBox>
+#include <QSettings>
 
 #include <KDE/KLocale>
 #include <KDE/KApplication>
 #include <KDE/KAboutData>
 #include <KDE/KDirSelectDialog>
 #include <KDE/KRun>
-#include <KDE/KConfig>
 #include <KDE/KTar>
 #include <KDE/KFileDialog>
 #include <KDE/KProgressDialog>
@@ -185,9 +185,9 @@ void BackupDialog::backup()
     QDir dir;
 
     // Compute a default file name & path (eg. "Baskets_2007-01-31.tar.gz"):
-    KConfig *config = KGlobal::config().data();
-    KConfigGroup configGroup(config, "Backups");
-    QString folder = configGroup.readEntry("lastFolder", QDir::homePath()) + "/";
+    QSettings settings;
+    settings.beginGroup("backups");
+    QString folder = settings.value("lastFolder", QDir::homePath()).toString() + "/";
     QString fileName = i18nc("Backup filename (without extension), %1 is the date", "Baskets_%1", QDate::currentDate().toString(Qt::ISODate));
     QString url = folder + fileName;
 
@@ -240,9 +240,9 @@ void BackupDialog::backup()
 void BackupDialog::restore()
 {
     // Get last backup folder:
-    KConfig *config = KGlobal::config().data();
-    KConfigGroup configGroup(config, "Backups");
-    QString folder = configGroup.readEntry("lastFolder", QDir::homePath()) + "/";
+    QSettings settings;
+    settings.beginGroup("backups");
+    QString folder = settings.value("lastFolder", QDir::homePath()).toString() + "/";
 
     // Ask a file name to the user:
     QString filter = "*.tar.gz|" + i18n("Tar Archives Compressed by Gzip") + "\n*|" + i18n("All Files");

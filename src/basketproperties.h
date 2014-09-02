@@ -21,19 +21,19 @@
 #ifndef BASKETPROPERTIES_H
 #define BASKETPROPERTIES_H
 
-#include <KDE/KDialog>
+#include <QDialog>
 #include <QtCore/QMap>
 
 #include "ui_basketproperties.h"
 
-class KIconButton;
-class KLineEdit;
 class QGroupBox;
 class QVBoxLayout;
 class QRadioButton;
 class QString;
-
+class QLineEdit;
+class QPushButton;
 class QComboBox;
+
 class KColorCombo2;
 
 class BasketScene;
@@ -41,7 +41,7 @@ class BasketScene;
 /** The dialog that hold basket settings.
   * @author Sébastien Laoût
   */
-class BasketPropertiesDialog : public KDialog, private Ui::BasketPropertiesUi
+class BasketPropertiesDialog : public QDialog, private Ui::BasketPropertiesUi
 {
     Q_OBJECT
 public:
@@ -57,8 +57,8 @@ protected slots:
 
 private:
     BasketScene   *m_basket;
-    KIconButton   *m_icon;
-    KLineEdit     *m_name;
+    QPushButton   *m_icon;
+    QLineEdit     *m_name;
     QComboBox     *m_backgroundImage;
     KColorCombo2  *m_backgroundColor;
     KColorCombo2  *m_textColor;

@@ -31,12 +31,11 @@
 #include <QtGui/QButtonGroup>
 #include <QtGui/QStyle>
 #include <QComboBox>
+#include <QApplication>
+#include <QPushButton>
+#include <QDialogButtonBox>
 
-#include <KDE/KLineEdit>
-#include <KDE/KLocale>
-#include <KDE/KApplication>
-#include <KDE/KIconLoader>
-#include <KDE/KIconDialog>
+#include <KDE/KIcon>
 
 #include "basketscene.h"
 #include "kcolorcombo2.h"
@@ -47,32 +46,50 @@
 #include "ui_basketproperties.h"
 
 BasketPropertiesDialog::BasketPropertiesDialog(BasketScene *basket, QWidget *parent)
-        : KDialog(parent)
+        : QDialog(parent)
         , Ui::BasketPropertiesUi()
         , m_basket(basket)
 {
+    // Set up buttons
+    QDialogButtonBox *buttonBox = new QDialogButtonBox(Qt::Horizontal);
+
+    QPushButton *b;
+    b = new QPushButton(tr("&Ok"));
+    b->setDefault(true);
+    buttonBox->addButton(b, QDialogButtonBox::ActionRole);
+    connect(b, SIGNAL(clicked()), SLOT(applyChanges()));
+    connect(b, SIGNAL(clicked()), SLOT(accept()));
+
+    b = new QPushButton(tr("&Apply"));
+    buttonBox->addButton(b, QDialogButtonBox::ActionRole);
+    connect(b, SIGNAL(clicked()), SLOT(applyChanges()));
+
+    b = new QPushButton(tr("&Cancel"));
+    buttonBox->addButton(b, QDialogButtonBox::ActionRole);
+    connect(b, SIGNAL(clicked()), SLOT(reject()));
+
+    // Set up widget and layout
     QWidget *mainWidget = new QWidget(this);
     setupUi(mainWidget);
-    setMainWidget(mainWidget);
-  
+    QVBoxLayout *topLayout = new QVBoxLayout(this);
+    topLayout->addWidget(mainWidget);
+    topLayout->addWidget(buttonBox);
+
     // Set up dialog options
-    setCaption(i18n("Basket Properties"));
-    setButtons(Ok | Apply | Cancel);
-    setDefaultButton(Ok);
+    setWindowTitle(tr("Basket Properties"));
+    setObjectName("NewBasket");
+    setModal(true);
     setObjectName("BasketProperties");
     setModal(true);
-    showButtonSeparator(false);
 
-    icon->setIconType(KIconLoader::NoGroup, KIconLoader::Action);
-    icon->setIconSize(16);
-    icon->setIcon(m_basket->icon());
+    icon->setIcon(KIcon(m_basket->icon()));
 
     int size = qMax(icon->sizeHint().width(), icon->sizeHint().height());
     icon->setFixedSize(size, size); // Make it square!
-    icon->setToolTip(i18n("Icon"));
+    icon->setToolTip(tr("Icon"));
     name->setText(m_basket->basketName());
     name->setMinimumWidth(name->fontMetrics().maxWidth()*20);
-    name->setToolTip(i18n("Name"));
+    name->setToolTip(tr("Name"));
 
     // Appearance:
     m_backgroundColor = new KColorCombo2(m_basket->backgroundColorSetting(), palette().color(QPalette::Base), appearanceGroup);
@@ -88,7 +105,7 @@ BasketPropertiesDialog::BasketPropertiesDialog(BasketScene *basket, QWidget *par
     setTabOrder(m_backgroundColor, m_textColor);
     setTabOrder(m_textColor, columnForm);
 
-    backgroundImage->addItem(i18n("(None)"));
+    backgroundImage->addItem(tr("(None)"));
     m_backgroundImagesMap.insert(0, "");
     backgroundImage->setIconSize(QSize(100, 75));
     QStringList backgrounds = Global::backgroundManager->imageNames();
@@ -104,8 +121,8 @@ BasketPropertiesDialog::BasketPropertiesDialog(BasketScene *basket, QWidget *par
             index++;
         }
     }
-//  m_backgroundImage->insertItem(i18n("Other..."), -1);
-    int BUTTON_MARGIN = kapp->style()->pixelMetric(QStyle::PM_ButtonMargin);
+//  m_backgroundImage->insertItem(tr("Other..."), -1);
+    int BUTTON_MARGIN = qApp->style()->pixelMetric(QStyle::PM_ButtonMargin);
     backgroundImage->setMaxVisibleItems(50/*75 * 6 / m_backgroundImage->sizeHint().height()*/);
     backgroundImage->setMinimumHeight(75 + 2 * BUTTON_MARGIN);
 
@@ -125,10 +142,6 @@ BasketPropertiesDialog::BasketPropertiesDialog(BasketScene *basket, QWidget *par
         freeForm->setChecked(true);
 
     mindMap->hide();
-
-    // Connect the Ok and Apply buttons to actually apply the changes
-    connect(this, SIGNAL(okClicked()), SLOT(applyChanges()));
-    connect(this, SIGNAL(applyClicked()), SLOT(applyChanges()));
 }
 
 BasketPropertiesDialog::~BasketPropertiesDialog()
@@ -152,7 +165,7 @@ void BasketPropertiesDialog::applyChanges()
     }
 
     // Should be called LAST, because it will emit the propertiesChanged() signal and the tree will be able to show the newly set Alt+Letter shortcut:
-    m_basket->setAppearance(icon->icon(), name->text(), m_backgroundImagesMap[backgroundImage->currentIndex()], m_backgroundColor->color(), m_textColor->color());
+    m_basket->setAppearance(icon->icon().name(), name->text(), m_backgroundImagesMap[backgroundImage->currentIndex()], m_backgroundColor->color(), m_textColor->color());
     m_basket->save();
 }
 

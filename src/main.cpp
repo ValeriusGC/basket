@@ -64,7 +64,9 @@ int main(int argc, char *argv[])
 //    }
 
     // Initialize the config file
-    Global::basketConfig = KSharedConfig::openConfig("basketrc");
+    QCoreApplication::setOrganizationName("BasketDev");
+    QCoreApplication::setOrganizationDomain("basket.kde.org");
+    QCoreApplication::setApplicationName("Basket Note Pads");
 
     QApplication app(argc, argv);
     Backup::figureOutBinaryPath(argv0, app);

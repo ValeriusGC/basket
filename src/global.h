@@ -22,7 +22,6 @@
 #define GLOBAL_H
 
 #include "basket_export.h"
-#include <KDE/KSharedConfig>
 
 class QString;
 
@@ -34,7 +33,6 @@ class DebugWindow;
 class BackgroundManager;
 class SystemTray;
 class BNPView;
-
 
 /** Handle all global variables of the application.
   * This file only declare classes : developer should include
@@ -52,7 +50,6 @@ public:
     static BackgroundManager *backgroundManager;
     static SystemTray        *systemTray;
     static BNPView           *bnpView;
-    static KSharedConfig::Ptr basketConfig;
 
     // Application Folders:
     static void setCustomSavesFolder(const QString &folder);
@@ -65,7 +62,6 @@ public:
     // Various Things:
     static QString openNoteIcon();      /// << @return the icon used for the "Open" action on notes.
     static QMainWindow* mainWindow();
-    static KConfig* config();
 };
 
 #endif // GLOBAL_H

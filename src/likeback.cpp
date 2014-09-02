@@ -22,7 +22,6 @@
 #include "likeback_p.h"
 
 #include <KDE/KApplication>
-#include <KDE/KConfig>
 #include <KDE/KAction>
 #include <KDE/KActionCollection>
 #include <KDE/KIcon>
@@ -57,6 +56,7 @@
 #include <QMenuBar>
 #include <QMessageBox>
 #include <QDebug>
+#include <QSettings>
 
 /****************************************/
 /********** class LikeBackBar: **********/
@@ -377,8 +377,8 @@ QAction* LikeBack::sendACommentAction(QMenu *parent)
 bool LikeBack::userWantsToShowBar()
 {
     // Store the button-bar per version, so it can be disabled by the developer for the final version:
-    KConfigGroup configGroup = KGlobal::config()->group("LikeBack");
-    return configGroup.readEntry("userWantToShowBarForVersion_" + qApp->applicationVersion(), d->showBarByDefault);
+    QSettings settings;
+    return settings.value("likeback/userWantToShowBarForVersion_" + qApp->applicationVersion(), d->showBarByDefault).toBool();
 }
 
 void LikeBack::setUserWantsToShowBar(bool showBar)
@@ -389,9 +389,8 @@ void LikeBack::setUserWantsToShowBar(bool showBar)
     d->showBar = showBar;
 
     // Store the button-bar per version, so it can be disabled by the developer for the final version:
-    KConfigGroup configGroup = KGlobal::config()->group("LikeBack");
-    configGroup.writeEntry("userWantToShowBarForVersion_" + qApp->applicationVersion(), showBar);
-    configGroup.sync(); // Make sure the option is saved, even if the application crashes after that.
+    QSettings settings;
+    settings.setValue("likeback/userWantToShowBarForVersion_" + qApp->applicationVersion(), showBar);
 
     if (showBar)
         d->bar->startTimer();
@@ -489,8 +488,8 @@ QString LikeBack::activeWindowPath()
 
 bool LikeBack::emailAddressAlreadyProvided()
 {
-    KConfigGroup configGroup = KGlobal::config()->group("LikeBack");
-    return configGroup.readEntry("emailAlreadyAsked", false);
+    QSettings settings;
+    return settings.value("likeback/emailAlreadyAsked", false).toBool();
 }
 
 QString LikeBack::emailAddress()
@@ -498,23 +497,22 @@ QString LikeBack::emailAddress()
     if (!emailAddressAlreadyProvided())
         askEmailAddress();
 
-    KConfigGroup configGroup = KGlobal::config()->group("LikeBack");
-    return configGroup.readEntry("emailAddress", "");
+    QSettings settings;
+    return settings.value("likeback/emailAddress", "").toString();
 }
 
 void LikeBack::setEmailAddress(const QString &address, bool userProvided)
 {
-    KConfigGroup configGroup = KGlobal::config()->group("LikeBack");
-    configGroup.writeEntry("emailAddress",      address);
-    configGroup.writeEntry("emailAlreadyAsked", userProvided || emailAddressAlreadyProvided());
-    configGroup.sync(); // Make sure the option is saved, even if the application crashes after that.
+    QSettings settings;
+    settings.setValue("likeback/emailAddress",      address);
+    settings.setValue("likeback/emailAlreadyAsked", userProvided || emailAddressAlreadyProvided());
 }
 
 void LikeBack::askEmailAddress()
 {
-    KConfigGroup configGroup = KGlobal::config()->group("LikeBack");
+    QSettings settings;
 
-    QString currentEmailAddress = configGroup.readEntry("emailAddress", "");
+    QString currentEmailAddress = settings.value("likeback/emailAddress", "").toString();
     if (!emailAddressAlreadyProvided() && !d->fetchedEmail.isEmpty())
         currentEmailAddress = d->fetchedEmail;
 

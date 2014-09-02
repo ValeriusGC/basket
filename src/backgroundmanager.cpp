@@ -23,8 +23,8 @@
 #include <KDE/KUrl>
 #include <KDE/KGlobal>
 #include <KDE/KStandardDirs>
-#include <KDE/KConfig>
-#include <KDE/KConfigGroup>
+
+#include <QSettings>
 
 #include <QtCore/QDir>
 #include <QtGui/QPainter>
@@ -121,9 +121,8 @@ bool BackgroundManager::subscribe(const QString &image)
             // Try to load the pixmap:
             entry->pixmap = new QPixmap(entry->location);
             // Try to figure out if it's a tiled background image or not (default to NO):
-            KConfig config(entry->location + ".config", KConfig::SimpleConfig);
-            KConfigGroup configGroup = config.group("BasKet Background Image Configuration");
-            entry->tiled = configGroup.readEntry("tiled", false);
+            QSettings settings;
+            entry->tiled = settings.value(entry->location + "/imageconfig/tiled", QVariant(false)).toBool();
         }
         // Return if the image loading has failed:
         if (entry->pixmap->isNull()) {
@@ -288,9 +287,8 @@ QPixmap* BackgroundManager::preview(const QString &image)
         // Because, as we are loading the pixmap we ALSO need to know if it's a tile or not, in case that image will soon be used (and not destroyed by the garbager):
         entry->pixmap = new QPixmap(entry->location);
         // Try to figure out if it's a tiled background image or not (default to NO):
-        KConfig config(entry->location + ".config");
-        KConfigGroup configGroup = config.group("BasKet Background Image Configuration");
-        entry->tiled = configGroup.readEntry("tiled", false);
+        QSettings settings;
+        entry->tiled = settings.value(entry->location + "/imageconfig/tiled", QVariant(false)).toBool();
     }
 
     // The image cannot be loaded, we failed:

@@ -31,10 +31,10 @@
 #include <QtCore/QDate>
 #include <QDialogButtonBox>
 #include <QComboBox>
+#include <QLineEdit>
+#include <QPointer>
+#include <QSettings>
 
-#include <KDE/KLineEdit>
-#include <KDE/KConfig>
-#include <KDE/KConfigGroup>
 #include <KDE/KGlobal>
 #include <KDE/KLocale>
 #include <KDE/KAboutData>
@@ -122,63 +122,66 @@ void Settings::loadConfig()
     loadLinkLook(LinkLook::launcherLook,    "Launcher Look",     defaultLauncherLook);
     loadLinkLook(LinkLook::crossReferenceLook, "Cross Reference Look", defaultCrossReferenceLook);
 
-    KConfigGroup config = Global::config()->group("Main window");    // TODO: Split with a "System tray icon" group !
-    setTreeOnLeft(config.readEntry("treeOnLeft",           true));
-    setFilterOnTop(config.readEntry("filterOnTop",          false));
-    setPlayAnimations(config.readEntry("playAnimations",       true));
-    setShowNotesToolTip(config.readEntry("showNotesToolTip",     true));
-    setBigNotes(config.readEntry("bigNotes",             false));
-    setConfirmNoteDeletion(config.readEntry("confirmNoteDeletion",  true));
-    setAutoBullet(config.readEntry("autoBullet",           true));
-    setExportTextTags(config.readEntry("exportTextTags",       true));
-    setUseGnuPGAgent(config.readEntry("useGnuPGAgent",        false));
-    setBlinkedFilter(config.readEntry("blinkedFilter",        false));
-    setEnableReLockTimeout(config.readEntry("enableReLockTimeout",  true));
-    setReLockTimeoutMinutes(config.readEntry("reLockTimeoutMinutes", 0));
-    setUseSystray(config.readEntry("useSystray",           true));
-    setShowIconInSystray(config.readEntry("showIconInSystray",    false));
-    setStartDocked(config.readEntry("startDocked",          false));
-    setMiddleAction(config.readEntry("middleAction",         0));
-    setGroupOnInsertionLine(config.readEntry("groupOnInsertionLine", false));
-    setSpellCheckTextNotes(config.readEntry("spellCheckTextNotes",  true));
-    setHideOnMouseOut(config.readEntry("hideOnMouseOut",       false));
-    setTimeToHideOnMouseOut(config.readEntry("timeToHideOnMouseOut", 0));
-    setShowOnMouseIn(config.readEntry("showOnMouseIn",        false));
-    setTimeToShowOnMouseIn(config.readEntry("timeToShowOnMouseIn",  1));
-    setBasketTreeWidth(config.readEntry("basketTreeWidth",      -1));
-    setUsePassivePopup(config.readEntry("usePassivePopup",      true));
-    setWelcomeBasketsAdded(config.readEntry("welcomeBasketsAdded",  false));
-    setDataFolder(config.readEntry("dataFolder",           ""));
-    setLastBackup(config.readEntry("lastBackup", QDate()));
-    setMainWindowPosition(config.readEntry("position", QPoint()));
-    setMainWindowSize(config.readEntry("size",     QSize()));
+    QSettings settings;
+    settings.beginGroup("mainwindow");
+    setTreeOnLeft(settings.value("treeOnLeft",           true).toBool());
+    setFilterOnTop(settings.value("filterOnTop",          false).toBool());
+    setPlayAnimations(settings.value("playAnimations",       true).toBool());
+    setShowNotesToolTip(settings.value("showNotesToolTip",     true).toBool());
+    setBigNotes(settings.value("bigNotes",             false).toBool());
+    setConfirmNoteDeletion(settings.value("confirmNoteDeletion",  true).toBool());
+    setAutoBullet(settings.value("autoBullet",           true).toBool());
+    setExportTextTags(settings.value("exportTextTags",       true).toBool());
+    setUseGnuPGAgent(settings.value("useGnuPGAgent",        false).toBool());
+    setBlinkedFilter(settings.value("blinkedFilter",        false).toBool());
+    setEnableReLockTimeout(settings.value("enableReLockTimeout",  true).toBool());
+    setReLockTimeoutMinutes(settings.value("reLockTimeoutMinutes", 0).toInt());
+    setUseSystray(settings.value("useSystray",           true).toBool());
+    setShowIconInSystray(settings.value("showIconInSystray",    false).toBool());
+    setStartDocked(settings.value("startDocked",          false).toBool());
+    setMiddleAction(settings.value("middleAction",         0).toInt());
+    setGroupOnInsertionLine(settings.value("groupOnInsertionLine", false).toBool());
+    setSpellCheckTextNotes(settings.value("spellCheckTextNotes",  true).toBool());
+    setHideOnMouseOut(settings.value("hideOnMouseOut",       false).toBool());
+    setTimeToHideOnMouseOut(settings.value("timeToHideOnMouseOut", 0).toInt());
+    setShowOnMouseIn(settings.value("showOnMouseIn",        false).toBool());
+    setTimeToShowOnMouseIn(settings.value("timeToShowOnMouseIn",  1).toInt());
+    setBasketTreeWidth(settings.value("basketTreeWidth",      -1).toInt());
+    setUsePassivePopup(settings.value("usePassivePopup",      true).toBool());
+    setWelcomeBasketsAdded(settings.value("welcomeBasketsAdded",  false).toBool());
+    setDataFolder(settings.value("dataFolder",           "").toString());
+    setLastBackup(settings.value("lastBackup", QDate()).toDate());
+    setMainWindowPosition(settings.value("position", QPoint()).toPoint());
+    setMainWindowSize(settings.value("size",     QSize()).toSize());
+    settings.endGroup();
 
-    config = Global::config()->group("Notification Messages");
-    setShowEmptyBasketInfo(config.readEntry("emptyBasketInfo",      true));
+    setShowEmptyBasketInfo(settings.value("notificationmessages/emptyBasketInfo",      true).toBool());
 
-    config = Global::config()->group("Programs");
-    setIsHtmlUseProg(config.readEntry("htmlUseProg",          false));
-    setIsImageUseProg(config.readEntry("imageUseProg",         true));
-    setIsAnimationUseProg(config.readEntry("animationUseProg",     true));
-    setIsSoundUseProg(config.readEntry("soundUseProg",         false));
-    setHtmlProg(config.readEntry("htmlProg",             "quanta"));
-    setImageProg(config.readEntry("imageProg",            "kolourpaint"));
-    setAnimationProg(config.readEntry("animationProg",        "gimp"));
-    setSoundProg(config.readEntry("soundProg",            ""));
+    settings.beginGroup("programs");
+    setIsHtmlUseProg(settings.value("htmlUseProg",          false).toBool());
+    setIsImageUseProg(settings.value("imageUseProg",         true).toBool());
+    setIsAnimationUseProg(settings.value("animationUseProg",     true).toBool());
+    setIsSoundUseProg(settings.value("soundUseProg",         false).toBool());
+    setHtmlProg(settings.value("htmlProg",             "quanta").toString());
+    setImageProg(settings.value("imageProg",            "kolourpaint").toString());
+    setAnimationProg(settings.value("animationProg",        "gimp").toString());
+    setSoundProg(settings.value("soundProg",            "").toString());
+    settings.endGroup();
 
-    config = Global::config()->group("Note Addition");
-    setNewNotesPlace(config.readEntry("newNotesPlace",        1));
-    setViewTextFileContent(config.readEntry("viewTextFileContent",  false));
-    setViewHtmlFileContent(config.readEntry("viewHtmlFileContent",  false));
-    setViewImageFileContent(config.readEntry("viewImageFileContent", true));
-    setViewSoundFileContent(config.readEntry("viewSoundFileContent", true));
+    settings.beginGroup("noteaddition");
+    setNewNotesPlace(settings.value("newNotesPlace",        1).toInt());
+    setViewTextFileContent(settings.value("viewTextFileContent",  false).toBool());
+    setViewHtmlFileContent(settings.value("viewHtmlFileContent",  false).toBool());
+    setViewImageFileContent(settings.value("viewImageFileContent", true).toBool());
+    setViewSoundFileContent(settings.value("viewSoundFileContent", true).toBool());
+    settings.endGroup();
 
-    config = Global::config()->group("Insert Note Default Values");
-    setDefImageX(config.readEntry("defImageX",   300));
-    setDefImageY(config.readEntry("defImageY",   200));
-    setDefIconSize(config.readEntry("defIconSize", 32));
+    settings.beginGroup("insertnotedefaultvalues");
+    setDefImageX(settings.value("defImageX",   300).toInt());
+    setDefImageY(settings.value("defImageY",   200).toInt());
+    setDefIconSize(settings.value("defIconSize", 32).toInt());
+    settings.endGroup();
 
-    config = Global::config()->group("MainWindow Toolbar mainToolBar");
     // The first time we start, we define "Text Alongside Icons" for the main toolbar.
     // After that, the user is free to hide the text from the icons or customize as he/she want.
     // But it is a good default (Fitt's Laws, better looking, less "empty"-feeling), especially for this application.
@@ -186,14 +189,12 @@ void Settings::loadConfig()
 //      config->writeEntry( "IconText",                "IconTextRight" );
 //      config->writeEntry( "alreadySetIconTextRight", true            );
 //  }
-    if (!config.readEntry("alreadySetToolbarSettings", false)) {
-        config.writeEntry("IconText", "IconOnly"); // In 0.6.0 Alpha versions, it was made "IconTextRight". We're back to IconOnly
-        config.writeEntry("Index",    "0");        // Make sure the main toolbar is the first...
-        config = Global::config()->group("MainWindow Toolbar richTextEditToolBar");
-        config.writeEntry("Position", "Top");      // In 0.6.0 Alpha versions, it was made "Bottom"
-        config.writeEntry("Index",    "1");        // ... and the rich text toolbar is on the right of the main toolbar
-        config = Global::config()->group("MainWindow Toolbar mainToolBar");
-        config.writeEntry("alreadySetToolbarSettings", true);
+    if (!settings.value("mainwindowtoolbarmaintoolbar/alreadySetToolbarSettings", false).toBool()) {
+        settings.value("mainwindowtoolbarmaintoolbar/IconText", "IconOnly"); // In 0.6.0 Alpha versions, it was made "IconTextRight". We're back to IconOnly
+        settings.value("mainwindowtoolbarmaintoolbar/Index",    "0");        // Make sure the main toolbar is the first...
+        settings.value("mainwindowtoolbarrichtextedittoolbar/Position", "Top");      // In 0.6.0 Alpha versions, it was made "Bottom"
+        settings.value("mainwindowtoolbarrichtextedittoolbarIndex",    "1");        // ... and the rich text toolbar is on the right of the main toolbar
+        settings.value("mainwindowtoolbarmaintoolbar/alreadySetToolbarSettings", true);
     }
 }
 
@@ -206,71 +207,74 @@ void Settings::saveConfig()
     saveLinkLook(LinkLook::launcherLook,    "Launcher Look");
     saveLinkLook(LinkLook::crossReferenceLook,"Cross Reference Look");
 
-    KConfigGroup config = Global::config()->group("Main window");
-    config.writeEntry("treeOnLeft",           treeOnLeft());
-    config.writeEntry("filterOnTop",          filterOnTop());
-    config.writeEntry("playAnimations",       playAnimations());
-    config.writeEntry("showNotesToolTip",     showNotesToolTip());
-    config.writeEntry("confirmNoteDeletion",  confirmNoteDeletion());
-    config.writeEntry("bigNotes",             bigNotes());
-    config.writeEntry("autoBullet",           autoBullet());
-    config.writeEntry("exportTextTags",       exportTextTags());
+    QSettings settings;
+    settings.beginGroup("mainwindow");
+    settings.setValue("treeOnLeft",           treeOnLeft());
+    settings.setValue("filterOnTop",          filterOnTop());
+    settings.setValue("playAnimations",       playAnimations());
+    settings.setValue("showNotesToolTip",     showNotesToolTip());
+    settings.setValue("confirmNoteDeletion",  confirmNoteDeletion());
+    settings.setValue("bigNotes",             bigNotes());
+    settings.setValue("autoBullet",           autoBullet());
+    settings.setValue("exportTextTags",       exportTextTags());
 #ifdef HAVE_LIBGPGME
     if (KGpgMe::isGnuPGAgentAvailable())
-        config.writeEntry("useGnuPGAgent",    useGnuPGAgent());
+        settings.setValue("useGnuPGAgent",    useGnuPGAgent());
 #endif
-    config.writeEntry("blinkedFilter",        blinkedFilter());
-    config.writeEntry("enableReLockTimeout",  enableReLockTimeout());
-    config.writeEntry("reLockTimeoutMinutes", reLockTimeoutMinutes());
-    config.writeEntry("useSystray",           useSystray());
-    config.writeEntry("showIconInSystray",    showIconInSystray());
-    config.writeEntry("startDocked",          startDocked());
-    config.writeEntry("middleAction",         middleAction());
-    config.writeEntry("groupOnInsertionLine", groupOnInsertionLine());
-    config.writeEntry("spellCheckTextNotes",  spellCheckTextNotes());
-    config.writeEntry("hideOnMouseOut",       hideOnMouseOut());
-    config.writeEntry("timeToHideOnMouseOut", timeToHideOnMouseOut());
-    config.writeEntry("showOnMouseIn",        showOnMouseIn());
-    config.writeEntry("timeToShowOnMouseIn",  timeToShowOnMouseIn());
-    config.writeEntry("basketTreeWidth",      basketTreeWidth());
-    config.writeEntry("usePassivePopup",      usePassivePopup());
-    config.writeEntry("welcomeBasketsAdded",  welcomeBasketsAdded());
-    config.writePathEntry("dataFolder",        dataFolder());
-    config.writeEntry("lastBackup",           QDate(lastBackup()));
-    config.writeEntry("position",             mainWindowPosition());
-    config.writeEntry("size",                 mainWindowSize());
+    settings.setValue("blinkedFilter",        blinkedFilter());
+    settings.setValue("enableReLockTimeout",  enableReLockTimeout());
+    settings.setValue("reLockTimeoutMinutes", reLockTimeoutMinutes());
+    settings.setValue("useSystray",           useSystray());
+    settings.setValue("showIconInSystray",    showIconInSystray());
+    settings.setValue("startDocked",          startDocked());
+    settings.setValue("middleAction",         middleAction());
+    settings.setValue("groupOnInsertionLine", groupOnInsertionLine());
+    settings.setValue("spellCheckTextNotes",  spellCheckTextNotes());
+    settings.setValue("hideOnMouseOut",       hideOnMouseOut());
+    settings.setValue("timeToHideOnMouseOut", timeToHideOnMouseOut());
+    settings.setValue("showOnMouseIn",        showOnMouseIn());
+    settings.setValue("timeToShowOnMouseIn",  timeToShowOnMouseIn());
+    settings.setValue("basketTreeWidth",      basketTreeWidth());
+    settings.setValue("usePassivePopup",      usePassivePopup());
+    settings.setValue("welcomeBasketsAdded",  welcomeBasketsAdded());
+    settings.setValue("dataFolder",        dataFolder());
+    settings.setValue("lastBackup",           QDate(lastBackup()));
+    settings.setValue("position",             mainWindowPosition());
+    settings.setValue("size",                 mainWindowSize());
+    settings.endGroup();
 
-    config = Global::config()->group("Notification Messages");
-    config.writeEntry("emptyBasketInfo",      showEmptyBasketInfo());
+    settings.setValue("notificationmessages/emptyBasketInfo",      showEmptyBasketInfo());
 
-    config = Global::config()->group("Programs");
-    config.writeEntry("htmlUseProg",          isHtmlUseProg());
-    config.writeEntry("imageUseProg",         isImageUseProg());
-    config.writeEntry("animationUseProg",     isAnimationUseProg());
-    config.writeEntry("soundUseProg",         isSoundUseProg());
-    config.writeEntry("htmlProg",             htmlProg());
-    config.writeEntry("imageProg",            imageProg());
-    config.writeEntry("animationProg",        animationProg());
-    config.writeEntry("soundProg",            soundProg());
+    settings.beginGroup("programs");
+    settings.setValue("htmlUseProg",          isHtmlUseProg());
+    settings.setValue("imageUseProg",         isImageUseProg());
+    settings.setValue("animationUseProg",     isAnimationUseProg());
+    settings.setValue("soundUseProg",         isSoundUseProg());
+    settings.setValue("htmlProg",             htmlProg());
+    settings.setValue("imageProg",            imageProg());
+    settings.setValue("animationProg",        animationProg());
+    settings.setValue("soundProg",            soundProg());
+    settings.endGroup();
 
-    config = Global::config()->group("Note Addition");
-    config.writeEntry("newNotesPlace",        newNotesPlace());
-    config.writeEntry("viewTextFileContent",  viewTextFileContent());
-    config.writeEntry("viewHtmlFileContent",  viewHtmlFileContent());
-    config.writeEntry("viewImageFileContent", viewImageFileContent());
-    config.writeEntry("viewSoundFileContent", viewSoundFileContent());
+    settings.beginGroup("noteaddition");
+    settings.setValue("newNotesPlace",        newNotesPlace());
+    settings.setValue("viewTextFileContent",  viewTextFileContent());
+    settings.setValue("viewHtmlFileContent",  viewHtmlFileContent());
+    settings.setValue("viewImageFileContent", viewImageFileContent());
+    settings.setValue("viewSoundFileContent", viewSoundFileContent());
+    settings.endGroup();
 
-    config = Global::config()->group("Insert Note Default Values");
-    config.writeEntry("defImageX",         defImageX());
-    config.writeEntry("defImageY",         defImageY());
-    config.writeEntry("defIconSize",       defIconSize());
-
-    config.sync();
+    settings.beginGroup("insertnotedefaultvalues");
+    settings.setValue("defImageX",         defImageX());
+    settings.setValue("defImageY",         defImageY());
+    settings.setValue("defIconSize",       defIconSize());
+    settings.endGroup();
 }
 
 void Settings::loadLinkLook(LinkLook *look, const QString &name, const LinkLook &defaultLook)
 {
-    KConfigGroup config = Global::config()->group(name);
+    QSettings settings;
+    settings.beginGroup(name);
 
     QString underliningStrings[] = { "Always", "Never", "OnMouseHover", "OnMouseOutside" };
     QString defaultUnderliningString = underliningStrings[defaultLook.underlining()];
@@ -278,13 +282,13 @@ void Settings::loadLinkLook(LinkLook *look, const QString &name, const LinkLook 
     QString previewStrings[] = { "None", "IconSize", "TwiceIconSize", "ThreeIconSize" };
     QString defaultPreviewString = previewStrings[defaultLook.preview()];
 
-    bool    italic            = config.readEntry("italic",      defaultLook.italic());
-    bool    bold              = config.readEntry("bold",        defaultLook.bold());
-    QString underliningString = config.readEntry("underlining", defaultUnderliningString);
-    QColor  color             = config.readEntry("color",       defaultLook.color());
-    QColor  hoverColor        = config.readEntry("hoverColor",  defaultLook.hoverColor());
-    int     iconSize          = config.readEntry("iconSize",    defaultLook.iconSize());
-    QString previewString     = config.readEntry("preview",     defaultPreviewString);
+    bool    italic            = settings.value("italic",      defaultLook.italic()).toBool();
+    bool    bold              = settings.value("bold",        defaultLook.bold()).toBool();
+    QString underliningString = settings.value("underlining", defaultUnderliningString).toString();
+    QColor  color             = QColor(settings.value("color",       defaultLook.color()).toString());
+    QColor  hoverColor        = QColor(settings.value("hoverColor",  defaultLook.hoverColor()).toString());
+    int     iconSize          = settings.value("iconSize",    defaultLook.iconSize()).toInt();
+    QString previewString     = settings.value("preview",     defaultPreviewString).toString();
 
     int underlining = 0;
     if (underliningString == underliningStrings[1]) underlining = 1;
@@ -301,7 +305,8 @@ void Settings::loadLinkLook(LinkLook *look, const QString &name, const LinkLook 
 
 void Settings::saveLinkLook(LinkLook *look, const QString &name)
 {
-    KConfigGroup config = Global::config()->group(name);
+    QSettings settings;
+    settings.beginGroup(name);
 
     QString underliningStrings[] = { "Always", "Never", "OnMouseHover", "OnMouseOutside" };
     QString underliningString = underliningStrings[look->underlining()];
@@ -309,13 +314,13 @@ void Settings::saveLinkLook(LinkLook *look, const QString &name)
     QString previewStrings[] = { "None", "IconSize", "TwiceIconSize", "ThreeIconSize" };
     QString previewString = previewStrings[look->preview()];
 
-    config.writeEntry("italic",      look->italic());
-    config.writeEntry("bold",        look->bold());
-    config.writeEntry("underlining", underliningString);
-    config.writeEntry("color",       look->color());
-    config.writeEntry("hoverColor",  look->hoverColor());
-    config.writeEntry("iconSize",    look->iconSize());
-    config.writeEntry("preview",     previewString);
+    settings.setValue("italic",      look->italic());
+    settings.setValue("bold",        look->bold());
+    settings.setValue("underlining", underliningString);
+    settings.setValue("color",       look->color());
+    settings.setValue("hoverColor",  look->hoverColor());
+    settings.setValue("iconSize",    look->iconSize());
+    settings.setValue("preview",     previewString);
 }
 
 void Settings::setBigNotes(bool big)

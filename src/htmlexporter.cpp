@@ -33,7 +33,6 @@
 #include <KDE/KAboutData>
 #include <KDE/KLocale>
 #include <KDE/KGlobal>
-#include <KDE/KConfig>
 #include <KDE/KFileDialog>
 #include <KDE/KProgressDialog>
 
@@ -48,14 +47,15 @@
 #include <QtGui/QPixmap>
 #include <QMessageBox>
 #include <QDebug>
+#include <QSettings>
 
 HTMLExporter::HTMLExporter(BasketScene *basket)
 {
     QDir dir;
 
     // Compute a default file name & path:
-    KConfigGroup config = Global::config()->group("Export to HTML");
-    QString folder = config.readEntry("lastFolder", QDir::homePath()) + "/";
+    QSettings settings;
+    QString folder = settings.value("exporthtml/lastFolder", QDir::homePath()).toString() + "/";
     QString url = folder + QString(basket->basketName()).replace("/", "_") + ".html";
 
     // Ask a file name & path to the user:
@@ -89,8 +89,7 @@ HTMLExporter::HTMLExporter(BasketScene *basket)
     progress = dialog.progressBar();
 
     // Remember the last folder used for HTML exporation:
-    config.writeEntry("lastFolder", KUrl(destination).directory());
-    config.sync();
+    settings.setValue("exporthtml/lastFolder", KUrl(destination).directory());
 
     prepareExport(basket, destination);
     exportBasket(basket, /*isSubBasketScene*/false);

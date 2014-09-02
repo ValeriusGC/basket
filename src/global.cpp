@@ -23,11 +23,9 @@
 #include <KDE/KGlobal>
 #include <KDE/KStandardDirs>
 
-#include <KDE/KApplication>
-#include <KDE/KConfig>
-
 #include <QtCore/QString>
 #include <QtCore/QDir>
+#include <QApplication>
 
 #include "bnpview.h"
 #include "settings.h"
@@ -40,7 +38,6 @@ DebugWindow       *Global::debugWindow         = 0L;
 BackgroundManager *Global::backgroundManager   = 0L;
 SystemTray        *Global::systemTray          = 0L;
 BNPView           *Global::bnpView             = 0L;
-KSharedConfig::Ptr Global::basketConfig;
 
 void Global::setCustomSavesFolder(const QString &folder)
 {
@@ -98,10 +95,4 @@ QMainWindow* Global::mainWindow()
         return static_cast<QMainWindow*>(res);
     }
     return 0;
-}
-
-KConfig* Global::config()
-{
-    //The correct solution is to go and replace all KConfig* with KSharedConfig::Ptr, but that seems awfully annoying to do right now
-    return Global::basketConfig.data();
 }

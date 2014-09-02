@@ -24,13 +24,13 @@
 #include <KDE/KFileDialog>
 #include <KDE/KLineEdit>
 #include <KDE/KLocale>
-#include <KDE/KConfig>
 #include <KDE/KVBox>
 
 #include <QtCore/QDir>
 #include <QtGui/QCheckBox>
 #include <QtGui/QLabel>
 #include <QtGui/QHBoxLayout>
+#include <QSettings>
 
 #include "basketscene.h"
 #include "global.h"
@@ -102,28 +102,30 @@ void ExporterDialog::show()
 
 void ExporterDialog::load()
 {
-    KConfigGroup config = Global::config()->group("HTML Export");
+    QSettings settings;
+    settings.beginGroup("htmlexport");
 
-    QString folder = config.readEntry("lastFolder", QDir::homePath()) + "/";
+    QString folder = settings.value("lastFolder", QDir::homePath()).toString() + "/";
     QString url = folder + QString(m_basket->basketName()).replace("/", "_") + ".html";
     m_url->setUrl(KUrl(url));
 
-    m_embedLinkedFiles->setChecked(config.readEntry("embedLinkedFiles",    true));
-    m_embedLinkedFolders->setChecked(config.readEntry("embedLinkedFolders",  false));
-    m_erasePreviousFiles->setChecked(config.readEntry("erasePreviousFiles",  true));
-    m_formatForImpression->setChecked(config.readEntry("formatForImpression", false));
+    m_embedLinkedFiles->setChecked(settings.value("embedLinkedFiles",    true).toBool());
+    m_embedLinkedFolders->setChecked(settings.value("embedLinkedFolders",  false).toBool());
+    m_erasePreviousFiles->setChecked(settings.value("erasePreviousFiles",  true).toBool());
+    m_formatForImpression->setChecked(settings.value("formatForImpression", false).toBool());
 }
 
 void ExporterDialog::save()
 {
-    KConfigGroup config = Global::config()->group("HTML Export");
+    QSettings settings;
+    settings.beginGroup("htmlexport");
 
     QString folder = KUrl(m_url->url()).directory();
-    config.writeEntry("lastFolder",          folder);
-    config.writeEntry("embedLinkedFiles",    m_embedLinkedFiles->isChecked());
-    config.writeEntry("embedLinkedFolders",  m_embedLinkedFolders->isChecked());
-    config.writeEntry("erasePreviousFiles",  m_erasePreviousFiles->isChecked());
-    config.writeEntry("formatForImpression", m_formatForImpression->isChecked());
+    settings.setValue("lastFolder",          folder);
+    settings.setValue("embedLinkedFiles",    m_embedLinkedFiles->isChecked());
+    settings.setValue("embedLinkedFolders",  m_embedLinkedFolders->isChecked());
+    settings.setValue("erasePreviousFiles",  m_erasePreviousFiles->isChecked());
+    settings.setValue("formatForImpression", m_formatForImpression->isChecked());
 }
 
 void ExporterDialog::accept()
