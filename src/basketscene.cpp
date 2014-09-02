@@ -53,6 +53,8 @@
 #include <QtGui/QInputDialog>
 #include <QtGui/QGraphicsProxyWidget>
 #include <QtXml/QDomDocument>
+#include <QMessageBox>
+#include <QDebug>
 
 #include <KDE/KTextEdit>
 #include <KDE/KStyle>
@@ -65,12 +67,10 @@
 #include <KDE/KAboutData>
 #include <KDE/KLineEdit>
 #include <KDE/KSaveFile>
-#include <KDE/KDebug>
 #include <KDE/KAuthorized>
 #include <KDE/KMenu>
 #include <KDE/KIconLoader>
 #include <KDE/KRun>
-#include <KDE/KMessageBox>
 #include <KDE/KDirWatch>
 
 #include <KIO/CopyJob>
@@ -128,7 +128,7 @@ void debugZone(int zone)
             s = "Emblem0+" + QString::number(zone - Note::Emblem0);
         break;
     }
-    kDebug() << s;
+    qDebug() << s;
 }
 
 #define FOR_EACH_NOTE(noteVar) \
@@ -1357,7 +1357,7 @@ void BasketScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 	    
 	    if( /*m_animationTimeLine == 0 && */Settings::playAnimations())
 	    {
- 		kWarning()<<"Folding animation to be done";
+        qWarning()<<"Folding animation to be done";
 	    }
 	    
 	    relayoutNotes(true);
@@ -1589,7 +1589,7 @@ void BasketScene::removedStates(const QList<State*> &deletedStates)
 void BasketScene::insertNote(Note *note, Note *clicked, int zone, const QPointF &pos, bool animateNewPosition)
 {
     if (!note) {
-        kDebug() << "Wanted to insert NO note";
+        qDebug() << "Wanted to insert NO note";
        return;
     }
 
@@ -1745,7 +1745,7 @@ void BasketScene::dragLeaveEvent(QGraphicsSceneDragDropEvent *)
 void BasketScene::dropEvent(QGraphicsSceneDragDropEvent *event)
 {
     QPointF pos = event->scenePos();
-    kDebug() << "Drop Event at position " << pos.x() << ":" << pos.y();
+    qDebug() << "Drop Event at position " << pos.x() << ":" << pos.y();
 
     m_isDuringDrag = false;
     emit resetStatusBarText();
@@ -2185,7 +2185,7 @@ void BasketScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
         // We select note on mousePress if it was unselected or Ctrl is pressed.
         // But the user can want to drag select_s_ notes, so it the note is selected, we only select it alone on mouseRelease:
         if (event->buttons() == 0) {
-            kDebug() << "EXEC";
+            qDebug() << "EXEC";
             if (!(event->modifiers() & Qt::ControlModifier) && clicked->allSelected())
                 unselectAllBut(clicked);
             if (zone == Note::Handle && isDuringEdit() && editedNote() == clicked) {
@@ -2248,8 +2248,8 @@ void BasketScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 
     case Note::None:
     default:
-        KMessageBox::information(m_view->viewport(),
-                                 i18n("This message should never appear. If it does, this program is buggy! "
+        QMessageBox::information(m_view->viewport(), QString(),
+                                 tr("This message should never appear. If it does, this program is buggy! "
                                       "Please report the bug to the developer."));
         break;
     }
@@ -3783,7 +3783,7 @@ void BasketScene::openBasket()
 Note* BasketScene::theSelectedNote()
 {
     if (countSelecteds() != 1) {
-        kDebug() << "NO SELECTED NOTE !!!!";
+        qDebug() << "NO SELECTED NOTE !!!!";
         return 0;
     }
 
@@ -3794,7 +3794,7 @@ Note* BasketScene::theSelectedNote()
             return selectedOne;
     }
 
-    kDebug() << "One selected note, BUT NOT FOUND !!!!";
+    qDebug() << "One selected note, BUT NOT FOUND !!!!";
 
     return 0;
 }
@@ -3937,15 +3937,13 @@ void BasketScene::noteDelete()
 
     if (countSelecteds() <= 0)
         return;
-    int really = KMessageBox::Yes;
+    int really = QMessageBox::Yes;
     if (Settings::confirmNoteDeletion())
-        really = KMessageBox::questionYesNo(m_view,
-                                            i18np("<qt>Do you really want to delete this note?</qt>",
-                                                  "<qt>Do you really want to delete these <b>%1</b> notes?</qt>",
-                                                  countSelecteds()),
-                                            i18np("Delete Note", "Delete Notes", countSelecteds())
-                                            , KStandardGuiItem::del(), KStandardGuiItem::cancel());
-    if (really == KMessageBox::No)
+        really = QMessageBox::question(m_view, tr("Delete %n note(s)", 0, countSelecteds()),
+                                            countSelecteds() == 1 ? tr("<qt>Do you really want to delete this note?</qt>") :
+                                                  tr("<qt>Do you really want to delete these <b>%1</b> notes?</qt>"),
+                                       QMessageBox::Yes | QMessageBox::No);
+    if (really == QMessageBox::No)
         return;
 
     noteDeleteWithoutConfirmation();
@@ -4095,8 +4093,8 @@ void BasketScene::noteOpen(Note *note)
         if (message.isEmpty())
             emit postMessage(i18n("Unable to open this note.") /*"Unable to open those notes."*/);
         else {
-            int result = KMessageBox::warningContinueCancel(m_view, message, /*caption=*/QString::null, KGuiItem(i18n("&Edit"), "edit"));
-            if (result == KMessageBox::Continue)
+            int result = QMessageBox::warning(m_view, QString(), message, QMessageBox::Ok | QMessageBox::Cancel);
+            if (result == QMessageBox::Ok)
                 noteEdit(note);
         }
     } else {
@@ -4120,7 +4118,7 @@ void BasketScene::noteOpen(Note *note)
 bool KRun__displayOpenWithDialog(const KUrl::List& lst, QWidget *window, bool tempFiles, const QString &text)
 {
     if (kapp && !KAuthorized::authorizeKAction("openwith")) {
-        KMessageBox::sorry(window, i18n("You are not authorized to open this file.")); // TODO: Better message, i18n freeze :-(
+        QMessageBox::information(window, QString(), QObject::tr("You are not authorized to open this file.")); // TODO: Better message, i18n freeze :-(
         return false;
     }
     KOpenWithDialog l(lst, text, QString::null, 0L);

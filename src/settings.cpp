@@ -33,7 +33,6 @@
 #include <QComboBox>
 
 #include <KDE/KLineEdit>
-#include <KDE/KNumInput>
 #include <KDE/KConfig>
 #include <KDE/KConfigGroup>
 #include <KDE/KGlobal>
@@ -458,11 +457,10 @@ GeneralPage::GeneralPage(QWidget * parent)
     gs->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding), 0, 2);
 
     // Hide Main Window when Mouse Goes out of it for Some Time:
-    m_timeToHideOnMouseOut = new KIntNumInput(0, m_systray);
-    m_hideOnMouseOut = new QCheckBox(i18n("&Hide main window when mouse leaves it for"), m_systray);
-    m_timeToHideOnMouseOut->setRange(0, 600, 1);
-    m_timeToHideOnMouseOut->setSliderEnabled(false);
-    m_timeToHideOnMouseOut->setSuffix(i18n(" tenths of seconds"));
+    m_timeToHideOnMouseOut = new QLineEdit(0, m_systray);
+    m_timeToHideOnMouseOut->setValidator(new QIntValidator(0, 600, this));
+    m_hideOnMouseOut = new QCheckBox(tr("&Hide main window when mouse leaves it for"), m_systray);
+    m_timeToHideOnMouseOut->setToolTip(tr("tenths of seconds"));
     gs->addWidget(m_hideOnMouseOut,       0, 0);
     gs->addWidget(m_timeToHideOnMouseOut, 0, 1);
     connect(m_hideOnMouseOut, SIGNAL(stateChanged(int)), this, SLOT(changed()));
@@ -470,11 +468,10 @@ GeneralPage::GeneralPage(QWidget * parent)
 //  subSysLay->addWidget(
 
     // Show Main Window when Mouse Hovers over the System Tray Icon for Some Time:
-    m_timeToShowOnMouseIn = new KIntNumInput(0, m_systray);
-    m_showOnMouseIn  = new QCheckBox(i18n("Show &main window when mouse hovers over the system tray icon for"), m_systray);
-    m_timeToShowOnMouseIn->setRange(0, 600, 1);
-    m_timeToShowOnMouseIn->setSliderEnabled(false);
-    m_timeToShowOnMouseIn->setSuffix(i18n(" tenths of seconds"));
+    m_timeToShowOnMouseIn = new QLineEdit(0, m_systray);
+    m_timeToShowOnMouseIn->setValidator(new QIntValidator(0, 600, this));
+    m_showOnMouseIn  = new QCheckBox(tr("Show &main window when mouse hovers over the system tray icon for"), m_systray);
+    m_timeToShowOnMouseIn->setToolTip(tr("tenths of seconds"));
     gs->addWidget(m_showOnMouseIn,       1, 0);
     gs->addWidget(m_timeToShowOnMouseIn, 1, 1);
     connect(m_showOnMouseIn, SIGNAL(stateChanged(int)), this, SLOT(changed()));
@@ -502,11 +499,11 @@ void GeneralPage::load()
     m_showIconInSystray->setChecked(Settings::showIconInSystray());
 
     m_hideOnMouseOut->setChecked(Settings::hideOnMouseOut());
-    m_timeToHideOnMouseOut->setValue(Settings::timeToHideOnMouseOut());
+    m_timeToHideOnMouseOut->setText(QString(Settings::timeToHideOnMouseOut()));
     m_timeToHideOnMouseOut->setEnabled(Settings::hideOnMouseOut());
 
     m_showOnMouseIn->setChecked(Settings::showOnMouseIn());
-    m_timeToShowOnMouseIn->setValue(Settings::timeToShowOnMouseIn());
+    m_timeToShowOnMouseIn->setText(QString(Settings::timeToShowOnMouseIn()));
     m_timeToShowOnMouseIn->setEnabled(Settings::showOnMouseIn());
 
 
@@ -522,9 +519,9 @@ void GeneralPage::save()
     Settings::setUseSystray(m_useSystray->isChecked());
     Settings::setShowIconInSystray(m_showIconInSystray->isChecked());
     Settings::setShowOnMouseIn(m_showOnMouseIn->isChecked());
-    Settings::setTimeToShowOnMouseIn(m_timeToShowOnMouseIn->value());
+    Settings::setTimeToShowOnMouseIn(m_timeToShowOnMouseIn->text().toInt());
     Settings::setHideOnMouseOut(m_hideOnMouseOut->isChecked());
-    Settings::setTimeToHideOnMouseOut(m_timeToHideOnMouseOut->value());
+    Settings::setTimeToHideOnMouseOut(m_timeToHideOnMouseOut->text().toInt());
 }
 
 void GeneralPage::defaults()
@@ -652,9 +649,9 @@ BasketsPage::BasketsPage(QWidget * parent)
     hLay = new QHBoxLayout(widget);
     m_enableReLockTimeoutMinutes = new QCheckBox(i18n("A&utomatically lock protected baskets when closed for"), widget);
     hLay->addWidget(m_enableReLockTimeoutMinutes);
-    m_reLockTimeoutMinutes = new KIntNumInput(widget);
-    m_reLockTimeoutMinutes->setMinimum(0);
-    m_reLockTimeoutMinutes->setSuffix(i18n(" minutes"));
+    m_reLockTimeoutMinutes = new QLineEdit(widget);
+    m_reLockTimeoutMinutes->setValidator(new QIntValidator(0, 1000000, this));
+    m_reLockTimeoutMinutes->setToolTip(tr("minutes"));
     hLay->addWidget(m_reLockTimeoutMinutes);
     //label = new QLabel(i18n("minutes"), this);
     //hLay->addWidget(label);
@@ -691,7 +688,7 @@ void BasketsPage::load()
     // The correctness of this code depends on the default of enableReLockTimeout
     // being true - otherwise, the reLockTimeoutMinutes widget is not disabled properly.
     m_enableReLockTimeoutMinutes->setChecked(Settings::enableReLockTimeout());
-    m_reLockTimeoutMinutes->setValue(Settings::reLockTimeoutMinutes());
+    m_reLockTimeoutMinutes->setText(QString(Settings::reLockTimeoutMinutes()));
 #ifdef HAVE_LIBGPGME
     m_useGnuPGAgent->setChecked(Settings::useGnuPGAgent());
 
@@ -718,7 +715,7 @@ void BasketsPage::save()
     Settings::setMiddleAction(m_middleAction->currentIndex());
 
     Settings::setEnableReLockTimeout(m_enableReLockTimeoutMinutes->isChecked());
-    Settings::setReLockTimeoutMinutes(m_reLockTimeoutMinutes->value());
+    Settings::setReLockTimeoutMinutes(m_reLockTimeoutMinutes->text().toInt());
 #ifdef HAVE_LIBGPGME
     Settings::setUseGnuPGAgent(m_useGnuPGAgent->isChecked());
 #endif
@@ -761,10 +758,8 @@ NewNotesPage::NewNotesPage(QWidget * parent)
     // New Images Size:
 
     hLay = new QHBoxLayout;
-    m_imgSizeX = new KIntNumInput(this);
-    m_imgSizeX->setMinimum(1);
-    m_imgSizeX->setMaximum(4096);
-    m_imgSizeX->setReferencePoint(100);
+    m_imgSizeX = new QLineEdit("100", this);
+    m_imgSizeX->setValidator(new QIntValidator(1, 4096, this));
     connect(m_imgSizeX, SIGNAL(valueChanged(int)), this, SLOT(changed()));
 
     label = new QLabel(this);
@@ -774,10 +769,8 @@ NewNotesPage::NewNotesPage(QWidget * parent)
     hLay->addWidget(label);
     hLay->addWidget(m_imgSizeX);
 
-    m_imgSizeY = new KIntNumInput(this);
-    m_imgSizeY->setMinimum(1);
-    m_imgSizeY->setMaximum(4096);
-    m_imgSizeY->setReferencePoint(100);
+    m_imgSizeY = new QLineEdit("100", this);
+    m_imgSizeY->setValidator(new QIntValidator(1, 4096, this));
     connect(m_imgSizeY, SIGNAL(valueChanged(int)), this, SLOT(changed()));
 
     label = new QLabel(this);
@@ -823,8 +816,8 @@ void NewNotesPage::load()
 {
     m_newNotesPlace->setCurrentIndex(Settings::newNotesPlace());
 
-    m_imgSizeX->setValue(Settings::defImageX());
-    m_imgSizeY->setValue(Settings::defImageY());
+    m_imgSizeX->setText(QString(Settings::defImageX()));
+    m_imgSizeY->setText(QString(Settings::defImageY()));
 
     m_viewTextFileContent->setChecked(Settings::viewTextFileContent());
     m_viewHtmlFileContent->setChecked(Settings::viewHtmlFileContent());
@@ -836,8 +829,8 @@ void NewNotesPage::save()
 {
     Settings::setNewNotesPlace(m_newNotesPlace->currentIndex());
 
-    Settings::setDefImageX(m_imgSizeX->value());
-    Settings::setDefImageY(m_imgSizeY->value());
+    Settings::setDefImageX(m_imgSizeX->text().toInt());
+    Settings::setDefImageY(m_imgSizeY->text().toInt());
 
     Settings::setViewTextFileContent(m_viewTextFileContent->isChecked());
     Settings::setViewHtmlFileContent(m_viewHtmlFileContent->isChecked());
@@ -852,10 +845,10 @@ void NewNotesPage::defaults()
 
 void NewNotesPage::visualize()
 {
-    QPointer<ViewSizeDialog> size = new ViewSizeDialog(this, m_imgSizeX->value(), m_imgSizeY->value());
+    QPointer<ViewSizeDialog> size = new ViewSizeDialog(this, m_imgSizeX->text().toInt(), m_imgSizeY->text().toInt());
     size->exec();
-    m_imgSizeX->setValue(size->width());
-    m_imgSizeY->setValue(size->height());
+    m_imgSizeX->setText(QString(size->width()));
+    m_imgSizeY->setText(QString(size->height()));
 }
 
 /** class NotesAppearancePage: */

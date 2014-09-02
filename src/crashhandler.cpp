@@ -18,11 +18,11 @@
 #include <KDE/KComponentData>
 #include <KDE/KTemporaryFile>
 #include <KDE/KToolInvocation>
-#include <KDE/KDebug>
 
 #include <kdeversion.h>
 
 #include <QtCore/QRegExp>
+#include <QDebug>
 
 #include <cstdio>         //popen, fread
 #include <sys/types.h>    //pid_t
@@ -185,7 +185,7 @@ Crash::crashHandler(int /*signal*/)
                 /*attachURLs*/  QStringList(),
                 /*startup_id*/  "");
         } else {
-            kDebug() << "\n" + i18n("%1 has crashed! We're sorry about this.\n\n"
+            qDebug() << "\n" + i18n("%1 has crashed! We're sorry about this.\n\n"
                                     "But, all is not lost! Perhaps an upgrade is already available "
                                     "which fixes the problem. Please check your distribution's software repository.",
                                     KGlobal::mainComponent().aboutData()->programName());

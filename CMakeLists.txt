@@ -2,15 +2,9 @@ cmake_minimum_required(VERSION 2.6)
 
 find_package(X11 REQUIRED)
 find_package(KDE4 REQUIRED)
-find_package(QImageBlitz REQUIRED)
 find_package(Gpgme)
 find_package(Gpgmepp)
 find_package(SharedDesktopOntologies)
-
-if (BUILD_KPARTS)
-find_package(KdepimLibs REQUIRED)
-include_directories(${KDEPIMLIBS_INCLUDE_DIRS})
-endif (BUILD_KPARTS)
 
 add_definitions(${QT_DEFINITIONS} ${KDE4_DEFINITIONS})
 
@@ -30,7 +24,6 @@ ENDIF(GPGME_FOUND)
 
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h )
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
-
 
 include_directories(${KDE4_INCLUDES} ${KDE4_INCLUDE_DIR} ${QT_INCLUDES} ${X11_INCLUDES} )
 

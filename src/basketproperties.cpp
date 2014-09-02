@@ -34,7 +34,6 @@
 
 #include <KDE/KLineEdit>
 #include <KDE/KLocale>
-#include <KDE/KNumInput>
 #include <KDE/KApplication>
 #include <KDE/KIconLoader>
 #include <KDE/KIconDialog>
@@ -111,12 +110,9 @@ BasketPropertiesDialog::BasketPropertiesDialog(BasketScene *basket, QWidget *par
     backgroundImage->setMinimumHeight(75 + 2 * BUTTON_MARGIN);
 
     // Disposition:
-
-    columnCount->setValue(m_basket->columnsCount());
-    columnCount->setRange(1, 20, /*step=*/1);
-    columnCount->setSliderEnabled(false);
-    columnCount->setValue(m_basket->columnsCount());
-    connect(columnCount, SIGNAL(valueChanged(int)), this, SLOT(selectColumnsLayout()));
+    columnCount->setValidator(new QIntValidator(1, 20, this));
+    columnCount->setText(QString(m_basket->columnsCount()));
+    connect(columnCount, SIGNAL(textChanged(QString)), this, SLOT(selectColumnsLayout()));
 
     int height = qMax(mindMap->sizeHint().height(), columnCount->sizeHint().height()); // Make all radioButtons vertically equaly-spaced!
     mindMap->setMinimumSize(mindMap->sizeHint().width(), height); // Because the m_columnCount can be heigher, and make radio1 and radio2 more spaced than radio2 and radio3.
@@ -148,11 +144,11 @@ void BasketPropertiesDialog::ensurePolished()
 void BasketPropertiesDialog::applyChanges()
 {
     if (columnForm->isChecked()) {
-        m_basket->setDisposition(0, columnCount->value());
+        m_basket->setDisposition(0, columnCount->text().toInt());
     } else if (freeForm->isChecked()) {
-        m_basket->setDisposition(1, columnCount->value());
+        m_basket->setDisposition(1, columnCount->text().toInt());
     } else {
-        m_basket->setDisposition(2, columnCount->value());
+        m_basket->setDisposition(2, columnCount->text().toInt());
     }
 
     // Should be called LAST, because it will emit the propertiesChanged() signal and the tree will be able to show the newly set Alt+Letter shortcut:

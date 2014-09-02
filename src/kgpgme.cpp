@@ -29,10 +29,10 @@
 #include <QtGui/QLabel>
 #include <QtGui/QPixmap>
 #include <QtGui/QVBoxLayout>
+#include <QMessageBox>
 
 #include <KDE/KApplication>
 #include <KDE/KLocale>
-#include <KDE/KMessageBox>
 #include <KDE/KPasswordDialog>
 
 #include <locale.h>         //For LC_ALL, etc.
@@ -146,7 +146,7 @@ void KGpgMe::init(gpgme_protocol_t proto)
 #endif
     err = gpgme_engine_check_version(proto);
     if (err) {
-        KMessageBox::error(kapp->activeWindow(), QString("%1: %2")
+        QMessageBox::critical(kapp->activeWindow(), QString("%1: %2")
                            .arg(gpgme_strsource(err)).arg(gpgme_strerror(err)));
     }
 }
@@ -228,12 +228,12 @@ KGpgKeyList KGpgMe::keys(bool privateKeys /* = false */) const
     }
 
     if (err) {
-        KMessageBox::error(kapp->activeWindow(), QString("%1: %2")
+        QMessageBox::critical(kapp->activeWindow(), QString("%1: %2")
                            .arg(gpgme_strsource(err)).arg(gpgme_strerror(err)));
     } else {
         result = gpgme_op_keylist_result(m_ctx);
         if (result->truncated) {
-            KMessageBox::error(kapp->activeWindow(),
+            QMessageBox::critical(kapp->activeWindow(),
                                i18n("Key listing unexpectedly truncated."));
         }
     }
@@ -268,7 +268,7 @@ bool KGpgMe::encrypt(const QByteArray& inBuffer, unsigned long length,
                     if (!err) {
                         result = gpgme_op_encrypt_result(m_ctx);
                         if (result->invalid_recipients) {
-                            KMessageBox::error(kapp->activeWindow(), QString("%1: %2")
+                            QMessageBox::critical(kapp->activeWindow(), QString("%1: %2")
                                                .arg(i18n("That public key is not meant for encryption"))
                                                .arg(result->invalid_recipients->fpr));
                         } else {
@@ -280,7 +280,7 @@ bool KGpgMe::encrypt(const QByteArray& inBuffer, unsigned long length,
         }
     }
     if (err != GPG_ERR_NO_ERROR && err != GPG_ERR_CANCELED) {
-        KMessageBox::error(kapp->activeWindow(), QString("%1: %2")
+        QMessageBox::critical(kapp->activeWindow(), QString("%1: %2")
                            .arg(gpgme_strsource(err)).arg(gpgme_strerror(err)));
     }
     if (err != GPG_ERR_NO_ERROR)
@@ -310,7 +310,7 @@ bool KGpgMe::decrypt(const QByteArray& inBuffer, QByteArray* outBuffer)
                 if (!err) {
                     result = gpgme_op_decrypt_result(m_ctx);
                     if (result->unsupported_algorithm) {
-                        KMessageBox::error(kapp->activeWindow(), QString("%1: %2")
+                        QMessageBox::critical(kapp->activeWindow(), QString("%1: %2")
                                            .arg(i18n("Unsupported algorithm"))
                                            .arg(result->unsupported_algorithm));
                     } else {
@@ -321,7 +321,7 @@ bool KGpgMe::decrypt(const QByteArray& inBuffer, QByteArray* outBuffer)
         }
     }
     if (err != GPG_ERR_NO_ERROR && err != GPG_ERR_CANCELED) {
-        KMessageBox::error(kapp->activeWindow(), QString("%1: %2")
+        QMessageBox::critical(kapp->activeWindow(), QString("%1: %2")
                            .arg(gpgme_strsource(err)).arg(gpgme_strerror(err)));
     }
     if (err != GPG_ERR_NO_ERROR)

@@ -22,7 +22,6 @@
 #define SETTINGS_H
 
 #include <KDE/KAction>          //For UseSysTray
-#include <KDE/KMainWindow>      //For Global::mainWindow()
 
 #include <QtCore/QDate>
 #include <QDialog>
@@ -31,7 +30,7 @@
 #include "bnpview.h"
 #include "systemtray.h"
 
-class KIntNumInput;
+class QLineEdit;
 class QComboBox;
 
 class QDialogButtonBox;
@@ -79,9 +78,9 @@ private:
     QWidget             *m_systray;
     QCheckBox           *m_showIconInSystray;
     QCheckBox           *m_hideOnMouseOut;
-    KIntNumInput        *m_timeToHideOnMouseOut;
+    QLineEdit        *m_timeToHideOnMouseOut;
     QCheckBox           *m_showOnMouseIn;
-    KIntNumInput        *m_timeToShowOnMouseIn;
+    QLineEdit        *m_timeToShowOnMouseIn;
 };
 
 class BASKET_EXPORT BasketsPage : public QWidget
@@ -111,7 +110,7 @@ private:
     // Protection
     QCheckBox           *m_useGnuPGAgent;
     QCheckBox           *m_enableReLockTimeoutMinutes;
-    KIntNumInput        *m_reLockTimeoutMinutes;
+    QLineEdit        *m_reLockTimeoutMinutes;
 };
 
 class BASKET_EXPORT NewNotesPage : public QWidget
@@ -129,8 +128,8 @@ private slots:
 
 private:
     // Notes Image Size
-    KIntNumInput        *m_imgSizeX;
-    KIntNumInput        *m_imgSizeY;
+    QLineEdit        *m_imgSizeX;
+    QLineEdit        *m_imgSizeY;
     QPushButton         *m_pushVisualize;
 
     // Note Addition

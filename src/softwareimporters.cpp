@@ -29,11 +29,11 @@
 #include <QtGui/QVBoxLayout>
 #include <QtGui/QRadioButton>
 #include <QtXml/QDomDocument>
+#include <QMessageBox>
 
 #include <KDE/KStandardDirs>
 #include <KDE/KLocale>
 #include <KDE/KFileDialog>
-#include <KDE/KMessageBox>
 #include <KDE/KTextEdit>
 
 #include "basketscene.h"
@@ -730,7 +730,7 @@ void SoftwareImporters::importTuxCards()
 
     QDomDocument *document = XMLWork::openFile("tuxcards_data_file"/*"InformationCollection"*/, fileName);
     if (document == 0) {
-        KMessageBox::error(0, i18n("Can not import that file. It is either corrupted or not a TuxCards file."), i18n("Bad File Format"));
+        QMessageBox::critical(0, QObject::tr("Bad File Format"), QObject::tr("Can not import that file. It is either corrupted or not a TuxCards file."));
         return;
     }
 
@@ -758,7 +758,7 @@ void SoftwareImporters::importTuxCardsNode(const QDomElement &element, BasketSce
         Note *nContent;
 
         if (isEncrypted) {
-            KMessageBox::information(0, i18n("A note is encrypted. The importer does not yet support encrypted notes. Please remove the encryption with TuxCards and re-import the file."), i18n("Encrypted Notes not Supported Yet"));
+            QMessageBox::information(0, QObject::tr("Encrypted Notes not Supported Yet"), QObject::tr("A note is encrypted. The importer does not yet support encrypted notes. Please remove the encryption with TuxCards and re-import the file."));
             isRichText = true;
             content = i18n("<font color='red'><b>Encrypted note.</b><br>The importer do not support encrypted notes yet. Please remove the encryption with TuxCards and re-import the file.</font>");
         }

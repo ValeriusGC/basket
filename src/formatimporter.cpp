@@ -25,12 +25,12 @@
 #include <QtCore/QDir>
 #include <QtCore/QTextStream>
 #include <QtXml/QDomDocument>
+#include <QMessageBox>
+#include "QDebug"
 
-#include <KDE/KMessageBox>
 #include <KDE/KLocale>
 #include <KIO/CopyJob>
 #include <KDE/KApplication>
-#include "KDE/KDebug"
 
 #include "notecontent.h"
 #include "notefactory.h"
@@ -86,7 +86,7 @@ void FormatImporter::slotCopyingDone(KIO::Job *)
 
 void FormatImporter::importBaskets()
 {
-    kDebug() << "Import Baskets: Preparing...";
+    qDebug() << "Import Baskets: Preparing...";
 
     // Some preliminary preparations (create the destination folders and the basket tree file):
     QDir dirPrep;
@@ -122,21 +122,20 @@ void FormatImporter::importBaskets()
                 if (!(baskets.contains((*it) + "/")) && baskets.contains(*it))   // And if it is not already in the imported baskets list
                     baskets.append(*it);
 
-    kDebug() << "Import Baskets: Found " << baskets.count() << " baskets to import.";
+    qDebug() << "Import Baskets: Found " << baskets.count() << " baskets to import.";
 
     // Import every baskets:
     int i = 0;
     for (QStringList::iterator it = baskets.begin(); it != baskets.end(); ++it) {
         ++i;
-        kDebug() << "Import Baskets: Importing basket " << i << " of " << baskets.count() << "...";
+        qDebug() << "Import Baskets: Importing basket " << i << " of " << baskets.count() << "...";
 
         // Move the folder to the new repository (normal basket) or copy the folder (mirorred folder):
         QString folderName = *it;
         if (folderName.startsWith('/')) { // It was a folder mirror:
-            KMessageBox::information(0, i18n("<p>Folder mirroring is not possible anymore (see <a href='http://basket.kde.org/'>basket.kde.org</a> for more information).</p>"
+            QMessageBox::information(0, tr("Folder Mirror Import"), tr("<p>Folder mirroring is not possible anymore (see <a href='http://basket.kde.org/'>basket.kde.org</a> for more information).</p>"
                                              "<p>The folder <b>%1</b> has been copied for the basket needs. You can either delete this folder or delete the basket, or use both. But remember that "
-                                             "modifying one will not modify the other anymore as they are now separate entities.</p>", folderName), i18n("Folder Mirror Import"),
-                                     "", KMessageBox::AllowLink);
+                                             "modifying one will not modify the other anymore as they are now separate entities.</p>").arg(folderName));
             // Also modify folderName to be only the folder name and not the full path anymore:
             QString newFolderName = folderName;
             if (newFolderName.endsWith('/'))
@@ -160,7 +159,7 @@ void FormatImporter::importBaskets()
     }
 
     // Finalize (write to disk and delete now useless files):
-    kDebug() << "Import Baskets: Finalizing...";
+    qDebug() << "Import Baskets: Finalizing...";
 
     QFile file(Global::basketsFolder() + "baskets.xml");
     if (file.open(QIODevice::WriteOnly)) {
@@ -175,7 +174,7 @@ void FormatImporter::importBaskets()
     Tools::deleteRecursively(Global::savesFolder() + ".tmp");
     dir.remove(Global::savesFolder() + "container.baskets");
 
-    kDebug() << "Import Baskets: Finished.";
+    qDebug() << "Import Baskets: Finished.";
 }
 
 QDomElement FormatImporter::importBasket(const QString &folderName)
@@ -183,7 +182,7 @@ QDomElement FormatImporter::importBasket(const QString &folderName)
     // Load the XML file:
     QDomDocument *document = XMLWork::openFile("basket", Global::basketsFolder() + folderName + "/.basket");
     if (!document) {
-        kDebug() << "Import Baskets: Failed to read the basket file!";
+        qDebug() << "Import Baskets: Failed to read the basket file!";
         return QDomElement();
     }
     QDomElement docElem = document->documentElement();
@@ -302,7 +301,7 @@ QDomElement FormatImporter::importBasket(const QString &folderName)
         stream << document->toString(); // Document is ALREADY using UTF-8
         file.close();
     } else
-        kDebug() << "Import Baskets: Failed to save the basket file!";
+        qDebug() << "Import Baskets: Failed to save the basket file!";
 
     // Return the newly created properties (to put in the basket tree):
     return properties;

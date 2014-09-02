@@ -31,12 +31,10 @@
 
 #include <KDE/KApplication>
 #include <KDE/KAboutData>
-#include <KDE/KDebug>
 #include <KDE/KLocale>
 #include <KDE/KGlobal>
 #include <KDE/KConfig>
 #include <KDE/KFileDialog>
-#include <KDE/KMessageBox>
 #include <KDE/KProgressDialog>
 
 #include <KDE/KIO/Job>      //For KIO::file_copy
@@ -48,6 +46,8 @@
 #include <QtCore/QList>
 #include <QtGui/QPainter>
 #include <QtGui/QPixmap>
+#include <QMessageBox>
+#include <QDebug>
 
 HTMLExporter::HTMLExporter(BasketScene *basket)
 {
@@ -69,16 +69,13 @@ HTMLExporter::HTMLExporter(BasketScene *basket)
             return;
         // File already existing? Ask for overriding:
         if (dir.exists(destination)) {
-            int result = KMessageBox::questionYesNoCancel(
-                             0,
-                             "<qt>" + i18n("The file <b>%1</b> already exists. Do you really want to override it?",
+            int result = QMessageBox::question(0, QObject::tr("Override File?"),
+                                               "<qt>" + QObject::tr("The file <b>%1</b> already exists. Do you really want to override it?").arg(
                                            KUrl(destination).fileName()),
-                             i18n("Override File?"),
-                             KGuiItem(i18n("&Override"), "document-save")
-                         );
-            if (result == KMessageBox::Cancel)
+                                               QMessageBox::Yes | QMessageBox::Cancel);
+            if (result == QMessageBox::Cancel)
                 return;
-            else if (result == KMessageBox::Yes)
+            else if (result == QMessageBox::Yes)
                 askAgain = false;
         } else
             askAgain = false;
@@ -163,19 +160,19 @@ void HTMLExporter::exportBasket(BasketScene *basket, bool isSubBasket)
     iconsFolderName   = (isSubBasket ? "../" : filesFolderName) + i18nc("HTML export folder (icons)",   "icons")   + "/"; // eg.: "foo.html_files/icons/"   or "../icons/"
     imagesFolderName  = (isSubBasket ? "../" : filesFolderName) + i18nc("HTML export folder (images)",  "images")  + "/"; // eg.: "foo.html_files/images/"  or "../images/"
 
-    kDebug() << "Exporting ================================================";
-    kDebug() << "  filePath:" << filePath;
-    kDebug() << "  basketFilePath:" << basketFilePath;
-    kDebug() << "  filesFolderPath:" << filesFolderPath;
-    kDebug() << "  filesFolderName:" << filesFolderName;
-    kDebug() << "  iconsFolderPath:" << iconsFolderPath;
-    kDebug() << "  iconsFolderName:" << iconsFolderName;
-    kDebug() << "  imagesFolderPath:" << imagesFolderPath;
-    kDebug() << "  imagesFolderName:" << imagesFolderName;
-    kDebug() << "  dataFolderPath:" << dataFolderPath;
-    kDebug() << "  dataFolderName:" << dataFolderName;
-    kDebug() << "  basketsFolderPath:" << basketsFolderPath;
-    kDebug() << "  basketsFolderName:" << basketsFolderName;
+    qDebug() << "Exporting ================================================";
+    qDebug() << "  filePath:" << filePath;
+    qDebug() << "  basketFilePath:" << basketFilePath;
+    qDebug() << "  filesFolderPath:" << filesFolderPath;
+    qDebug() << "  filesFolderName:" << filesFolderName;
+    qDebug() << "  iconsFolderPath:" << iconsFolderPath;
+    qDebug() << "  iconsFolderName:" << iconsFolderName;
+    qDebug() << "  imagesFolderPath:" << imagesFolderPath;
+    qDebug() << "  imagesFolderName:" << imagesFolderName;
+    qDebug() << "  dataFolderPath:" << dataFolderPath;
+    qDebug() << "  dataFolderName:" << dataFolderName;
+    qDebug() << "  basketsFolderPath:" << basketsFolderPath;
+    qDebug() << "  basketsFolderName:" << basketsFolderName;
 
     // Create the data folder for this basket:
     QDir dir;

@@ -28,10 +28,8 @@
 #include <QtGui/QStyle>
 #include <QtGui/QStyleOption>
 #include <QtGui/QImage>
+#include <QDebug>
 
-#include <qimageblitz/qimageblitz.h>        //For Blitz::fade(...)
-
-#include <KDE/KDebug>
 #include <KDE/KApplication>
 #include <KDE/KIconLoader>
 #include <KDE/KGlobal>
@@ -2366,10 +2364,14 @@ void Note::unbufferizeAll()
 void Note::bufferizeSelectionPixmap()
 {
     if (m_bufferedSelectionPixmap.isNull()) {
+        m_bufferedSelectionPixmap = QPixmap(m_bufferedPixmap.size());
         QColor insideColor = palette().color(QPalette::Highlight);
-        QImage image = m_bufferedPixmap.toImage();
-        image = Blitz::fade(image, 0.25, insideColor);
-        m_bufferedSelectionPixmap = QPixmap::fromImage(image);
+        {
+            QPainter painter(&m_bufferedSelectionPixmap);
+            painter.fillRect(0, 0, m_bufferedSelectionPixmap.width(), m_bufferedSelectionPixmap.height(), insideColor);
+            painter.setOpacity(0.25);
+            painter.drawPixmap(0, 0, m_bufferedPixmap);
+        }
     }
 }
 
@@ -2560,19 +2562,19 @@ bool Note::isShown()
 
 void Note::debug()
 {
-    kDebug() << "Note@" << (quint64)this;
+    qDebug() << "Note@" << (quint64)this;
     if (!this) {
-        kDebug();
+        qDebug();
         return;
     }
 
     if (isColumn())
-        kDebug() << ": Column";
+        qDebug() << ": Column";
     else if (isGroup())
-        kDebug() << ": Group";
+        qDebug() << ": Group";
     else
-        kDebug() << ": Content[" << content()->lowerTypeName() << "]: " << toText("");
-    kDebug();
+        qDebug() << ": Content[" << content()->lowerTypeName() << "]: " << toText("");
+    qDebug();
 }
 
 Note* Note::firstSelected()

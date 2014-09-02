@@ -23,9 +23,9 @@
 #ifdef HAVE_LIBGPGME
 
 #include <QtGui/QHBoxLayout>
+#include <QMessageBox>
 
 #include <KDE/KLocale>
-#include <KDE/KMessageBox>
 
 #include "basketscene.h"
 #include "kgpgme.h"
@@ -56,7 +56,7 @@ void PasswordDlg::accept()
 {
     int n = type();
     if (n == BasketScene::PrivateKeyEncryption && key().isEmpty())
-        KMessageBox::error(w, i18n("No private key selected."));
+        QMessageBox::critical(w, QString(), tr("No private key selected."));
     else
         KDialog::accept();
 }

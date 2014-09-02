@@ -24,7 +24,6 @@
 #include <KDE/KStandardDirs>
 
 #include <KDE/KApplication>
-#include <KDE/KMainWindow>
 #include <KDE/KConfig>
 
 #include <QtCore/QString>
@@ -93,10 +92,10 @@ QString Global::openNoteIcon() // FIXME: Now an edit icon
 
 QMainWindow* Global::mainWindow()
 {
-    QWidget* res = kapp->activeWindow();
+    QWidget* res = qApp->activeWindow();
 
-    if (res && res->inherits("KMainWindow")) {
-        return static_cast<KMainWindow*>(res);
+    if (res && res->inherits("QMainWindow")) {
+        return static_cast<QMainWindow*>(res);
     }
     return 0;
 }

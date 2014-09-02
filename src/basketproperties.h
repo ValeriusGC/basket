@@ -34,7 +34,6 @@ class QRadioButton;
 class QString;
 
 class QComboBox;
-class KIntNumInput;
 class KColorCombo2;
 
 class BasketScene;

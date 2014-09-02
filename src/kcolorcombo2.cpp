@@ -33,8 +33,8 @@
 #include <QtGui/QKeyEvent>
 #include <QtGui/QDragEnterEvent>
 #include <QtGui/QClipboard>
+#include <QDebug>
 
-#include <KDE/KDebug>
 #include <KDE/KLocale>
 #include <KDE/KColorDialog>
 #include <KDE/KStandardShortcut>
@@ -430,22 +430,22 @@ void KColorCombo2::setRainbowPreset(int colorColumnCount, int lightRowCount, int
     }
 
 #ifdef DEBUG_COLOR_ARRAY
-    kDebug() << "KColorCombo2::setColorPreset";
+    qDebug() << "KColorCombo2::setColorPreset";
     for (int j = 0; j < rowCount; ++j) {
         for (int i = 0; i < columnCount; ++i) {
             int h, s, v;
             m_colorArray[i][j].getHsv(&h, &s, &v);
-            kDebug() << QString("(%1,%2,%3)").arg(h, 3).arg(s, 3).arg(v, 3);
+            qDebug() << QString("(%1,%2,%3)").arg(h, 3).arg(s, 3).arg(v, 3);
             //kDebug() << colorArray[i][j].name() << " ";
         }
-        kDebug();
+        qDebug();
     }
 #endif
 #ifdef OUTPUT_GIMP_PALETTE
-    kDebug() << "GIMP Palette";
+    qDebug() << "GIMP Palette";
     for (int j = 0; j < rowCount; ++j) {
         for (int i = 0; i < columnCount; ++i) {
-            kDebug() << QString("(%1,%2,%3)")
+            qDebug() << QString("(%1,%2,%3)")
             .arg(m_colorArray[i][j].red(), 3)
             .arg(m_colorArray[i][j].green(), 3)
             .arg(m_colorArray[i][j].blue(), 3);

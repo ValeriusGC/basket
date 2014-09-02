@@ -37,10 +37,11 @@
 #include <QtGui/QTextDocument> //For Qt::mightBeRichText(...)
 #include <QtGui/QBitmap> //For createHeuristicMask
 #include <QtCore/qnamespace.h>
+#include <QMessageBox>
+#include <QApplication>
 
 #include <KDE/KUrl>
 #include <KDE/KMimeType>
-#include <KDE/KMessageBox>
 #include <KDE/KLocale>
 #include <KDE/KFileMetaInfo>
 #include <KDE/KOpenWithDialog>
@@ -480,12 +481,11 @@ Note* NoteFactory::dropNote(const QMimeData *source, BasketScene *parent, bool f
 
     /* Unsucceful drop */
     note = createNoteUnknown(source, parent);
-    QString message = i18n("<p>%1 doesn't support the data you've dropped.<br>"
+    QString message = QObject::tr("<p>%1 doesn't support the data you've dropped.<br>"
                            "It however created a generic note, allowing you to drag or copy it to an application that understand it.</p>"
                            "<p>If you want the support of these data, please contact developer or visit the "
-                           "<a href=\"http://basket.kde.org/dropdb.php\">BasKet Drop Database</a>.</p>", KGlobal::mainComponent().aboutData()->programName());
-    KMessageBox::information(parent->graphicsView()->viewport(), message, i18n("Unsupported MIME Type(s)"),
-                             "unsupportedDropInfo", KMessageBox::AllowLink);
+                           "<a href=\"http://basket.kde.org/dropdb.php\">BasKet Drop Database</a>.</p>").arg(qApp->applicationName());
+    QMessageBox::information(parent->graphicsView()->viewport(), QObject::tr("Unsupported MIME Type(s)"), message);
     return note;
 }
 

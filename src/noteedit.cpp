@@ -29,6 +29,8 @@
 #include <QtGui/QScrollBar>
 #include <QtGui/QFontComboBox>
 #include <QToolBar>
+#include <QMessageBox>
+#include <QDebug>
 
 #include <KDE/KApplication>
 #include <KDE/KLineEdit>
@@ -37,7 +39,6 @@
 #include <KDE/KColorCombo>
 #include <KDE/KService>
 #include <KDE/KConfig>
-#include <KDE/KMessageBox>
 #include <KDE/KLocale>
 #include <KDE/KToolBar>
 #include <KDE/KAction>
@@ -45,7 +46,6 @@
 #include <KDE/KIconButton>
 #include <KDE/KToggleAction>
 #include <KDE/KDesktopFile>
-#include <KDE/KDebug>
 
 #include "notecontent.h"
 #include "notefactory.h"
@@ -448,7 +448,7 @@ void HtmlEditor::setBlock()
 
 void HtmlEditor::setBold(bool isChecked)
 {
-    kWarning()<<"setBold "<<isChecked;
+    qWarning()<<"setBold "<<isChecked;
     textEdit()->setFontWeight(isChecked ? QFont::Bold : QFont::Normal);
 }
 
@@ -499,14 +499,12 @@ void HtmlEditor::validate()
 ImageEditor::ImageEditor(ImageContent *imageContent, QWidget *parent)
         : NoteEditor(imageContent)
 {
-    int choice = KMessageBox::questionYesNo(parent, i18n(
-                                                "Images can not be edited here at the moment (the next version of BasKet Note Pads will include an image editor).\n"
+    int choice = QMessageBox::question(parent, tr("Edit Image Note"),
+                                            tr( "Images can not be edited here at the moment (the next version of BasKet Note Pads will include an image editor).\n"
                                                 "Do you want to open it with an application that understand it?"),
-                                            i18n("Edit Image Note"),
-                                            KStandardGuiItem::open(),
-                                            KStandardGuiItem::cancel());
+                                            QMessageBox::Yes | QMessageBox::No);
 
-    if (choice == KMessageBox::Yes)
+    if (choice == QMessageBox::Yes)
         note()->basket()->noteOpen(note());
 }
 
@@ -515,14 +513,12 @@ ImageEditor::ImageEditor(ImageContent *imageContent, QWidget *parent)
 AnimationEditor::AnimationEditor(AnimationContent *animationContent, QWidget *parent)
         : NoteEditor(animationContent)
 {
-    int choice = KMessageBox::questionYesNo(parent, i18n(
-                                                "This animated image can not be edited here.\n"
-                                                "Do you want to open it with an application that understands it?"),
-                                            i18n("Edit Animation Note"),
-                                            KStandardGuiItem::open(),
-                                            KStandardGuiItem::cancel());
+    int choice = QMessageBox::question(parent, tr("Edit Animation Note"),
+                                            i18n("This animated image can not be edited here.\n"
+                                                 "Do you want to open it with an application that understands it?"),
+                                            QMessageBox::Yes | QMessageBox::No);
 
-    if (choice == KMessageBox::Yes)
+    if (choice == QMessageBox::Yes)
         note()->basket()->noteOpen(note());
 }
 
@@ -636,10 +632,9 @@ ColorEditor::ColorEditor(ColorContent *colorContent, QWidget *parent)
 UnknownEditor::UnknownEditor(UnknownContent *unknownContent, QWidget *parent)
         : NoteEditor(unknownContent)
 {
-    KMessageBox::information(parent, i18n(
-                                 "The type of this note is unknown and can not be edited here.\n"
-                                 "You however can drag or copy the note into an application that understands it."),
-                             i18n("Edit Unknown Note"));
+    QMessageBox::information(parent, tr("Edit Unknown Note"),
+                             tr("The type of this note is unknown and can not be edited here.\n"
+                                "You however can drag or copy the note into an application that understands it."));
 }
 
 /*********************************************************************/

@@ -27,8 +27,6 @@
 #include <KDE/KActionCollection>
 #include <KDE/KIcon>
 #include <KDE/KLocale>
-#include <KDE/KDebug>
-#include <KDE/KMessageBox>
 #include <KDE/KTextEdit>
 
 #include <KDE/KPushButton>
@@ -57,6 +55,8 @@
 #include <QtGui/QValidator>
 #include <QtGui/QDesktopWidget>
 #include <QMenuBar>
+#include <QMessageBox>
+#include <QDebug>
 
 /****************************************/
 /********** class LikeBackBar: **********/
@@ -140,9 +140,9 @@ void LikeBackBar::autoMove()
 
         if (window != lastWindow && m_likeBack->windowNamesListing() != LikeBack::NoListing) {
             if (window->objectName().isEmpty() || window->objectName() == "unnamed") {
-                kDebug() << "===== LikeBack ===== UNNAMED ACTIVE WINDOW OF TYPE " << window->metaObject()->className() << " ======" << LikeBack::activeWindowPath();
+                qDebug() << "===== LikeBack ===== UNNAMED ACTIVE WINDOW OF TYPE " << window->metaObject()->className() << " ======" << LikeBack::activeWindowPath();
             } else if (m_likeBack->windowNamesListing() == LikeBack::AllWindows) {
-                kDebug() << "LikeBack: Active Window: " << LikeBack::activeWindowPath();
+                qDebug() << "LikeBack: Active Window: " << LikeBack::activeWindowPath();
             }
         }
         lastWindow = window;
@@ -234,10 +234,8 @@ LikeBack::LikeBack(Button buttons, bool showBarByDefault, KConfig *config)
     d->bar->resize(d->bar->sizeHint());
 
     // Show the information message if it is the first time, and if the button-bar is shown:
-    static const char *messageShown = "LikeBack_starting_information";
-    if (d->showBar && KMessageBox::shouldBeShownContinue(messageShown)) {
+    if (d->showBar) {
         showInformationMessage();
-        KMessageBox::saveDontShowAgainContinue(messageShown);
     }
 
     // Show the bar if that's wanted by the developer or the user:
@@ -333,7 +331,7 @@ void LikeBack::enableBar()
 {
     d->disabledCount--;
     if (d->disabledCount < 0)
-        kDebug() << "===== LikeBack ===== Enabled more times than it was disabled. Please refer to the disableBar() documentation for more information and hints.";
+        qDebug() << "===== LikeBack ===== Enabled more times than it was disabled. Please refer to the disableBar() documentation for more information and hints.";
     if (d->bar && d->disabledCount <= 0) {
         d->bar->startTimer();
     }
@@ -407,23 +405,23 @@ void LikeBack::showInformationMessage()
                     (buttons & Dislike ? 1 : 0) +
                     (buttons & Bug     ? 1 : 0) +
                     (buttons & Feature ? 1 : 0);
-    KMessageBox::information(0,
+    QMessageBox::information(0, tr("Help Improve the Application"),
                              "<p><b>" + (isDevelopmentVersion(qApp->applicationVersion()) ?
-                                         i18n("Welcome to this testing version of %1.", qApp->applicationName()) :
-                                         i18n("Welcome to %1.", qApp->applicationName())
+                                         tr("Welcome to this testing version of %1.").arg(qApp->applicationName()) :
+                                         tr("Welcome to %1.").arg(qApp->applicationName())
                                         ) + "</b></p>"
-                             "<p>" + i18n("To help us improve it, your comments are important.") + "</p>"
+                             "<p>" + tr("To help us improve it, your comments are important.") + "</p>"
                              "<p>" +
                              ((buttons & LikeBack::Like) && (buttons & LikeBack::Dislike) ?
-                              i18n("Each time you have a great or frustrating experience, "
+                              tr("Each time you have a great or frustrating experience, "
                                    "please click the appropriate face below the window title-bar, "
                                    "briefly describe what you like or dislike and click Send.")
                               : (buttons & LikeBack::Like ?
-                                 i18n("Each time you have a great experience, "
+                                 tr("Each time you have a great experience, "
                                       "please click the smiling face below the window title-bar, "
                                       "briefly describe what you like and click Send.")
                                  : (buttons & LikeBack::Dislike ?
-                                    i18n("Each time you have a frustrating experience, "
+                                    tr("Each time you have a frustrating experience, "
                                          "please click the frowning face below the window title-bar, "
                                          "briefly describe what you dislike and click Send.")
                                     :
@@ -432,33 +430,33 @@ void LikeBack::showInformationMessage()
                              (buttons & LikeBack::Bug ?
                               "<p>" +
                               (buttons & (LikeBack::Like | LikeBack::Dislike) ?
-                               i18n("Follow the same principle to quickly report a bug: "
+                               tr("Follow the same principle to quickly report a bug: "
                                     "just click the broken-object icon in the top-right corner of the window, describe it and click Send.")
                                :
-                               i18n("Each time you discover a bug in the application, "
+                               tr("Each time you discover a bug in the application, "
                                     "please click the broken-object icon below the window title-bar, "
                                     "briefly describe the mis-behaviour and click Send.")
                               ) + "</p>"
                           : "") +
-                             "<p>" + i18np("Example:", "Examples:", nbButtons) + "</p>" +
+                             "<p>" + tr("Example(s):", 0, nbButtons) + "</p>" +
                              (buttons & LikeBack::Like ?
                               "<p><img source=\":images/hi16-action-likeback_like.png\"> &nbsp;" +
-                              i18n("<b>I like</b> the new artwork. Very refreshing.") + "</p>"
+                              tr("<b>I like</b> the new artwork. Very refreshing.") + "</p>"
                               : "") +
                              (buttons & LikeBack::Dislike ?
                               "<p><img source=\":images/hi16-action-likeback_dislike.png\"> &nbsp;" +
-                              i18n("<b>I dislike</b> the welcome page of that assistant. Too time consuming.") + "</p>"
+                              tr("<b>I dislike</b> the welcome page of that assistant. Too time consuming.") + "</p>"
                               : "") +
                              (buttons & LikeBack::Bug ?
                               "<p><img source=\":images/hi16-action-likeback_bug.png\"> &nbsp;" +
-                              i18n("<b>The application has an improper behaviour</b> when clicking the Add button. Nothing happens.") + "</p>"
+                              tr("<b>The application has an improper behaviour</b> when clicking the Add button. Nothing happens.") + "</p>"
                               : "") +
                              (buttons & LikeBack::Feature ?
                               "<p><img source=\":images/hi16-action-likeback_feature.png\"> &nbsp;" +
-                              i18n("<b>I desire a new feature</b> allowing me to send my work by email.") + "</p>"
+                              tr("<b>I desire a new feature</b> allowing me to send my work by email.") + "</p>"
                               : "") +
-                             "</tr></table>",
-                             i18n("Help Improve the Application"));
+                             "</tr></table>"
+                             );
 
 }
 
@@ -796,8 +794,8 @@ void LikeBackDialog::send()
     QNetworkRequest request(url);
     request.setRawHeader("Content-Type", "application/x-www-form-urlencoded");
 
-    kDebug() << "http://" << m_likeBack->hostName() << ":" << m_likeBack->hostPort() << m_likeBack->remotePath();
-    kDebug() << data;
+    qDebug() << "http://" << m_likeBack->hostName() << ":" << m_likeBack->hostPort() << m_likeBack->remotePath();
+    qDebug() << data;
 
     connect(http, SIGNAL(finished(QNetworkReply*)), this, SLOT(requestFinished(QNetworkReply*)));
 
@@ -812,12 +810,12 @@ void LikeBackDialog::requestFinished(QNetworkReply *reply)
     m_comment->setEnabled(true);
     m_likeBack->disableBar();
     if (reply->error() != QNetworkReply::NoError) {
-        KMessageBox::error(this, i18n("<p>Error while trying to send the report.</p><p>Please retry later.</p>"), i18n("Transfer Error"));
+        QMessageBox::critical(this, tr("Transfer Error"), tr("<p>Error while trying to send the report.</p><p>Please retry later.</p>"));
     } else {
-        KMessageBox::information(
+        QMessageBox::information(
             this,
-            i18n("<p>Your comment has been sent successfully. It will help improve the application.</p><p>Thanks for your time.</p>"),
-            i18n("Comment Sent")
+            tr("Comment Sent"),
+            tr("<p>Your comment has been sent successfully. It will help improve the application.</p><p>Thanks for your time.</p>")
         );
         close();
     }

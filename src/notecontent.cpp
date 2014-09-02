@@ -37,8 +37,8 @@
 #include <QtXml/QDomDocument>
 #include <QtNetwork/QNetworkReply>
 #include <KDE/KIO/AccessManager>
+#include <QDebug>
 
-#include <KDE/KDebug>
 #include <KDE/KService>
 #include <KDE/KLocale>
 #include <KDE/KFileMetaInfo>
@@ -981,7 +981,7 @@ bool TextContent::loadFromFile(bool lazyLoad)
     if (success)
         setText(content, lazyLoad);
     else {
-        kDebug() << "FAILED TO LOAD TextContent: " << fullPath();
+        qDebug() << "FAILED TO LOAD TextContent: " << fullPath();
         setText("", lazyLoad);
         if (!QFile::exists(fullPath()))
             saveToFile(); // Reserve the fileName so no new note will have the same name!
@@ -1225,7 +1225,7 @@ bool ImageContent::finishLazyLoad()
         }
     }
 
-    kDebug() << "FAILED TO LOAD ImageContent: " << fullPath();
+    qDebug() << "FAILED TO LOAD ImageContent: " << fullPath();
     m_format = "PNG"; // If the image is set later, it should be saved without destruction, so we use PNG by default.
     pixmap = QPixmap(1, 1); // Create a 1x1 pixels image instead of an undefined one.
     pixmap.fill();
@@ -1607,7 +1607,7 @@ SoundContent::SoundContent(Note *parent, const QString &fileName)
 
 void SoundContent::stateChanged(Phonon::State newState, Phonon::State oldState)
 {
-    kDebug() << "stateChanged " << oldState << " to " << newState;
+    qDebug() << "stateChanged " << oldState << " to " << newState;
 }
 
 QString SoundContent::zoneTip(int zone)

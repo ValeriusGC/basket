@@ -33,8 +33,8 @@
 #include <QtGui/QFont>
 #include <QtGui/QFontInfo>
 #include <QtGui/QTextDocument>  //For Qt::convertFromPlainText and Qt::WhiteSpaceNormal.
+#include <QDebug>
 
-#include <KDE/KDebug>
 #include <KDE/KIO/CopyJob>      //For KIO::trash
 #include <KDE/KUrl>
 
@@ -72,7 +72,7 @@ void StopWatch::check(int id)
     double time = starts[id].msecsTo(QTime::currentTime()) / 1000.0;
     totals[id] += time;
     counts[id]++;
-    kDebug() << k_funcinfo << "Timer_" << id << ": " << time << " s    [" << counts[id] << " times, total: " << totals[id] << " s, average: " << totals[id] / counts[id] << " s]" <<  endl;
+    qDebug() << "StopWatch::check " << "Timer_" << id << ": " << time << " s    [" << counts[id] << " times, total: " << totals[id] << " s, average: " << totals[id] / counts[id] << " s]" <<  endl;
 }
 
 QString Tools::textToHTML(const QString &text)
@@ -627,7 +627,7 @@ void Tools::printChildren(QObject* parent)
     QObject * obj;
     for (int i = 0 ; i < objs.size() ; i++) {
         obj = objs.at(i);
-        kDebug() << k_funcinfo << obj->metaObject()->className() << ": " << obj->objectName() << endl;
+        qDebug() << "Tools::printChildren " << obj->metaObject()->className() << ": " << obj->objectName() << endl;
     }
 
 }

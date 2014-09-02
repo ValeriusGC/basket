@@ -34,11 +34,11 @@
 #include <QtGui/QBitmap>
 #include <QtGui/QPixmapCache>
 #include <QtGui/QToolTip>
+#include <QDebug>
 
 #include <KDE/KIconLoader>
 #include <KDE/KLocale>
 #include <KDE/KStringHandler>
-#include <KDE/KDebug>
 
 #include "global.h"
 #include "bnpview.h"
@@ -447,7 +447,7 @@ void BasketTreeListView::mouseMoveEvent(QMouseEvent *event)
 
 void BasketTreeListView::dragEnterEvent(QDragEnterEvent *event)
 {
-    kDebug() << event->format();
+    qDebug() << event->format();
     event->acceptProposedAction();
     QTreeWidget::dragEnterEvent(event);
     if (event->mimeData()->hasFormat("application/x-basket-note")) {
@@ -470,7 +470,7 @@ void BasketTreeListView::removeExpands()
 
 void BasketTreeListView::dragLeaveEvent(QDragLeaveEvent *event)
 {
-    kDebug() << "BasketTreeListView::dragLeaveEvent";
+    qDebug() << "BasketTreeListView::dragLeaveEvent";
     m_autoOpenItem = 0;
     m_autoOpenTimer.stop();
     setItemUnderDrag(0);
@@ -484,14 +484,14 @@ void BasketTreeListView::dropEvent(QDropEvent *event)
         event->setDropAction(Qt::MoveAction);
         QTreeWidget::dropEvent(event);
     } else { // this handels application/x-basket-note drag events.
-        kDebug() << "Forwarding dropped data to the basket";
+        qDebug() << "Forwarding dropped data to the basket";
         event->setDropAction(Qt::MoveAction);
         QTreeWidgetItem *item = itemAt(event->pos());
         BasketListViewItem* bitem = dynamic_cast<BasketListViewItem*>(item);
         if (bitem) {
             bitem->basket()->blindDrop(event->mimeData(),event->dropAction(),event->source());
         } else {
-            kDebug() << "Forwarding failed: no bitem found";
+            qDebug() << "Forwarding failed: no bitem found";
         }
     }
 
@@ -505,7 +505,7 @@ void BasketTreeListView::dropEvent(QDropEvent *event)
 
 void BasketTreeListView::dragMoveEvent(QDragMoveEvent *event)
 {
-    kDebug() << "BasketTreeListView::dragMoveEvent";
+    qDebug() << "BasketTreeListView::dragMoveEvent";
     if (event->provides("application/x-qabstractitemmodeldatalist"))
         QTreeWidget::dragMoveEvent(event);
     else {

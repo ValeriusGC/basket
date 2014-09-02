@@ -30,16 +30,16 @@
 #include <QtGui/QPainter>
 #include <QtGui/QProgressBar>
 #include <QtXml/QDomDocument>
+#include <QMessageBox>
+#include <QApplication>
+#include <QDebug>
 
-#include <KDE/KDebug>
 #include <KDE/KLocale>
 #include <KDE/KAboutData>
 #include <KDE/KStandardDirs>        //For KGlobal::dirs()
-#include <KDE/KMainWindow>          //For Global::MainWindow()
 #include <KDE/KComponentData>       //For KGlobal::mainComponent aboutData
 #include <KDE/KIconLoader>
 #include <KDE/KProgressDialog>
-#include <KDE/KMessageBox>
 #include <KDE/KTar>
 
 #include "global.h"
@@ -77,7 +77,7 @@ void Archive::save(BasketScene *basket, bool withSubBaskets, const QString &dest
 
     progress->setValue(progress->value() + 1);      // Preparation finished
 
-    kDebug() << "Preparation finished out of " << progress->maximum();
+    qDebug() << "Preparation finished out of " << progress->maximum();
 
     // Copy the baskets data into the archive:
     QStringList backgrounds;
@@ -184,7 +184,7 @@ void Archive::save(BasketScene *basket, bool withSubBaskets, const QString &dest
     }
 
     progress->setValue(progress->value() + 1); // Finishing finished
-    kDebug() << "Finishing finished";
+    qDebug() << "Finishing finished";
 
     // Clean Up Everything:
     dir.remove(tempFolder + "preview.png");
@@ -235,7 +235,7 @@ void Archive::saveBasketToArchive(BasketScene *basket, bool recursive, KTar *tar
     }
 
     progress->setValue(progress->value() + 1); // Basket exportation finished
-    kDebug() << basket->basketName() << " finished";
+    qDebug() << basket->basketName() << " finished";
 
     // Recursively save child baskets:
     BasketListViewItem *item = Global::bnpView->listViewItemForBasket(basket);
@@ -271,7 +271,7 @@ void Archive::open(const QString &path)
         stream.setCodec("ISO-8859-1");
         QString line = stream.readLine();
         if (line != "BasKetNP:archive") {
-            KMessageBox::error(0, i18n("This file is not a basket archive."), i18n("Basket Archive Error"));
+            QMessageBox::critical(0, QObject::tr("Basket Archive Error"), QObject::tr("This file is not a basket archive."));
             file.close();
             Tools::deleteRecursively(tempFolder);
             return;
@@ -302,7 +302,7 @@ void Archive::open(const QString &path)
                 bool ok;
                 qint64 size = value.toULong(&ok);
                 if (!ok) {
-                    KMessageBox::error(0, i18n("This file is corrupted. It can not be opened."), i18n("Basket Archive Error"));
+                    QMessageBox::critical(0, QObject::tr("Basket Archive Error"), QObject::tr("This file is corrupted. It can not be opened."));
                     file.close();
                     Tools::deleteRecursively(tempFolder);
                     return;
@@ -314,23 +314,17 @@ void Archive::open(const QString &path)
                 stream.seek(stream.pos() + size);
             } else if (key == "archive*") {
                 if (version != "0.6.1" && readCompatibleVersions.contains("0.6.1") && !writeCompatibleVersions.contains("0.6.1")) {
-                    KMessageBox::information(
-                        0,
-                        i18n("This file was created with a recent version of %1. "
+                    QMessageBox::information(0, QObject::tr("Basket Archive Error"),
+                        QObject::tr("This file was created with a recent version of %1. "
                              "It can be opened but not every information will be available to you. "
                              "For instance, some notes may be missing because they are of a type only available in new versions. "
-                             "When saving the file back, consider to save it to another file, to preserve the original one.",
-                             KGlobal::mainComponent().aboutData()->programName()),
-                        i18n("Basket Archive Error")
-                    );
+                             "When saving the file back, consider to save it to another file, to preserve the original one.").arg(
+                             qApp->applicationName()));
                 }
                 if (version != "0.6.1" && !readCompatibleVersions.contains("0.6.1") && !writeCompatibleVersions.contains("0.6.1")) {
-                    KMessageBox::error(
-                        0,
-                        i18n("This file was created with a recent version of %1. Please upgrade to a newer version to be able to open that file.",
-                             KGlobal::mainComponent().aboutData()->programName()),
-                        i18n("Basket Archive Error")
-                    );
+                    QMessageBox::critical(0, QObject::tr("Basket Archive Error"),
+                        QObject::tr("This file was created with a recent version of %1. Please upgrade to a newer version to be able to open that file.").arg(
+                             qApp->applicationName()));
                     file.close();
                     Tools::deleteRecursively(tempFolder);
                     return;
@@ -339,7 +333,7 @@ void Archive::open(const QString &path)
                 bool ok;
                 qint64 size = value.toULong(&ok);
                 if (!ok) {
-                    KMessageBox::error(0, i18n("This file is corrupted. It can not be opened."), i18n("Basket Archive Error"));
+                    QMessageBox::critical(0, QObject::tr("Basket Archive Error"), QObject::tr("This file is corrupted. It can not be opened."));
                     file.close();
                     Tools::deleteRecursively(tempFolder);
                     return;
@@ -393,7 +387,7 @@ void Archive::open(const QString &path)
                 bool ok;
                 qint64 size = value.toULong(&ok);
                 if (!ok) {
-                    KMessageBox::error(0, i18n("This file is corrupted. It can not be opened."), i18n("Basket Archive Error"));
+                    QMessageBox::critical(0, QObject::tr("Basket Archive Error"), QObject::tr("This file is corrupted. It can not be opened."));
                     file.close();
                     Tools::deleteRecursively(tempFolder);
                     return;

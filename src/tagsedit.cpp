@@ -35,13 +35,13 @@
 #include <QtGui/QMouseEvent>
 #include <QtGui/QPainter>
 #include <QtGui/QVBoxLayout>
+#include <QMessageBox>
 
 #include <KDE/KApplication>
 #include <KDE/KLineEdit>
 #include <KDE/KIconButton>
 #include <KDE/KIconLoader>
 #include <KDE/KLocale>
-#include <KDE/KMessageBox>
 #include <KDE/KPushButton>
 #include <KDE/KSeparator>
 
@@ -50,8 +50,6 @@
 #include "variouswidgets.h"         //For FontSizeCombo
 #include "global.h"
 #include "bnpview.h"
-
-#include <KDE/KDebug>
 
 /** class StateCopy: */
 
@@ -954,22 +952,22 @@ void TagsEditDialog::deleteTag()
 
     TagListViewItem *item = m_tags->currentItem();
 
-    int result = KMessageBox::Continue;
+    int result = QMessageBox::Ok;
     if (item->tagCopy() && item->tagCopy()->oldTag)
-        result = KMessageBox::warningContinueCancel(
+        result = QMessageBox::warning(
                      this,
-                     i18n("Deleting the tag will remove it from every note it is currently assigned to."),
-                     i18n("Confirm Delete Tag"),
-                     KGuiItem(i18n("Delete Tag"), "edit-delete")
+                     tr("Confirm Delete Tag"),
+                     tr("Deleting the tag will remove it from every note it is currently assigned to."),
+                     QMessageBox::Ok | QMessageBox::Cancel
                  );
     else if (item->stateCopy() && item->stateCopy()->oldState)
-        result = KMessageBox::warningContinueCancel(
+        result = QMessageBox::warning(
                      this,
-                     i18n("Deleting the state will remove the tag from every note the state is currently assigned to."),
-                     i18n("Confirm Delete State"),
-                     KGuiItem(i18n("Delete State"), "edit-delete")
+                     tr("Confirm Delete State"),
+                     tr("Deleting the state will remove the tag from every note the state is currently assigned to."),
+                     QMessageBox::Ok | QMessageBox::Cancel
                  );
-    if (result != KMessageBox::Continue)
+    if (result != QMessageBox::Ok)
         return;
 
     if (item->tagCopy()) {

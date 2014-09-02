@@ -34,6 +34,7 @@
 #include <QtGui/QHBoxLayout>
 #include <QtGui/QGroupBox>
 #include <QtGui/QProgressBar>
+#include <QMessageBox>
 
 #include <KDE/KLocale>
 #include <KDE/KApplication>
@@ -44,7 +45,6 @@
 #include <KDE/KTar>
 #include <KDE/KFileDialog>
 #include <KDE/KProgressDialog>
-#include <KDE/KMessageBox>
 #include <KDE/KVBox>
 
 #include <unistd.h> // usleep()
@@ -155,13 +155,10 @@ void BackupDialog::moveToAnotherFolder()
             // Get the content of the folder:
             QStringList content = dir.entryList();
             if (content.count() > 2) { // "." and ".."
-                int result = KMessageBox::questionYesNo(
-                                 0,
-                                 "<qt>" + i18n("The folder <b>%1</b> is not empty. Do you want to override it?", folder),
-                                 i18n("Override Folder?"),
-                                 KGuiItem(i18n("&Override"), "document-save")
-                             );
-                if (result == KMessageBox::No)
+                int result = QMessageBox::question(0, tr("Override Folder?"),
+                                 "<qt>" + tr("The folder <b>%1</b> is not empty. Do you want to override it?").arg(folder),
+                                             QMessageBox::Yes | QMessageBox::No);
+                if (result == QMessageBox::Yes)
                     return;
             }
             Tools::deleteRecursively(folder);
@@ -205,16 +202,13 @@ void BackupDialog::backup()
             return;
         // File already existing? Ask for overriding:
         if (dir.exists(destination)) {
-            int result = KMessageBox::questionYesNoCancel(
-                             0,
-                             "<qt>" + i18n("The file <b>%1</b> already exists. Do you really want to override it?",
-                                           KUrl(destination).fileName()),
-                             i18n("Override File?"),
-                             KGuiItem(i18n("&Override"), "document-save")
-                         );
-            if (result == KMessageBox::Cancel)
+            int result = QMessageBox::question(0, tr("Override File?"),
+                                               "<qt>" + tr("The file <b>%1</b> already exists. Do you really want to override it?").arg(
+                                                   KUrl(destination).fileName()),
+                                               QMessageBox::Yes | QMessageBox::Cancel);
+            if (result == QMessageBox::Cancel)
                 return;
-            else if (result == KMessageBox::Yes)
+            else if (result == QMessageBox::Yes)
                 askAgain = false;
         } else
             askAgain = false;
@@ -309,7 +303,7 @@ void BackupDialog::restore()
         dir.remove(readmePath);
         copier.moveFolder(safetyPath, Global::savesFolder());
         // Tell the user:
-        KMessageBox::error(0, i18n("This archive is either not a backup of baskets or is corrupted. It cannot be imported. Your old baskets have been preserved instead."), i18n("Restore Error"));
+        QMessageBox::critical(0, tr("Restore Error"), tr("This archive is either not a backup of baskets or is corrupted. It cannot be imported. Your old baskets have been preserved instead."));
         return;
     }
 
@@ -353,13 +347,10 @@ void Backup::setFolderAndRestart(const QString &folder, const QString &message)
 
     // Rassure the user that the application main window disapearition is not a crash, but a normal restart.
     // This is important for users to trust the application in such a critical phase and understands what's happening:
-    KMessageBox::information(
-        0,
+    QMessageBox::information(0, QObject::tr("Restart"),
         "<qt>" + message.arg(
             (folder.endsWith('/') ? folder.left(folder.length() - 1) : folder),
-            KGlobal::mainComponent().aboutData()->programName()),
-        i18n("Restart")
-    );
+            qApp->applicationName()));
 
     // Restart the application:
     KRun::runCommand(binaryPath, KGlobal::mainComponent().aboutData()->programName(), KGlobal::mainComponent().aboutData()->programName(), 0);

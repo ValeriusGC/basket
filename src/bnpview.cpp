@@ -38,11 +38,11 @@
 #include <QAction>
 #include <QMenuBar>
 #include <QToolBar>
+#include <QMessageBox>
 
 #include <KDE/KApplication>
 #include <KDE/KMenu>
 #include <KDE/KIconLoader>
-#include <KDE/KMessageBox>
 #include <KDE/KFileDialog>
 #include <KDE/KProgressDialog>
 #include <KDE/KStandardDirs>
@@ -1661,9 +1661,9 @@ void BNPView::slotConvertTexts()
     conversionsDone = convertTexts();
 
     if (conversionsDone)
-        KMessageBox::information(this, i18n("The plain text notes have been converted to rich text."), i18n("Conversion Finished"));
+        QMessageBox::information(this, tr("Conversion Finished"), tr("The plain text notes have been converted to rich text."));
     else
-        KMessageBox::information(this, i18n("There are no plain text notes to convert."), i18n("Conversion Finished"));
+        QMessageBox::information(this, tr("Conversion Finished"), tr("There are no plain text notes to convert."));
 }
 
 QMenu* BNPView::popupMenu(const QString &menuName)
@@ -1847,33 +1847,21 @@ void BNPView::delBasket()
 //  DecoratedBasket *decoBasket    = currentDecoratedBasket();
     BasketScene      *basket        = currentBasket();
 
-    int really = KMessageBox::questionYesNo(this,
-                                            i18n("<qt>Do you really want to remove the basket <b>%1</b> and its contents?</qt>",
+    int really = QMessageBox::question(this, tr("Remove Basket"),
+                                            tr("<qt>Do you really want to remove the basket <b>%1</b> and its contents?</qt>").arg(
                                                  Tools::textToHTMLWithoutP(basket->basketName())),
-                                            i18n("Remove Basket")
-#if KDE_IS_VERSION( 3, 2, 90 ) // KDE 3.3.x
-                                            , KGuiItem(i18n("&Remove Basket"), "edit-delete"), KStandardGuiItem::cancel());
-#else
-                                           );
-#endif
-
-    if (really == KMessageBox::No)
+                                       QMessageBox::Yes | QMessageBox::No);
+    if (really == QMessageBox::No)
         return;
 
     QStringList basketsList = listViewItemForBasket(basket)->childNamesTree(0);
     if (basketsList.count() > 0) {
-        int deleteChilds = KMessageBox::questionYesNoList(this,
-                           i18n("<qt><b>%1</b> has the following children baskets.<br>Do you want to remove them too?</qt>",
+        int deleteChilds = QMessageBox::question(this, tr("Remove Children Baskets"),
+                           tr("<qt><b>%1</b> has the following children baskets.<br>Do you want to remove them too?</qt>").arg(
                                 Tools::textToHTMLWithoutP(basket->basketName())),
-                           basketsList,
-                           i18n("Remove Children Baskets")
-#if KDE_IS_VERSION( 3, 2, 90 ) // KDE 3.3.x
-                           , KGuiItem(i18n("&Remove Children Baskets"), "edit-delete"));
-#else
-                                                         );
-#endif
-
-        if (deleteChilds == KMessageBox::No)
+//                           basketsList, // TODO
+                                                 QMessageBox::Yes | QMessageBox::No);
+        if (deleteChilds == QMessageBox::No)
             return;
     }
 
@@ -1941,16 +1929,13 @@ void BNPView::saveAsArchive()
         if (destination.isEmpty()) // User canceled
             return;
         if (dir.exists(destination)) {
-            int result = KMessageBox::questionYesNoCancel(
-                             this,
-                             "<qt>" + i18n("The file <b>%1</b> already exists. Do you really want to override it?",
+            int result = QMessageBox::question(this, tr("Override File?"),
+                             "<qt>" + tr("The file <b>%1</b> already exists. Do you really want to override it?").arg(
                                            KUrl(destination).fileName()),
-                             i18n("Override File?"),
-                             KGuiItem(i18n("&Override"), "document-save")
-                         );
-            if (result == KMessageBox::Cancel)
+                                               QMessageBox::Yes | QMessageBox::Cancel);
+            if (result == QMessageBox::Cancel)
                 return;
-            else if (result == KMessageBox::Yes)
+            else if (result == QMessageBox::Yes)
                 askAgain = false;
         } else
             askAgain = false;
