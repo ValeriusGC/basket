@@ -91,7 +91,7 @@ QString Global::openNoteIcon() // FIXME: Now an edit icon
     return QVariant(Global::bnpView->m_actEditNote->icon()).toString();
 }
 
-KMainWindow* Global::mainWindow()
+QMainWindow* Global::mainWindow()
 {
     QWidget* res = kapp->activeWindow();
 

@@ -385,7 +385,7 @@ private:
     QTimer             *m_hideTimer;
 
     QUndoStack *m_history;
-    KMainWindow *m_HiddenMainWindow;
+    QMainWindow *m_HiddenMainWindow;
 };
 
 #endif // BNPVIEW_H

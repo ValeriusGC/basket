@@ -2332,13 +2332,12 @@ void BNPView::setUnsavedStatus(bool isUnsaved)
 
 void BNPView::setActive(bool active)
 {
-    KMainWindow* win = Global::mainWindow();
+    QMainWindow* win = Global::mainWindow();
     if (!win)
         return;
 
     if (active == isMainWindowActive())
         return;
-    kapp->updateUserTimestamp(); // If "activate on mouse hovering systray", or "on drag through systray"
     Global::systemTray->toggleActive();
 }
 
@@ -2355,7 +2354,7 @@ bool BNPView::isPart()
 
 bool BNPView::isMainWindowActive()
 {
-    KMainWindow* main = Global::mainWindow();
+    QMainWindow* main = Global::mainWindow();
     if (main && main->isActiveWindow())
         return true;
     return false;
@@ -2538,7 +2537,7 @@ void BNPView::showMainWindow()
         m_HiddenMainWindow->show();
         m_HiddenMainWindow = NULL;
     } else {  
-        KMainWindow *win = Global::mainWindow();
+        QMainWindow *win = Global::mainWindow();
 
         if (win) {
             win->show();

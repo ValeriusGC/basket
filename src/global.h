@@ -26,8 +26,7 @@
 
 class QString;
 
-class KMainWindow;
-class KAboutData;
+class QMainWindow;
 
 class AboutData;
 class LikeBack;
@@ -65,7 +64,7 @@ public:
 
     // Various Things:
     static QString openNoteIcon();      /// << @return the icon used for the "Open" action on notes.
-    static KMainWindow* mainWindow();
+    static QMainWindow* mainWindow();
     static KConfig* config();
 };
 

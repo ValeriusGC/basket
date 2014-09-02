@@ -21,16 +21,16 @@
 #ifndef NEWBASKETDIALOG_H
 #define NEWBASKETDIALOG_H
 
-#include <KDE/KDialog>
+#include <QDialog>
 
 #include <QtCore/QMap>
 #include <QtGui/QListWidget>
 
-class KIconButton;
-class KLineEdit;
+class QLineEdit;
 class QMimeData;
 class QComboBox;
 class QTreeWidgetItem;
+class QPushButton;
 
 class BasketScene;
 
@@ -76,7 +76,7 @@ struct NewBasketDefaultProperties {
 /** The dialog to create a new basket from a template.
   * @author Sébastien Laoût
   */
-class NewBasketDialog : public KDialog
+class NewBasketDialog : public QDialog
 {
     Q_OBJECT
 public:
@@ -91,12 +91,14 @@ protected slots:
 private:
     int populateBasketsList(QTreeWidgetItem *item, int indent, int index);
     NewBasketDefaultProperties  m_defaultProperties;
-    KIconButton                *m_icon;
-    KLineEdit                  *m_name;
+    QPushButton                *m_icon;
+    QLineEdit                  *m_name;
     KColorCombo2               *m_backgroundColor;
     QListWidget                 *m_templates;
     QComboBox                  *m_createIn;
     QMap<int, BasketScene*>     m_basketsMap;
+    QPushButton                *m_okButton;
+    QPushButton                *m_cancelButton;
 };
 
 #endif // NEWBASKETDIALOG_H
