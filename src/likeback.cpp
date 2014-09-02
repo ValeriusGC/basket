@@ -22,7 +22,6 @@
 #include "likeback_p.h"
 
 #include <KDE/KApplication>
-#include <KDE/KAboutData>
 #include <KDE/KConfig>
 #include <KDE/KAction>
 #include <KDE/KActionCollection>
@@ -184,7 +183,6 @@ void LikeBackBar::clickedFeature()
 LikeBackPrivate::LikeBackPrivate()
         : bar(0)
         , config(0)
-        , aboutData(0)
         , buttons(LikeBack::DefaultButtons)
         , hostName()
         , remotePath()
@@ -205,28 +203,24 @@ LikeBackPrivate::~LikeBackPrivate()
     delete action;
 
     config = 0;
-    aboutData = 0;
 }
 
 /*************************************/
 /********** class LikeBack: **********/
 /*************************************/
 
-LikeBack::LikeBack(Button buttons, bool showBarByDefault, KConfig *config, const KAboutData *aboutData)
+LikeBack::LikeBack(Button buttons, bool showBarByDefault, KConfig *config)
         : QObject()
 {
     // Initialize properties (1/2):
     d = new LikeBackPrivate();
     d->buttons          = buttons;
     d->config           = config;
-    d->aboutData        = aboutData;
     d->showBarByDefault = showBarByDefault;
 
-    // Use default KApplication config and aboutData if not provided:
+    // Use default KApplication config if not provided:
     if (d->config == 0)
         d->config = KGlobal::config().data();
-    if (d->aboutData == 0)
-        d->aboutData = KGlobal::mainComponent().aboutData();
 
     // Initialize properties (2/2) [Needs aboutData to be set]:
     d->showBar          = userWantsToShowBar();
@@ -368,11 +362,6 @@ LikeBack::Button LikeBack::buttons()
     return d->buttons;
 }
 
-const KAboutData* LikeBack::aboutData()
-{
-    return d->aboutData;
-}
-
 KConfig* LikeBack::config()
 {
     return d->config;
@@ -391,7 +380,7 @@ bool LikeBack::userWantsToShowBar()
 {
     // Store the button-bar per version, so it can be disabled by the developer for the final version:
     KConfigGroup configGroup = KGlobal::config()->group("LikeBack");
-    return configGroup.readEntry("userWantToShowBarForVersion_" + d->aboutData->version(), d->showBarByDefault);
+    return configGroup.readEntry("userWantToShowBarForVersion_" + qApp->applicationVersion(), d->showBarByDefault);
 }
 
 void LikeBack::setUserWantsToShowBar(bool showBar)
@@ -403,7 +392,7 @@ void LikeBack::setUserWantsToShowBar(bool showBar)
 
     // Store the button-bar per version, so it can be disabled by the developer for the final version:
     KConfigGroup configGroup = KGlobal::config()->group("LikeBack");
-    configGroup.writeEntry("userWantToShowBarForVersion_" + d->aboutData->version(), showBar);
+    configGroup.writeEntry("userWantToShowBarForVersion_" + qApp->applicationVersion(), showBar);
     configGroup.sync(); // Make sure the option is saved, even if the application crashes after that.
 
     if (showBar)
@@ -419,9 +408,9 @@ void LikeBack::showInformationMessage()
                     (buttons & Bug     ? 1 : 0) +
                     (buttons & Feature ? 1 : 0);
     KMessageBox::information(0,
-                             "<p><b>" + (isDevelopmentVersion(d->aboutData->version()) ?
-                                         i18n("Welcome to this testing version of %1.", d->aboutData->programName()) :
-                                         i18n("Welcome to %1.", d->aboutData->programName())
+                             "<p><b>" + (isDevelopmentVersion(qApp->applicationVersion()) ?
+                                         i18n("Welcome to this testing version of %1.", qApp->applicationName()) :
+                                         i18n("Welcome to %1.", qApp->applicationName())
                                         ) + "</b></p>"
                              "<p>" + i18n("To help us improve it, your comments are important.") + "</p>"
                              "<p>" +
@@ -723,7 +712,7 @@ LikeBackDialog::~LikeBackDialog()
 
 QString LikeBackDialog::introductionText()
 {
-    QString text = "<p>" + i18n("Please provide a brief description of your opinion of %1.", m_likeBack->aboutData()->programName()) + " ";
+    QString text = "<p>" + i18n("Please provide a brief description of your opinion of %1.", qApp->applicationName()) + " ";
 
     QString languagesMessage = "";
     if (!m_likeBack->acceptedLocales().isEmpty() && !m_likeBack->acceptedLanguagesMessage().isEmpty()) {
@@ -790,7 +779,7 @@ void LikeBackDialog::send()
     QString data =
         "protocol=" + QUrl::toPercentEncoding("1.0")                              + '&' +
         "type="     + QUrl::toPercentEncoding(type)                               + '&' +
-        "version="  + QUrl::toPercentEncoding(m_likeBack->aboutData()->version()) + '&' +
+        "version="  + QUrl::toPercentEncoding(qApp->applicationVersion()) + '&' +
         "locale="   + QUrl::toPercentEncoding(KGlobal::locale()->language())      + '&' +
         "window="   + QUrl::toPercentEncoding(m_windowPath)                       + '&' +
         "context="  + QUrl::toPercentEncoding(m_context)                          + '&' +

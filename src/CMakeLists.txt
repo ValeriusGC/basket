@@ -4,7 +4,7 @@ add_subdirectory(tests)
 ########### next target ###############
 
 set(basketcommon_LIB_SRCS
-    aboutdata.cpp
+    about.cpp
     archive.cpp
     backgroundmanager.cpp
     backup.cpp
@@ -51,7 +51,7 @@ set(basketcommon_LIB_SRCS
     xmlwork.cpp
 )
 
-kde4_add_ui_files(basketcommon_LIB_SRCS passwordlayout.ui basketproperties.ui)
+kde4_add_ui_files(basketcommon_LIB_SRCS passwordlayout.ui basketproperties.ui about.ui)
 
 QT4_ADD_DBUS_ADAPTOR(basketcommon_LIB_SRCS org.basket.BNPView.xml bnpview.h BNPView)
 

@@ -24,7 +24,6 @@
 #include <QtCore/QObject>
 
 class KConfig;
-class KAboutData;
 class KAction;
 class KActionCollection;
 class QAction;
@@ -123,7 +122,7 @@ public:
      *                         The version is used to store the button-bar visibility per version (can be shown in a development version but not in a final one...)
      *                         and to send with the comment, so you can filter per version and know if a comment refers the latest version of the application or not.
      */
-    explicit LikeBack(Button buttons = DefaultButtons, bool showBarByDefault = false, KConfig *config = 0, const KAboutData *aboutData = 0);
+    explicit LikeBack(Button buttons = DefaultButtons, bool showBarByDefault = false, KConfig *config = 0);
 
     /**
      * Destructor.
@@ -321,12 +320,6 @@ public:
      * and to the developers for the default value, already provided in the constructor.
      */
     void setUserWantsToShowBar(bool showBar);
-
-    /**
-     * @Returns A pointer to the KAboutData used to determin the application name and version.
-     * @See The LikeBack constructor for more information.
-     */
-    const KAboutData *aboutData();
 
     /**
      * @Returns A pointer to the KConfig used to store user configuration (email address, if the button-bar should be shown).

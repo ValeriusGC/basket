@@ -573,7 +573,7 @@ void BNPView::setupActions()
     m1->addAction(tr("&Welcome Baskets"), this, SLOT(addWelcomeBaskets()));
 
     /* LikeBack */
-    Global::likeBack = new LikeBack(LikeBack::AllButtons, /*showBarByDefault=*/false, Global::config(), Global::about());
+    Global::likeBack = new LikeBack(LikeBack::AllButtons, /*showBarByDefault=*/false, Global::config());
     Global::likeBack->setServer("basket.linux62.org", "/likeback/send.php");
 
 // There are too much comments, and people reading comments are more and more international, so we accept only English:

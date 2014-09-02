@@ -54,7 +54,6 @@ public:
     static SystemTray        *systemTray;
     static BNPView           *bnpView;
     static KSharedConfig::Ptr basketConfig;
-    static AboutData          basketAbout;
 
     // Application Folders:
     static void setCustomSavesFolder(const QString &folder);
@@ -68,7 +67,6 @@ public:
     static QString openNoteIcon();      /// << @return the icon used for the "Open" action on notes.
     static KMainWindow* mainWindow();
     static KConfig* config();
-    static KAboutData* about();
 };
 
 #endif // GLOBAL_H

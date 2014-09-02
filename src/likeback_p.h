@@ -45,7 +45,6 @@ public:
     ~LikeBackPrivate();
     LikeBackBar             *bar;
     KConfig                 *config;
-    const KAboutData        *aboutData;
     LikeBack::Button         buttons;
     QString                  hostName;
     QString                  remotePath;

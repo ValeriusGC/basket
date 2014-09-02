@@ -27,18 +27,10 @@
 #include <QStatusBar>
 #include <QToolBar>
 #include <QMenuBar>
-
+#include <QDesktopWidget>
 #include <QMessageBox>
-#include <KDE/KConfig>
-#include <KDE/KAboutData>
-#include <KDE/KToggleAction>
 
-#include <KDE/KSettings/Dialog>
-
-#include <kdeversion.h>
-
-#include <QtGui/QDesktopWidget>
-
+#include "about.h"
 #include "settings.h"
 #include "global.h"
 #include "bnpview.h"
@@ -73,6 +65,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Temp, settings
     menuBar()->addAction("Settings", this, SLOT(showSettingsDialog()));
+    menuBar()->addAction("About", this, SLOT(showAboutDialog()));
 }
 
 MainWindow::~MainWindow()
@@ -282,6 +275,12 @@ void MainWindow::showSettingsDialog()
     s.exec();
 }
 
+void MainWindow::showAboutDialog()
+{
+    About s;
+    s.exec();
+}
+
 void MainWindow::ensurePolished()
 {
     bool shouldSave = false;
@@ -368,7 +367,7 @@ bool MainWindow::queryClose()
 
 bool MainWindow::askForQuit()
 {
-    QString message = tr("<p>Do you really want to quit %1?</p>").arg(KGlobal::mainComponent().aboutData()->programName());
+    QString message = tr("<p>Do you really want to quit %1?</p>").arg(qApp->applicationName());
     if (Settings::useSystray())
         message += tr("<p>Notice that you do not have to quit the application before ending your KDE session. "
                         "If you end your session while the application is still running, the application will be reloaded the next time you log in.</p>");

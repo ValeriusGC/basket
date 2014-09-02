@@ -55,6 +55,7 @@ public slots:
     void configureToolbars();
     void configureNotifications();
     void showSettingsDialog();
+    void showAboutDialog();
     void minimizeRestore();
     void quit();
     void slotNewToolbarConfig();
