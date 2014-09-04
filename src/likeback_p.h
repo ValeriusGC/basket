@@ -23,7 +23,7 @@
 
 #include "likeback.h"
 
-#include <KDE/KDialog>
+#include <QDialog>
 
 #include <QtCore/QTimer>
 
@@ -33,8 +33,6 @@ class QRadioButton;
 class QCheckBox;
 class QGroupBox;
 class QNetworkReply;
-
-class Kaction;
 
 class LikeBackBar;
 
@@ -83,7 +81,7 @@ private:
     QToolButton *m_featureButton;
 };
 
-class LikeBackDialog : public KDialog
+class LikeBackDialog : public QDialog
 {
     Q_OBJECT
 public:
@@ -100,6 +98,9 @@ private:
     QRadioButton *featureButton;
     QCheckBox    *m_showButtons;
     QString introductionText();
+    QPushButton  *m_okButton;
+    QPushButton  *m_cancelButton;
+    QPushButton  *m_defaultButton;
 private slots:
     void ensurePolished();
     void slotDefault();

@@ -31,42 +31,40 @@
 #include <QtGui/QLabel>
 #include <QtGui/QHBoxLayout>
 #include <QSettings>
+#include <QDialogButtonBox>
 
 #include "basketscene.h"
 #include "global.h"
 
 ExporterDialog::ExporterDialog(BasketScene *basket, QWidget *parent, const char *name)
-        : KDialog(parent)
+        : QDialog(parent)
         , m_basket(basket)
 {
     // Dialog options
     setObjectName(name);
     setModal(true);
-    setCaption(i18n("Export Basket to HTML"));
-    setButtons(Ok | Cancel);
-    setDefaultButton(Ok);
-    showButtonSeparator(true);
-    connect(this, SIGNAL(okClicked()), SLOT(save()));
+    setWindowTitle(tr("Export Basket to HTML"));
+    QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok
+                                     | QDialogButtonBox::Cancel);
+    connect(buttonBox, SIGNAL(accepted()), this, SLOT(save()));
+    connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
+    connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
 
-    KVBox *page  = new KVBox(this);
-    QWidget     *wid  = new QWidget(page);
-    setMainWidget(wid);
-    //QHBoxLayout *hLay = new QHBoxLayout(wid, /*margin=*/0, spacingHint());
-    QHBoxLayout *hLay = new QHBoxLayout(wid);
-    m_url = new KUrlRequester(KUrl(""), wid);
-    m_url->setWindowTitle(i18n("HTML Page Filename"));
+    QHBoxLayout *hLay = new QHBoxLayout();
+    m_url = new KUrlRequester(KUrl(""), this);
+    m_url->setWindowTitle(tr("HTML Page Filename"));
     m_url->setFilter("text/html");
     m_url->fileDialog()->setOperationMode(KFileDialog::Saving);
-    QLabel *fileLabel = new QLabel(wid);
-    fileLabel->setText(i18n("&Filename:"));
+    QLabel *fileLabel = new QLabel(this);
+    fileLabel->setText(tr("&Filename:"));
     fileLabel->setBuddy(m_url);
     hLay->addWidget(fileLabel);
     hLay->addWidget(m_url);
 
-    m_embedLinkedFiles    = new QCheckBox(i18n("&Embed linked local files"),              page);
-    m_embedLinkedFolders  = new QCheckBox(i18n("Embed &linked local folders"),            page);
-    m_erasePreviousFiles  = new QCheckBox(i18n("Erase &previous files in target folder"), page);
-    m_formatForImpression = new QCheckBox(i18n("For&mat for impression"),                 page);
+    m_embedLinkedFiles    = new QCheckBox(tr("&Embed linked local files"),              this);
+    m_embedLinkedFolders  = new QCheckBox(tr("Embed &linked local folders"),            this);
+    m_erasePreviousFiles  = new QCheckBox(tr("Erase &previous files in target folder"), this);
+    m_formatForImpression = new QCheckBox(tr("For&mat for impression"),                 this);
     m_formatForImpression->hide();
 
     load();
@@ -75,7 +73,7 @@ ExporterDialog::ExporterDialog(BasketScene *basket, QWidget *parent, const char 
     //showTile(true);
     // Add a stretch at the bottom:
     // Duplicated code from AddBasketWizard::addStretch(QWidget *parent):
-    (new QWidget(page))->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     // Double the width, because the filename should be visible
     QSize size(sizeHint());
@@ -85,6 +83,7 @@ ExporterDialog::ExporterDialog(BasketScene *basket, QWidget *parent, const char 
     + [00000000000          ] Progress bar!
     + newBasket -> name folder as the basket
     */
+    setLayout(hLay);
 }
 
 ExporterDialog::~ExporterDialog()
@@ -93,7 +92,7 @@ ExporterDialog::~ExporterDialog()
 
 void ExporterDialog::show()
 {
-    KDialog::show();
+    QDialog::show();
 
     QString lineEditText = m_url->lineEdit()->text();
     int selectionStart = lineEditText.lastIndexOf("/") + 1;
@@ -157,4 +156,3 @@ bool ExporterDialog::formatForImpression()
 {
     return m_formatForImpression->isChecked();
 }
-

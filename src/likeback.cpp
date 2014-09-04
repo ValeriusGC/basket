@@ -57,6 +57,7 @@
 #include <QDebug>
 #include <QSettings>
 #include <QTextEdit>
+#include <QDialogButtonBox>
 
 
 /****************************************/
@@ -579,21 +580,29 @@ void LikeBack::fetchUserEmail()
 /*******************************************/
 
 LikeBackDialog::LikeBackDialog(LikeBack::Button reason, const QString &initialComment, const QString &windowPath, const QString &context, LikeBack *likeBack)
-        : KDialog(kapp->activeWindow())
+        : QDialog(qApp->activeWindow())
         , m_likeBack(likeBack)
         , m_windowPath(windowPath)
         , m_context(context)
 {
-    // KDialog Options
-    setCaption(i18n("Send a Comment to Developers"));
-    setButtons(Ok | Cancel | Default);
-    setDefaultButton(Ok);
-    setParent(kapp->activeWindow());
+    setWindowTitle(tr("Send a Comment to Developers"));
+
+    m_okButton = new QPushButton(tr("&Send Comment"));
+    m_okButton->setDefault(true);
+    m_cancelButton = new QPushButton(tr("&Cancel"));
+    m_defaultButton = new QPushButton(tr("&Email Address..."));
+    m_defaultButton->setIcon(KIcon("mail"));
+
+    QDialogButtonBox *buttonBox = new QDialogButtonBox(Qt::Horizontal);
+    buttonBox->addAction(m_defaultButton, QDialogButtonBox::ActionRole);
+    buttonBox->addButton(m_okButton, QDialogButtonBox::ActionRole);
+    buttonBox->addButton(m_cancelButton, QDialogButtonBox::ActionRole);
+    setParent(qApp->activeWindow());
     setObjectName("_likeback_feedback_window_");
     setModal(true);
-    showButtonSeparator(true);
-    connect(this, SIGNAL(okClicked()), SLOT(slotOk()));
-    connect(this, SIGNAL(defaultClicked()), SLOT(slotDefault()));
+    connect(m_okButton, SIGNAL(clicked()), SLOT(slotOk()));
+    connect(m_defaultButton, SIGNAL(clicked()), SLOT(slotDefault()));
+    connect(m_cancelButton, SIGNAL(clicked()), SLOT(reject()));
 
     // If no specific "reason" is provided, choose the first one:
     if (reason == LikeBack::AllButtons) {
@@ -610,16 +619,15 @@ LikeBackDialog::LikeBackDialog(LikeBack::Button reason, const QString &initialCo
     if (m_windowPath.isEmpty())
         m_windowPath = LikeBack::activeWindowPath();
 
-    QWidget *page = new QWidget(this);
-    QVBoxLayout *pageLayout = new QVBoxLayout(page);
+    QVBoxLayout *pageLayout = new QVBoxLayout(this);
 
     // The introduction message:
-    QLabel *introduction = new QLabel(introductionText(), page);
+    QLabel *introduction = new QLabel(introductionText(), this);
     introduction->setWordWrap(true);
     pageLayout->addWidget(introduction);
 
     // The comment group:
-    QGroupBox *box = new QGroupBox(i18n("Send Application Developers a Comment About:"), page);
+    QGroupBox *box = new QGroupBox(i18n("Send Application Developers a Comment About:"), this);
     QVBoxLayout* boxLayout = new QVBoxLayout;
     box->setLayout(boxLayout);
     pageLayout->addWidget(box);
@@ -683,24 +691,22 @@ LikeBackDialog::LikeBackDialog(LikeBack::Button reason, const QString &initialCo
     m_comment->setTabChangesFocus(true);
     m_comment->setPlainText(initialComment);
 
-    m_showButtons = new QCheckBox(i18n("Show comment buttons below &window titlebars"), page);
+    m_showButtons = new QCheckBox(tr("Show comment buttons below &window titlebars"), this);
     m_showButtons->setChecked(m_likeBack->userWantsToShowBar());
     pageLayout->addWidget(m_showButtons);
     connect(m_showButtons, SIGNAL(stateChanged(int)), this, SLOT(changeButtonBarVisible()));
 
-    setButtonGuiItem(Ok, KGuiItem(i18n("&Send Comment")));
-    enableButtonOk(false);
+    m_okButton->setEnabled(false);
     connect(m_comment, SIGNAL(textChanged()), this, SLOT(commentChanged()));
 
-    setButtonGuiItem(Default, KGuiItem(i18n("&Email Address..."), "mail"));
-
-    resize(QSize(kapp->desktop()->width() * 1 / 2, kapp->desktop()->height() * 3 / 5).expandedTo(sizeHint()));
+    resize(QSize(qApp->desktop()->width() * 1 / 2, qApp->desktop()->height() * 3 / 5).expandedTo(sizeHint()));
 
     QAction *sendShortcut = new QAction(this);
     sendShortcut->setShortcut(Qt::CTRL + Qt::Key_Return);
-    connect(sendShortcut, SIGNAL(triggered()), button(Ok), SLOT(animateClick()));
+    connect(sendShortcut, SIGNAL(triggered()), m_okButton, SLOT(animateClick()));
 
-    setMainWidget(page);
+    pageLayout->addWidget(buttonBox);
+    setLayout(pageLayout);
 }
 
 LikeBackDialog::~LikeBackDialog()
@@ -743,7 +749,7 @@ QString LikeBackDialog::introductionText()
 
 void LikeBackDialog::ensurePolished()
 {
-    KDialog::ensurePolished();
+    QDialog::ensurePolished();
     m_comment->setFocus();
 }
 
@@ -764,8 +770,7 @@ void LikeBackDialog::changeButtonBarVisible()
 
 void LikeBackDialog::commentChanged()
 {
-    QPushButton *sendButton = button(Ok);
-    sendButton->setEnabled(!m_comment->document()->isEmpty());
+    m_okButton->setEnabled(!m_comment->document()->isEmpty());
 }
 
 void LikeBackDialog::send()
@@ -820,6 +825,6 @@ void LikeBackDialog::requestFinished(QNetworkReply *reply)
     }
     m_likeBack->enableBar();
 
-    KDialog::accept();
+    QDialog::accept();
     reply->deleteLater();
 }
