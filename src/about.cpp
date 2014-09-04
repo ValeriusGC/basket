@@ -30,7 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <QProcess>
 #include <QDesktopServices>
 
-#define PERSON(name, email) name " &lt;<a href=\"mailto:" email "\"><span style=\" font-family:'Ubuntu'; font-size:11pt; text-decoration: underline; color:#ff5500;\">" email "</span></a>&gt;"
+#define PERSON(name, email) name + QString(" &lt;<a href=\"mailto:") + email + QString("\"><span style=\" font-family:'Ubuntu'; font-size:11pt; text-decoration: underline; color:#ff5500;\">") + email + QString("</span></a>&gt;")
 #define TRANSLATION(translation) translation " Translation:"
 
 About::About(QWidget *parent) :
@@ -47,15 +47,15 @@ About::About(QWidget *parent) :
     ui->about_button->setChecked(true);
 
     ui->writtenBy->append(tr("Qt5 Update:"));
-    ui->writtenBy->append(PERSON("Keelan Fischer", "keelan.fischer@gmail.com"));
+    ui->writtenBy->append(PERSON(tr("Keelan Fischer"), tr("keelan.fischer@gmail.com")));
     ui->writtenBy->append(tr("Maintainer:"));
-    ui->writtenBy->append(PERSON("Kelvie Wong", "kelvie@ieee.org"));
-    ui->writtenBy->append("Original Author:");
-    ui->writtenBy->append(PERSON("S\303\251bastien Lao\303\273t", "slaout@linux62.org"));
-    ui->writtenBy->append("Basket encryption, Kontact integration, KnowIt importer:");
-    ui->writtenBy->append(PERSON("Petri Damst\303\251n", "damu@iki.fi"));
-    ui->writtenBy->append("Baskets auto lock, save-status icon, HTML copy/paste, basket name tooltip, drop to basket name: ");
-    ui->writtenBy->append(PERSON("Alex Gontmakher", "gsasha@cs.technion.ac.il"));
+    ui->writtenBy->append(PERSON(tr("Kelvie Wong"), tr("kelvie@ieee.org")));
+    ui->writtenBy->append(tr("Original Author:"));
+    ui->writtenBy->append(PERSON(tr("S" "\xe9" "bastien Lao\xfbt"), tr("slaout@linux62.org")));
+    ui->writtenBy->append(tr("Basket encryption, Kontact integration, KnowIt importer:"));
+    ui->writtenBy->append(PERSON(tr("Petri Damst\xe9n"), tr("damu@iki.fi")));
+    ui->writtenBy->append(tr("Baskets auto lock, save-status icon, HTML copy/paste, basket name tooltip, drop to basket name: "));
+    ui->writtenBy->append(PERSON(tr("Alex Gontmakher"), tr("gsasha@cs.technion.ac.il")));
 
 //    ui->translatedBy->append(TRANSLATION("Greek"));
 //    ui->translatedBy->append(PERSON("Leon Vitanos", "leon.vitanos@gmail.com"));

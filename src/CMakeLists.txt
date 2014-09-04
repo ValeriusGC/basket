@@ -8,6 +8,7 @@ set(basketcommon_LIB_SRCS
     archive.cpp
     backgroundmanager.cpp
     backup.cpp
+    backupdialog.cpp
     basketfactory.cpp
     basketlistview.cpp
     basketproperties.cpp
@@ -51,7 +52,7 @@ set(basketcommon_LIB_SRCS
     xmlwork.cpp
 )
 
-kde4_add_ui_files(basketcommon_LIB_SRCS passwordlayout.ui basketproperties.ui about.ui)
+kde4_add_ui_files(basketcommon_LIB_SRCS passwordlayout.ui basketproperties.ui about.ui backupdialog.ui)
 
 QT4_ADD_DBUS_ADAPTOR(basketcommon_LIB_SRCS org.basket.BNPView.xml bnpview.h BNPView)
 

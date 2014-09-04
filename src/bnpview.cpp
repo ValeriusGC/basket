@@ -86,6 +86,7 @@
 #include "crashhandler.h"
 #include "likeback.h"
 #include "backup.h"
+#include "backupdialog.h"
 #include "notefactory.h"
 #include "history.h"
 
