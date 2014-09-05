@@ -25,7 +25,7 @@
 
 class QString;
 
-class QMainWindow;
+class MainWindow;
 
 class AboutData;
 class LikeBack;
@@ -50,6 +50,7 @@ public:
     static BackgroundManager *backgroundManager;
     static SystemTray        *systemTray;
     static BNPView           *bnpView;
+    static MainWindow        *mainWin;
 
     // Application Folders:
     static void setCustomSavesFolder(const QString &folder);
@@ -61,7 +62,6 @@ public:
 
     // Various Things:
     static QString openNoteIcon();      /// << @return the icon used for the "Open" action on notes.
-    static QMainWindow* mainWindow();
 };
 
 #endif // GLOBAL_H

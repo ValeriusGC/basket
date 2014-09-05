@@ -56,6 +56,7 @@
 #include <QMessageBox>
 #include <QDebug>
 #include <QTextEdit>
+#include <QCoreApplication>
 
 #include <KDE/KStyle>
 #include <KDE/KApplication>
@@ -1108,7 +1109,6 @@ BasketScene::BasketScene(QWidget *parent, const QString &folderName)
         , m_zoneToInsert(0)
         , m_posToInsert(-1 , -1)
         , m_isInsertPopupMenu(false)
-        , m_insertMenuTitle(0)
         , m_animationTimeLine(0)
         , m_loaded(false)
         , m_loadingLaunched(false)
@@ -1391,21 +1391,14 @@ void BasketScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
         m_zoneToInsert    = zone;
         m_posToInsert     = event->scenePos();
 
-        KMenu menu(m_view);
-        menu.addActions(Global::bnpView->popupMenu("insert_popup")->actions());
-
-        // If we already added a title, remove it because it would be kept and
-        // then added several times.
-        if (m_insertMenuTitle && menu.actions().contains(m_insertMenuTitle))
-            menu.removeAction(m_insertMenuTitle);
-
-        QAction *first = menu.actions().value(0);
+        QMenu menu(m_view);
+        menu.addActions(Global::bnpView->m_insertMenu->actions());
 
         // i18n: Verbs (for the "insert" menu)
         if (zone == Note::TopGroup || zone == Note::BottomGroup)
-            m_insertMenuTitle = menu.addTitle(i18n("Group"), first);
+            menu.setTitle(tr("Group"));
         else
-            m_insertMenuTitle = menu.addTitle(i18n("Insert"), first);
+            menu.setTitle(tr("Insert"));
 
         setInsertPopupMenu();
         connect(&menu, SIGNAL(aboutToHide()),  this, SLOT(delayedCancelInsertPopupMenu()));
@@ -1429,7 +1422,7 @@ void BasketScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
             clicked->setSelected(true);
         }
         m_startOfShiftSelectionNote = (clicked->isGroup() ? clicked->firstRealChild() : clicked);
-        QMenu* menu = Global::bnpView->popupMenu("note_popup");
+        QMenu* menu = new QMenu(); // Global::bnpView->popupMenu("note_popup"); TODO make note popup
         connect(menu, SIGNAL(aboutToHide()),  this, SLOT(unlockHovering()));
         connect(menu, SIGNAL(aboutToHide()),  this, SLOT(disableNextClick()));
         doHoverEffects(clicked, zone); // In the case where another popup menu was open, we should do that manually!
@@ -1502,7 +1495,7 @@ void BasketScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 {
     if (event->reason() == QGraphicsSceneContextMenuEvent::Keyboard) {
         if (countFounds/*countShown*/() == 0) { // TODO: Count shown!!
-            QMenu *menu = Global::bnpView->popupMenu("insert_popup");
+            QMenu *menu = new QMenu(); // Global::bnpView->popupMenu("insert_popup"); TODO insert popup
             setInsertPopupMenu();
             connect(menu, SIGNAL(aboutToHide()),  this, SLOT(delayedCancelInsertPopupMenu()));
             connect(menu, SIGNAL(aboutToHide()),  this, SLOT(unlockHovering()));
@@ -1516,7 +1509,7 @@ void BasketScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
             setFocusedNote(m_focusedNote); /// /// ///
             m_startOfShiftSelectionNote = (m_focusedNote->isGroup() ? m_focusedNote->firstRealChild() : m_focusedNote);
             // Popup at bottom (or top) of the focused note, if visible :
-            QMenu *menu = Global::bnpView->popupMenu("note_popup");
+            QMenu *menu = new QMenu(); //Global::bnpView->popupMenu("note_popup"); TODO note popup
             connect(menu, SIGNAL(aboutToHide()),  this, SLOT(unlockHovering()));
             connect(menu, SIGNAL(aboutToHide()),  this, SLOT(disableNextClick()));
             doHoverEffects(m_focusedNote, Note::Content); // In the case where another popup menu was open, we should do that manually!
@@ -2210,7 +2203,7 @@ void BasketScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
                 // TODO: ask confirmation: "Do you really want to delete the welcome baskets?\n You can re-add them at any time in the Help menu."
                 Global::bnpView->doBasketDeletion(this);
             } else if (link == "basket-internal-import") {
-                QMenu *menu = Global::bnpView->popupMenu("fileimport");
+                QMenu *menu = new QMenu(); // Global::bnpView->popupMenu("fileimport"); TODO fileimport menu
                 menu->exec(event->screenPos());
             } else if (link.startsWith("basket://")) {
                 emit crossReference(link);
@@ -3369,13 +3362,10 @@ void BasketScene::popupTagsMenu(Note *note)
 {
     m_tagPopupNote = note;
 
-    KMenu menu(m_view);
-    menu.addTitle(i18n("Tags"));
-
-    Global::bnpView->populateTagsMenu(menu, note);
-
+    Global::bnpView->populateTagsMenu(note);
+    Global::bnpView->m_tagsMenu->setTitle(tr("Tags"));
     m_lockedHovering = true;
-    menu.exec(QCursor::pos());
+    Global::bnpView->m_tagsMenu->popup(QCursor::pos());
 }
 
 void BasketScene::unlockHovering()
@@ -4116,7 +4106,7 @@ void BasketScene::noteOpen(Note *note)
 bool KRun__displayOpenWithDialog(const KUrl::List& lst, QWidget *window, bool tempFiles, const QString &text)
 {
     if (kapp && !KAuthorized::authorizeKAction("openwith")) {
-        QMessageBox::information(window, QString(), QObject::tr("You are not authorized to open this file.")); // TODO: Better message, i18n freeze :-(
+        QMessageBox::information(window, QString(), QCoreApplication::tr("You are not authorized to open this file.")); // TODO: Better message, i18n freeze :-(
         return false;
     }
     KOpenWithDialog l(lst, text, QString::null, 0L);

@@ -30,7 +30,6 @@
 #include <QPushButton>
 #include <QLineEdit>
 #include <QLocale>
-#include <QMainWindow>      //For Global::mainWindow()
 #include <QMessageBox>
 
 #include "basketfactory.h"
@@ -41,6 +40,7 @@
 #include "global.h"
 #include "bnpview.h"
 #include "variouswidgets.h"     //For HelpLabel
+#include "mainwindow.h"
 
 /** class SingleSelectionKIconView: */
 
@@ -328,7 +328,7 @@ void NewBasketDialog::slotOk()
 
     BasketFactory::newBasket(m_icon->icon().name(), m_name->text(), backgroundImage, m_backgroundColor->color(), textColor, templateName, m_basketsMap[m_createIn->currentIndex()]);
 
-    if (Global::mainWindow()) Global::mainWindow()->show();
+    if (Global::mainWin) Global::mainWin->show();
 
 }
 

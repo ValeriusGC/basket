@@ -47,8 +47,6 @@ class QHideEvent;
 class QShowEvent;
 
 class QAction;
-class KAction;
-class KToggleAction;
 class KTar;
 
 class DesktopColorPicker;
@@ -234,7 +232,6 @@ private slots:
     void currentBasketChanged();
     void isLockedChanged();
     void lateInit();
-    void onFirstShow();
 
 public:
     QAction       *m_actEditNote;
@@ -271,8 +268,8 @@ private:
     QAction       *m_actMoveNoteDown;
     QAction       *m_actMoveOnBottom;
     // Edit actions :
-    KAction       *m_actUndo;
-    KAction       *m_actRedo;
+    QAction       *m_actUndo;
+    QAction       *m_actRedo;
     QAction       *m_actCutNote;
     QAction       *m_actCopyNote;
     QAction       *m_actDelNote;
@@ -308,7 +305,6 @@ public:
 
     BasketScene* basketForFolderName(const QString &folderName);
     Note* noteForFileName(const QString &fileName, BasketScene &basket, Note* note = 0);
-    QMenu* popupMenu(const QString &menuName);
     bool isPart();
     bool isMainWindowActive();
     void showMainWindow();
@@ -337,16 +333,8 @@ public slots:
     void setUnsavedStatus(bool isUnsaved);
     void setActive(bool active = true);
 
-    void populateTagsMenu();
-    void populateTagsMenu(QMenu &menu, Note *referenceNote);
-    void connectTagsMenu();
+    void populateTagsMenu(Note *note);
     void disconnectTagsMenu();
-    void disconnectTagsMenuDelayed();
-protected:
-    void showEvent(QShowEvent*);
-    void hideEvent(QHideEvent*);
-private:
-    QMenu *m_lastOpenedTagsMenu;
 
 private slots:
     void slotPressed(QTreeWidgetItem *item, int column);
@@ -369,21 +357,20 @@ protected:
 
 private:
     BasketTreeListView *m_tree;
-    QStackedWidget *m_stack;
-    bool          m_loading;
-    bool          m_newBasketPopup;
-    bool          m_firstShow;
-    DesktopColorPicker *m_colorPicker;
+    QStackedWidget      *m_stack;
+    bool                m_loading;
+    bool                m_newBasketPopup;
+    DesktopColorPicker  *m_colorPicker;
     bool                m_colorPickWasShown;
     bool                m_colorPickWasGlobal;
-    RegionGrabber      *m_regionGrabber;
+    RegionGrabber       *m_regionGrabber;
     QString m_passiveDroppedTitle;
-    NoteSelection *m_passiveDroppedSelection;
-    static const int c_delayTooltipTime;
-    QMainWindow *m_guiClient;
-    BasketStatusBar *m_statusbar;
-    QTimer             *m_tryHideTimer;
-    QTimer             *m_hideTimer;
+    NoteSelection       *m_passiveDroppedSelection;
+    static const int    c_delayTooltipTime;
+    QMainWindow         *m_guiClient;
+    BasketStatusBar     *m_statusbar;
+    QTimer              *m_tryHideTimer;
+    QTimer              *m_hideTimer;
 
     QUndoStack *m_history;
     QMainWindow *m_HiddenMainWindow;

@@ -184,7 +184,6 @@ private:
     int    m_savedZoneToInsert;
     QPointF m_savedPosToInsert;
     bool   m_isInsertPopupMenu;
-    QAction *m_insertMenuTitle;
 public:
     void saveInsertionData();
     void restoreInsertionData();

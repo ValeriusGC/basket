@@ -69,8 +69,8 @@ HTMLExporter::HTMLExporter(BasketScene *basket)
             return;
         // File already existing? Ask for overriding:
         if (dir.exists(destination)) {
-            int result = QMessageBox::question(0, QObject::tr("Override File?"),
-                                               "<qt>" + QObject::tr("The file <b>%1</b> already exists. Do you really want to override it?").arg(
+            int result = QMessageBox::question(0, tr("Override File?"),
+                                               "<qt>" + tr("The file <b>%1</b> already exists. Do you really want to override it?").arg(
                                            KUrl(destination).fileName()),
                                                QMessageBox::Yes | QMessageBox::Cancel);
             if (result == QMessageBox::Cancel)

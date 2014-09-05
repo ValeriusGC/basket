@@ -23,6 +23,7 @@
 
 #include <QtCore/QString>
 #include <QtCore/QTextStream>
+#include <QCoreApplication>
 
 class QProgressBar;
 
@@ -34,6 +35,7 @@ class Note;
  */
 class HTMLExporter
 {
+    Q_DECLARE_TR_FUNCTIONS(HTMLExporter)
 public:
     HTMLExporter(BasketScene *basket);
     ~HTMLExporter();

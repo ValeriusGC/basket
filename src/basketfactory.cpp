@@ -25,6 +25,7 @@
 #include <QtGui/QGraphicsView>
 #include <QtXml/QDomElement>
 #include <QMessageBox>
+#include <QCoreApplication>
 
 #include <KDE/KLocale>
 
@@ -62,7 +63,7 @@ QString BasketFactory::unpackTemplate(const QString &templateName)
     QString fullPath   = Global::basketsFolder() + folderName;
     QDir dir;
     if (!dir.mkdir(fullPath)) {
-        QMessageBox::critical(/*parent=*/0, QObject::tr("Basket Creation Failed"), QObject::tr("Sorry, but the folder creation for this new basket has failed."));
+        QMessageBox::critical(/*parent=*/0, QCoreApplication::tr("Basket Creation Failed"), QCoreApplication::tr("Sorry, but the folder creation for this new basket has failed."));
         return "";
     }
 
@@ -92,7 +93,7 @@ QString BasketFactory::unpackTemplate(const QString &templateName)
         file.close();
         return folderName;
     } else {
-        QMessageBox::critical(/*parent=*/0, QObject::tr("Basket Creation Failed"), QObject::tr("Sorry, but the template copying for this new basket has failed."));
+        QMessageBox::critical(/*parent=*/0, QCoreApplication::tr("Basket Creation Failed"), QCoreApplication::tr("Sorry, but the template copying for this new basket has failed."));
         return "";
     }
 }
@@ -113,7 +114,7 @@ void BasketFactory::newBasket(const QString &icon,
     // Read the properties, change those that should be customized and save the result:
     QDomDocument *document  = XMLWork::openFile("basket", Global::basketsFolder() + folderName + "/.basket");
     if (!document) {
-        QMessageBox::critical(/*parent=*/0, QObject::tr("Basket Creation Failed"), QObject::tr("Sorry, but the template customization for this new basket has failed."));
+        QMessageBox::critical(/*parent=*/0, QCoreApplication::tr("Basket Creation Failed"), QCoreApplication::tr("Sorry, but the template customization for this new basket has failed."));
         return;
     }
     QDomElement properties  = XMLWork::getElement(document->documentElement(), "properties");

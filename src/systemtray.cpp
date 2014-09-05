@@ -189,7 +189,7 @@ void SystemTray::mousePressEvent(QMouseEvent *event)
             // Minimize / restore : since we manage the popup menu by ourself, we should do that work :
             action = Global::bnpView->actionCollection()->action("minimizeRestore");
             if (action) {
-                if (Global::mainWindow()->isVisible())
+                if (Global::mainWin->isVisible())
                     action->setText(i18n("&Minimize"));
                 else
                     action->setText(i18n("&Restore"));

@@ -21,6 +21,7 @@
 #ifndef BACKUP_H
 #define BACKUP_H
 
+#include <QCoreApplication>
 #include <QtCore/QThread>
 
 class QApplication;
@@ -33,6 +34,7 @@ class QLabel;
  */
 class BASKET_EXPORT Backup
 {
+    Q_DECLARE_TR_FUNCTIONS(Backup)
 public:
     static void figureOutBinaryPath(const char *argv0, QApplication &app);
     static void setFolderAndRestart(const QString &folder, const QString &message);

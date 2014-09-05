@@ -29,6 +29,7 @@
 #include "basket_export.h"
 #include "bnpview.h"
 #include "systemtray.h"
+#include "mainwindow.h"
 
 class QLineEdit;
 class QComboBox;
@@ -410,7 +411,7 @@ public:  /* And the following methods are just getter / setters */
                     Global::systemTray->show();
                 else {
                     Global::systemTray->hide();
-                    if (Global::mainWindow()) Global::mainWindow()->show();
+                    if (Global::mainWin) Global::mainWin->show();
                 }
             }
             if (Global::bnpView)

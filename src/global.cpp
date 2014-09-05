@@ -29,6 +29,7 @@
 
 #include "bnpview.h"
 #include "settings.h"
+#include "mainwindow.h"
 
 /** Define initial values for global variables : */
 
@@ -38,6 +39,7 @@ DebugWindow       *Global::debugWindow         = 0L;
 BackgroundManager *Global::backgroundManager   = 0L;
 SystemTray        *Global::systemTray          = 0L;
 BNPView           *Global::bnpView             = 0L;
+MainWindow        *Global::mainWin             = 0L;
 
 void Global::setCustomSavesFolder(const QString &folder)
 {
@@ -85,14 +87,4 @@ QString Global::tempCutFolder()
 QString Global::openNoteIcon() // FIXME: Now an edit icon
 {
     return QVariant(Global::bnpView->m_actEditNote->icon()).toString();
-}
-
-QMainWindow* Global::mainWindow()
-{
-    QWidget* res = qApp->activeWindow();
-
-    if (res && res->inherits("QMainWindow")) {
-        return static_cast<QMainWindow*>(res);
-    }
-    return 0;
 }

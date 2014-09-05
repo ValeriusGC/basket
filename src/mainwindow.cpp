@@ -45,6 +45,8 @@ MainWindow::MainWindow(QWidget *parent)
     m_mainToolBar = addToolBar("Main");
     m_editToolBar = addToolBar("Edit");
     m_baskets = new BNPView(this, "BNPViewApp", this, bar, m_mainToolBar, m_editToolBar);
+    bar->setupStatusBar();
+
     setCentralWidget(m_baskets);
 
     setupActions();
@@ -260,9 +262,6 @@ void MainWindow::configureNotifications()
 
 void MainWindow::slotNewToolbarConfig() // This is called when OK or Apply is clicked
 {
-    // ...if you use any action list, use plugActionList on each here...
-    if (!Global::bnpView->isPart())
-        Global::bnpView->connectTagsMenu(); // The Tags menu was created again!
     // TODO: Does this do anything?
 //    plugActionList(QString::fromLatin1("go_baskets_list"), actBasketsList);
 //    KConfigGroup group = KGlobal::config()->group(autoSaveGroup());

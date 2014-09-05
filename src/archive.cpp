@@ -33,13 +33,13 @@
 #include <QMessageBox>
 #include <QApplication>
 #include <QDebug>
+#include <QProgressDialog>
 
 #include <KDE/KLocale>
 #include <KDE/KAboutData>
 #include <KDE/KStandardDirs>        //For KGlobal::dirs()
 #include <KDE/KComponentData>       //For KGlobal::mainComponent aboutData
 #include <KDE/KIconLoader>
-#include <KDE/KProgressDialog>
 #include <KDE/KTar>
 
 #include "global.h"
@@ -52,18 +52,15 @@
 #include "tools.h"
 #include "backgroundmanager.h"
 #include "formatimporter.h"
+#include "mainwindow.h"
 
 void Archive::save(BasketScene *basket, bool withSubBaskets, const QString &destination)
 {
     QDir dir;
-    KProgressDialog dialog(0, i18n("Save as Basket Archive"), i18n("Saving as basket archive. Please wait..."));
-    dialog.showCancelButton(false);
+    QProgressDialog dialog(tr("Saving as basket archive. Please wait..."), QString(), 0, /*Preparation:*/1 + /*Finishing:*/1 + /*Basket:*/1 + /*SubBaskets:*/(withSubBaskets ? Global::bnpView->basketCount(Global::bnpView->listViewItemForBasket(basket)) : 0));
     dialog.setAutoClose(true);
+    dialog.setValue(0);
     dialog.show();
-    QProgressBar *progress = dialog.progressBar();
-
-    progress->setRange(0,/*Preparation:*/1 + /*Finishing:*/1 + /*Basket:*/1 + /*SubBaskets:*/(withSubBaskets ? Global::bnpView->basketCount(Global::bnpView->listViewItemForBasket(basket)) : 0));
-    progress->setValue(0);
 
     // Create the temporary folder:
     QString tempFolder = Global::savesFolder() + "temp-archive/";
@@ -75,13 +72,13 @@ void Archive::save(BasketScene *basket, bool withSubBaskets, const QString &dest
     tar.open(QIODevice::WriteOnly);
     tar.writeDir("baskets", "", "");
 
-    progress->setValue(progress->value() + 1);      // Preparation finished
+    dialog.setValue(dialog.value() + 1);      // Preparation finished
 
-    qDebug() << "Preparation finished out of " << progress->maximum();
+    qDebug() << "Preparation finished out of " << dialog.maximum();
 
     // Copy the baskets data into the archive:
     QStringList backgrounds;
-    Archive::saveBasketToArchive(basket, withSubBaskets, &tar, backgrounds, tempFolder, progress);
+    Archive::saveBasketToArchive(basket, withSubBaskets, &tar, backgrounds, tempFolder, &dialog);
 
     // Create a Small baskets.xml Document:
     QDomDocument document("basketTree");
@@ -183,7 +180,7 @@ void Archive::save(BasketScene *basket, bool withSubBaskets, const QString &dest
         file.close();
     }
 
-    progress->setValue(progress->value() + 1); // Finishing finished
+    dialog.setValue(dialog.value() + 1); // Finishing finished
     qDebug() << "Finishing finished";
 
     // Clean Up Everything:
@@ -192,7 +189,7 @@ void Archive::save(BasketScene *basket, bool withSubBaskets, const QString &dest
     dir.rmdir(tempFolder);
 }
 
-void Archive::saveBasketToArchive(BasketScene *basket, bool recursive, KTar *tar, QStringList &backgrounds, const QString &tempFolder, QProgressBar *progress)
+void Archive::saveBasketToArchive(BasketScene *basket, bool recursive, KTar *tar, QStringList &backgrounds, const QString &tempFolder, QProgressDialog *dialog)
 {
     // Basket need to be loaded for tags exportation.
     // We load it NOW so that the progress bar really reflect the state of the exportation:
@@ -234,14 +231,14 @@ void Archive::saveBasketToArchive(BasketScene *basket, bool recursive, KTar *tar
         backgrounds.append(imageName);
     }
 
-    progress->setValue(progress->value() + 1); // Basket exportation finished
+    dialog->setValue(dialog->value() + 1); // Basket exportation finished
     qDebug() << basket->basketName() << " finished";
 
     // Recursively save child baskets:
     BasketListViewItem *item = Global::bnpView->listViewItemForBasket(basket);
     if (recursive) {
         for (int i = 0; i < item->childCount(); i++) {
-            saveBasketToArchive(((BasketListViewItem *)item->child(i))->basket(), recursive, tar, backgrounds, tempFolder, progress);
+            saveBasketToArchive(((BasketListViewItem *)item->child(i))->basket(), recursive, tar, backgrounds, tempFolder, dialog);
         }
     }
 }
@@ -271,7 +268,7 @@ void Archive::open(const QString &path)
         stream.setCodec("ISO-8859-1");
         QString line = stream.readLine();
         if (line != "BasKetNP:archive") {
-            QMessageBox::critical(0, QObject::tr("Basket Archive Error"), QObject::tr("This file is not a basket archive."));
+            QMessageBox::critical(0, tr("Basket Archive Error"), tr("This file is not a basket archive."));
             file.close();
             Tools::deleteRecursively(tempFolder);
             return;
@@ -302,7 +299,7 @@ void Archive::open(const QString &path)
                 bool ok;
                 qint64 size = value.toULong(&ok);
                 if (!ok) {
-                    QMessageBox::critical(0, QObject::tr("Basket Archive Error"), QObject::tr("This file is corrupted. It can not be opened."));
+                    QMessageBox::critical(0, tr("Basket Archive Error"), tr("This file is corrupted. It can not be opened."));
                     file.close();
                     Tools::deleteRecursively(tempFolder);
                     return;
@@ -314,16 +311,16 @@ void Archive::open(const QString &path)
                 stream.seek(stream.pos() + size);
             } else if (key == "archive*") {
                 if (version != "0.6.1" && readCompatibleVersions.contains("0.6.1") && !writeCompatibleVersions.contains("0.6.1")) {
-                    QMessageBox::information(0, QObject::tr("Basket Archive Error"),
-                        QObject::tr("This file was created with a recent version of %1. "
+                    QMessageBox::information(0, tr("Basket Archive Error"),
+                        tr("This file was created with a recent version of %1. "
                              "It can be opened but not every information will be available to you. "
                              "For instance, some notes may be missing because they are of a type only available in new versions. "
                              "When saving the file back, consider to save it to another file, to preserve the original one.").arg(
                              qApp->applicationName()));
                 }
                 if (version != "0.6.1" && !readCompatibleVersions.contains("0.6.1") && !writeCompatibleVersions.contains("0.6.1")) {
-                    QMessageBox::critical(0, QObject::tr("Basket Archive Error"),
-                        QObject::tr("This file was created with a recent version of %1. Please upgrade to a newer version to be able to open that file.").arg(
+                    QMessageBox::critical(0, tr("Basket Archive Error"),
+                        tr("This file was created with a recent version of %1. Please upgrade to a newer version to be able to open that file.").arg(
                              qApp->applicationName()));
                     file.close();
                     Tools::deleteRecursively(tempFolder);
@@ -333,14 +330,14 @@ void Archive::open(const QString &path)
                 bool ok;
                 qint64 size = value.toULong(&ok);
                 if (!ok) {
-                    QMessageBox::critical(0, QObject::tr("Basket Archive Error"), QObject::tr("This file is corrupted. It can not be opened."));
+                    QMessageBox::critical(0, tr("Basket Archive Error"), tr("This file is corrupted. It can not be opened."));
                     file.close();
                     Tools::deleteRecursively(tempFolder);
                     return;
                 }
 
-                if (Global::mainWindow()) {
-                    Global::mainWindow()->raise();
+                if (Global::mainWin) {
+                    Global::mainWin->raise();
                 }
 
                 // Get the archive file:
@@ -387,7 +384,7 @@ void Archive::open(const QString &path)
                 bool ok;
                 qint64 size = value.toULong(&ok);
                 if (!ok) {
-                    QMessageBox::critical(0, QObject::tr("Basket Archive Error"), QObject::tr("This file is corrupted. It can not be opened."));
+                    QMessageBox::critical(0, tr("Basket Archive Error"), tr("This file is corrupted. It can not be opened."));
                     file.close();
                     Tools::deleteRecursively(tempFolder);
                     return;

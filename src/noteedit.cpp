@@ -1114,7 +1114,7 @@ void InlineEditors::initToolBars(QToolBar *editbar)
     editbar->addSeparator();
 
     // Init the RichTextEditor Toolbar:
-    richTextFont = new QFontComboBox(Global::mainWindow());
+    richTextFont = new QFontComboBox(Global::mainWin);
     focusWidgetFilter = new FocusWidgetFilter(richTextFont);
     richTextFont->setFixedWidth(richTextFont->sizeHint().width() * 2 / 3);
     richTextFont->setCurrentFont(defaultFont.family());
@@ -1123,13 +1123,13 @@ void InlineEditors::initToolBars(QToolBar *editbar)
     a->setText(tr("Font"));
     a->setShortcut(Qt::Key_F6);
 
-    richTextFontSize = new FontSizeCombo(/*rw=*/true, Global::mainWindow());
+    richTextFontSize = new FontSizeCombo(/*rw=*/true, Global::mainWin);
     richTextFontSize->setFontSize(defaultFont.pointSize());
     a = editbar->addWidget(richTextFontSize);
     a->setText(tr("Font Size"));
     a->setShortcut(Qt::Key_F7);
 
-    richTextColor = new KColorCombo(Global::mainWindow());
+    richTextColor = new KColorCombo(Global::mainWin);
     richTextColor->installEventFilter(focusWidgetFilter);
     richTextColor->setFixedWidth(richTextColor->sizeHint().height() * 2);
     richTextColor->setColor(textColor);

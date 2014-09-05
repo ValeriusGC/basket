@@ -39,6 +39,7 @@
 #include <QtCore/qnamespace.h>
 #include <QMessageBox>
 #include <QApplication>
+#include <QCoreApplication>
 
 #include <KDE/KUrl>
 #include <KDE/KMimeType>
@@ -481,11 +482,11 @@ Note* NoteFactory::dropNote(const QMimeData *source, BasketScene *parent, bool f
 
     /* Unsucceful drop */
     note = createNoteUnknown(source, parent);
-    QString message = QObject::tr("<p>%1 doesn't support the data you've dropped.<br>"
+    QString message = QCoreApplication::tr("<p>%1 doesn't support the data you've dropped.<br>"
                            "It however created a generic note, allowing you to drag or copy it to an application that understand it.</p>"
                            "<p>If you want the support of these data, please contact developer or visit the "
                            "<a href=\"http://basket.kde.org/dropdb.php\">BasKet Drop Database</a>.</p>").arg(qApp->applicationName());
-    QMessageBox::information(parent->graphicsView()->viewport(), QObject::tr("Unsupported MIME Type(s)"), message);
+    QMessageBox::information(parent->graphicsView()->viewport(), QCoreApplication::tr("Unsupported MIME Type(s)"), message);
     return note;
 }
 

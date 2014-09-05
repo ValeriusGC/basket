@@ -21,8 +21,6 @@
 #include "tag.h"
 
 #include <KDE/KIconLoader>
-#include <KDE/KLocale>
-#include <KDE/KActionCollection>
 
 #include <QtCore/QDir>
 #include <QtCore/QList>
@@ -37,6 +35,7 @@
 #include "bnpview.h"
 #include "tools.h"
 #include "basketscene.h"
+#include "mainwindow.h"
 
 /** class State: */
 
@@ -79,7 +78,7 @@ QString State::fullName()
 {
     if (!parentTag() || parentTag()->states().count() == 1)
         return (name().isEmpty() && parentTag() ? parentTag()->name() : name());
-    return QString(i18n("%1: %2", parentTag()->name(), name()));
+    return QString(tr("%1: %2").arg(parentTag()->name(), name()));
 }
 
 QFont State::font(QFont base)
@@ -254,7 +253,7 @@ State* Tag::stateForId(const QString &id)
     return 0;
 }
 
-Tag* Tag::tagForKAction(KAction *action)
+Tag* Tag::tagForKAction(QAction *action)
 {
     for (List::iterator it = all.begin(); it != all.end(); ++it)
         if ((*it)->m_action == action)
@@ -571,9 +570,9 @@ void Tag::createDefaultTagsSet(const QString &fullPath)
                       "    </state>\n"
                       "  </tag>\n"
                       "\n")
-                  .arg(i18n("To Do"),     i18n("Unchecked"),      i18n("Done"))           // %1 %2 %3
-                  .arg(i18n("Progress"),  i18n("0 %"),            i18n("25 %"))           // %4 %5 %6
-                  .arg(i18n("50 %"),      i18n("75 %"),           i18n("100 %"))          // %7 %8 %9
+                  .arg(tr("To Do"),     tr("Unchecked"),      tr("Done"))           // %1 %2 %3
+                  .arg(tr("Progress"),  tr("0 %"),            tr("25 %"))           // %4 %5 %6
+                  .arg(tr("50 %"),      tr("75 %"),           tr("100 %"))          // %7 %8 %9
                   + QString(
                       "  <tag>\n"
                       "    <name>%1</name>\n" // "Priority"
@@ -626,9 +625,9 @@ void Tag::createDefaultTagsSet(const QString &fullPath)
                       "    </state>\n"
                       "  </tag>\n"
                       "\n")
-                  .arg(i18n("Priority"),  i18n("Low"),            i18n("Medium"))         // %1 %2 %3
-                  .arg(i18n("High"),      i18n("Preference"),     i18n("Bad"))            // %4 %5 %6
-                  .arg(i18n("Good"),      i18n("Excellent"),      i18n("Highlight"))      // %7 %8 %9
+                  .arg(tr("Priority"),  tr("Low"),            tr("Medium"))         // %1 %2 %3
+                  .arg(tr("High"),      tr("Preference"),     tr("Bad"))            // %4 %5 %6
+                  .arg(tr("Good"),      tr("Excellent"),      tr("Highlight"))      // %7 %8 %9
                   + QString(
                       "  <tag>\n"
                       "    <name>%1</name>\n" // "Important"
@@ -695,9 +694,9 @@ void Tag::createDefaultTagsSet(const QString &fullPath)
                       "    </state>\n"
                       "  </tag>""\n"
                       "\n")
-                  .arg(i18n("Important"), i18n("Very Important"),              i18n("Information"))                   // %1 %2 %3
-                  .arg(i18n("Idea"),      i18nc("The initial of 'Idea'", "I."), i18n("Title"))                         // %4 %5 %6
-                  .arg(i18n("Code"),      i18n("Work"),                        i18nc("The initial of 'Work'", "W."))   // %7 %8 %9
+                  .arg(tr("Important"), tr("Very Important"),              tr("Information"))                   // %1 %2 %3
+                  .arg(tr("Idea"),      QCoreApplication::translate("The initial of 'Idea'", "I."), tr("Title"))                         // %4 %5 %6
+                  .arg(tr("Code"),      tr("Work"),                        QCoreApplication::translate("The initial of 'Work'", "W."))   // %7 %8 %9
                   + QString(
                       "  <tag>\n"
                       "    <state id=\"personal\">\n"
@@ -715,7 +714,7 @@ void Tag::createDefaultTagsSet(const QString &fullPath)
                       "  </tag>\n"
                       "</basketTags>\n"
                       "")
-                  .arg(i18n("Personal"), i18nc("The initial of 'Personal'", "P."), i18n("Funny"));   // %1 %2 %3
+                  .arg(tr("Personal"), QCoreApplication::translate("The initial of 'Personal'", "P."), tr("Funny"));   // %1 %2 %3
 
     // Write to Disk:
     QFile file(fullPath);
@@ -731,10 +730,11 @@ void Tag::createDefaultTagsSet(const QString &fullPath)
 
 // StateAction
 StateAction::StateAction(State *state, const QKeySequence &shortcut, QWidget* parent, bool withTagName)
-        : KToggleAction(parent)
+        : QAction(parent)
         , m_state(state)
         , m_shortcut(shortcut)
 {
+    setCheckable(true);
     setText(m_state->name());
 
     if (withTagName && m_state->parentTag())

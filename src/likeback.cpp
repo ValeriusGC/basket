@@ -594,7 +594,7 @@ LikeBackDialog::LikeBackDialog(LikeBack::Button reason, const QString &initialCo
     m_defaultButton->setIcon(KIcon("mail"));
 
     QDialogButtonBox *buttonBox = new QDialogButtonBox(Qt::Horizontal);
-    buttonBox->addAction(m_defaultButton, QDialogButtonBox::ActionRole);
+    buttonBox->addButton(m_defaultButton, QDialogButtonBox::ActionRole);
     buttonBox->addButton(m_okButton, QDialogButtonBox::ActionRole);
     buttonBox->addButton(m_cancelButton, QDialogButtonBox::ActionRole);
     setParent(qApp->activeWindow());

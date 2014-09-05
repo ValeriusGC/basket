@@ -90,7 +90,7 @@ void Backup::setFolderAndRestart(const QString &folder, const QString &message)
 
     // Rassure the user that the application main window disapearition is not a crash, but a normal restart.
     // This is important for users to trust the application in such a critical phase and understands what's happening:
-    QMessageBox::information(0, QObject::tr("Restart"),
+    QMessageBox::information(0, tr("Restart"),
         "<qt>" + message.arg(
             (folder.endsWith('/') ? folder.left(folder.length() - 1) : folder),
             qApp->applicationName()));

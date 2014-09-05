@@ -39,23 +39,16 @@
 #include <QMenuBar>
 #include <QToolBar>
 #include <QMessageBox>
+#include <QApplication>
 
-#include <KDE/KApplication>
-#include <KDE/KMenu>
 #include <KDE/KIconLoader>
 #include <KDE/KFileDialog>
 #include <KDE/KProgressDialog>
 #include <KDE/KStandardDirs>
-#include <KDE/KAboutData>
 #include <KDE/KWindowSystem>
 #include <KDE/KPassivePopup>
-#include <KDE/KXMLGUIFactory>
 #include <KDE/KCmdLineArgs>
-#include <KDE/KAction>
-#include <KDE/KActionMenu>
-#include <KDE/KActionCollection>
 #include <KDE/KStandardShortcut>
-#include <KDE/KToggleAction>
 
 #include <kdeversion.h>
 
@@ -89,6 +82,7 @@
 #include "backupdialog.h"
 #include "notefactory.h"
 #include "history.h"
+#include "mainwindow.h"
 
 #include "bnpviewadaptor.h"
 
@@ -103,7 +97,6 @@ BNPView::BNPView(QWidget *parent, const char *name, QMainWindow *aGUIClient,
         , m_actPassBasket(0)
         , m_loading(true)
         , m_newBasketPopup(false)
-        , m_firstShow(true)
         , m_regionGrabber(0)
         , m_passiveDroppedSelection(0)
         , m_guiClient(aGUIClient)
@@ -130,6 +123,13 @@ BNPView::BNPView(QWidget *parent, const char *name, QMainWindow *aGUIClient,
     m_history = new QUndoStack(this);
     initialize();
     QTimer::singleShot(0, this, SLOT(lateInit()));
+
+    int treeWidth = Settings::basketTreeWidth();
+    if (treeWidth < 0)
+        treeWidth = m_tree->fontMetrics().maxWidth() * 11;
+    QList<int> splitterSizes;
+    splitterSizes.append(treeWidth);
+    setSizes(splitterSizes);
 }
 
 BNPView::~BNPView()
@@ -190,7 +190,7 @@ void BNPView::lateInit()
     Settings::saveConfig();
 
     /* System tray icon */
-    Global::systemTray = new SystemTray(Global::mainWindow());
+    Global::systemTray = new SystemTray(Global::mainWin);
     Global::systemTray->setIcon(QIcon(":/images/hi22-app-basket"));
     connect(Global::systemTray, SIGNAL(showPart()), this, SIGNAL(showPart()));
     if (Settings::useSystray())
@@ -264,42 +264,6 @@ void BNPView::addWelcomeBaskets()
     // Extract:
     if (!path.isEmpty())
         Archive::open(path);
-}
-
-void BNPView::onFirstShow()
-{
-    // Don't enable LikeBack until bnpview is shown. This way it works better with kontact.
-    /* LikeBack */
-    /*  Global::likeBack = new LikeBack(LikeBack::AllButtons, / *showBarByDefault=* /true, Global::config(), Global::about());
-        Global::likeBack->setServer("basket.linux62.org", "/likeback/send.php");
-        Global:likeBack->setAcceptedLanguages(QStringList::split(";", "en;fr"), i18n("Only english and french languages are accepted."));
-        if (isPart())
-            Global::likeBack->disableBar(); // See BNPView::shown() and BNPView::hide().
-    */
-
-    if (isPart())
-        Global::likeBack->disableBar(); // See BNPView::shown() and BNPView::hide().
-
-    /*
-        LikeBack::init(Global::config(), Global::about(), LikeBack::AllButtons);
-        LikeBack::setServer("basket.linux62.org", "/likeback/send.php");
-    //  LikeBack::setServer("localhost", "/~seb/basket/likeback/send.php");
-        LikeBack::setCustomLanguageMessage(i18n("Only english and french languages are accepted."));
-    //  LikeBack::setWindowNamesListing(LikeBack:: / *NoListing* / / *WarnUnnamedWindows* / AllWindows);
-    */
-
-    // In late init, because we need kapp->mainWidget() to be set!
-    if (!isPart())
-        connectTagsMenu();
-
-    m_statusbar->setupStatusBar();
-
-    int treeWidth = Settings::basketTreeWidth();
-    if (treeWidth < 0)
-        treeWidth = m_tree->fontMetrics().maxWidth() * 11;
-    QList<int> splitterSizes;
-    splitterSizes.append(treeWidth);
-    setSizes(splitterSizes);
 }
 
 void BNPView::initialize()
@@ -488,8 +452,10 @@ void BNPView::setupActions()
     m_actMoveNoteDown = m1->addAction(KIcon("arrow-down"), tr("Move &Down"), this, SLOT(moveNoteDown()), QKeySequence("Ctrl+Shift+Down"));
     m_actMoveOnBottom = m1->addAction(KIcon("arrow-down-double"), tr("Move on &Bottom"), this, SLOT(moveOnBottom()), QKeySequence("Ctrl+Shift+End"));
 
-    /** Note : ****************************************************************/
+    /** Tags : ****************************************************************/
     m_tagsMenu = m_guiClient->menuBar()->addMenu("&Tags");
+    connect(m_tagsMenu, SIGNAL(aboutToShow()), this, SLOT(populateTagsMenu()));
+    connect(m_tagsMenu, SIGNAL(aboutToHide()), this, SLOT(disconnectTagsMenu()));
 
     /** Insert : **************************************************************/
     m1 = m_guiClient->menuBar()->addMenu("&Insert");
@@ -642,9 +608,9 @@ void BNPView::slotContextMenu(const QPoint &pos)
         setNewBasketPopup();
     }
 
-    QMenu *menu = popupMenu(menuName);
-    connect(menu, SIGNAL(aboutToHide()),  this, SLOT(aboutToHideNewBasketPopup()));
-    menu->exec(m_tree->mapToGlobal(pos));
+    //QMenu *menu = popupMenu(menuName); TODO i have no idea what this function does
+    //connect(menu, SIGNAL(aboutToHide()),  this, SLOT(aboutToHideNewBasketPopup()));
+    //menu->exec(m_tree->mapToGlobal(pos));
 }
 
 void BNPView::save()
@@ -993,7 +959,7 @@ void BNPView::newFilter()
 
     // Show/hide the "little filter icons" (during basket load)
     // or the "little numbers" (to show number of found notes in the baskets) is the tree:
-    kapp->processEvents();
+    qApp->processEvents();
 
     // Load every baskets for filtering, if they are not already loaded, and if necessary:
     if (filterData.isFiltering) {
@@ -1006,7 +972,7 @@ void BNPView::newFilter()
                 if (!basket->loadingLaunched() && !basket->isLocked())
                     basket->load();
                 basket->filterAgain();
-                kapp->processEvents();
+                qApp->processEvents();
                 if (shouldRestart) {
                     alreadyEntered = false;
                     shouldRestart  = false;
@@ -1150,7 +1116,7 @@ void BNPView::setTreePlacement(bool onLeft)
     else
         addWidget(m_tree);
     //updateGeometry();
-    kapp->postEvent(this, new QResizeEvent(size(), size()));
+    qApp->postEvent(this, new QResizeEvent(size(), size()));
 }
 
 void BNPView::relayoutAllBaskets()
@@ -1417,7 +1383,7 @@ void checkBasket(BasketListViewItem * item, QList<QString> & dirList, QList<QStr
         checkNote(note, fileList);
     }
     basket->save();
-    kapp->processEvents(QEventLoop::ExcludeUserInputEvents, 100);
+    qApp->processEvents(QEventLoop::ExcludeUserInputEvents, 100);
     for ( int i=0; i < item->childCount(); i++) {
         checkBasket((BasketListViewItem *) item->child(i), dirList, fileList);
     }
@@ -1429,7 +1395,7 @@ void checkBasket(BasketListViewItem * item, QList<QString> & dirList, QList<QStr
         DEBUG_WIN << basket->basketName() << "(" << basketFolderName << ") is the current basket, not unloading.";
         DEBUG_WIN << "\t********************************************************************************";
     }
-    kapp->processEvents(QEventLoop::ExcludeUserInputEvents, 100);
+    qApp->processEvents(QEventLoop::ExcludeUserInputEvents, 100);
 }
 
 void BNPView::checkCleanup() {
@@ -1667,14 +1633,6 @@ void BNPView::slotConvertTexts()
         QMessageBox::information(this, tr("Conversion Finished"), tr("There are no plain text notes to convert."));
 }
 
-QMenu* BNPView::popupMenu(const QString &menuName)
-{
-//    if (menuName == "tags")
-//        return m_tagsMenu;
-// TODO fix
-    return new QMenu();
-}
-
 void BNPView::showHideFilterBar(bool show, bool switchFocus)
 {
 //  if (show != m_actShowFilter->isChecked())
@@ -1732,8 +1690,8 @@ void BNPView::grabScreenshot(bool global)
 void BNPView::hideMainWindow() 
 {
     if (isMainWindowActive()) {
-        if (Global::mainWindow()) {
-            m_HiddenMainWindow = Global::mainWindow();
+        if (Global::mainWin) {
+            m_HiddenMainWindow = Global::mainWin;
             m_HiddenMainWindow->hide();
         }
         m_colorPickWasShown = true;
@@ -1973,7 +1931,7 @@ void BNPView::openArchive()
 
 void BNPView::activatedTagShortcut()
 {
-    Tag *tag = Tag::tagForKAction((KAction*)sender());
+    Tag *tag = Tag::tagForKAction((QAction*)sender());
     currentBasket()->activatedTagShortcut(tag);
 }
 
@@ -2284,7 +2242,7 @@ void BNPView::setUnsavedStatus(bool isUnsaved)
 
 void BNPView::setActive(bool active)
 {
-    QMainWindow* win = Global::mainWindow();
+    MainWindow* win = Global::mainWin;
     if (!win)
         return;
 
@@ -2299,14 +2257,9 @@ void BNPView::hideOnEscape()
         setActive(false);
 }
 
-bool BNPView::isPart()
-{
-    return objectName() == "BNPViewPart";
-}
-
 bool BNPView::isMainWindowActive()
 {
-    QMainWindow* main = Global::mainWindow();
+    MainWindow* main = Global::mainWin;
     if (main && main->isActiveWindow())
         return true;
     return false;
@@ -2432,10 +2385,10 @@ void BNPView::leaveEvent(QEvent*)
 void BNPView::timeoutTryHide()
 {
     // If a menu is displayed, do nothing for the moment
-    if (kapp->activePopupWidget() != 0L)
+    if (qApp->activePopupWidget() != 0L)
         return;
 
-    if (kapp->widgetAt(QCursor::pos()) != 0L)
+    if (qApp->widgetAt(QCursor::pos()) != 0L)
         m_hideTimer->stop();
     else if (! m_hideTimer->isActive()) {   // Start only one time
         m_hideTimer->setSingleShot(true);
@@ -2443,7 +2396,7 @@ void BNPView::timeoutTryHide()
     }
 
     // If a sub-dialog is oppened, we musn't hide the main window:
-    if (kapp->activeWindow() != 0L && kapp->activeWindow() != Global::mainWindow())
+    if (qApp->activeWindow() != 0L && qApp->activeWindow() != Global::mainWin)
         m_hideTimer->stop();
 }
 
@@ -2489,7 +2442,7 @@ void BNPView::showMainWindow()
         m_HiddenMainWindow->show();
         m_HiddenMainWindow = NULL;
     } else {  
-        QMainWindow *win = Global::mainWindow();
+        MainWindow *win = Global::mainWin;
 
         if (win) {
             win->show();
@@ -2500,32 +2453,24 @@ void BNPView::showMainWindow()
     emit showPart();
 }
 
-void BNPView::populateTagsMenu()
-{
-    QMenu *menu = popupMenu("tags");
-    if (menu == 0 || currentBasket() == 0) // TODO: Display a messagebox. [menu is 0, surely because on first launch, the XMLGUI does not work!]
-        return;
-    menu->clear();
-
-    Note *referenceNote;
-    if (currentBasket()->focusedNote() && currentBasket()->focusedNote()->isSelected())
-        referenceNote = currentBasket()->focusedNote();
-    else
-        referenceNote = currentBasket()->firstSelected();
-
-    populateTagsMenu(*menu, referenceNote);
-
-    m_lastOpenedTagsMenu = menu;
-//  connect( menu, SIGNAL(aboutToHide()), this, SLOT(disconnectTagsMenu()) );
-}
-
-void BNPView::populateTagsMenu(QMenu &menu, Note *referenceNote)
+void BNPView::populateTagsMenu(Note *note)
 {
     if (currentBasket() == 0)
         return;
 
+    Note *referenceNote;
+    if (note)
+        referenceNote = note;
+    else
+        if (currentBasket()->focusedNote() && currentBasket()->focusedNote()->isSelected())
+            referenceNote = currentBasket()->focusedNote();
+        else
+            referenceNote = currentBasket()->firstSelected();
+
     currentBasket()->m_tagPopupNote = referenceNote;
     bool enable = currentBasket()->countSelecteds() > 0;
+
+    m_tagsMenu->clear();
 
     QList<Tag*>::iterator it;
     Tag *currentTag;
@@ -2548,7 +2493,7 @@ void BNPView::populateTagsMenu(QMenu &menu, Note *referenceNote)
         if (referenceNote && referenceNote->hasTag(currentTag))
             mi->setChecked(true);
 
-        menu.addAction(mi);
+        m_tagsMenu->addAction(mi);
 
         if (!currentTag->shortcut().isEmpty())
             mi->setShortcut(sequence);
@@ -2557,35 +2502,17 @@ void BNPView::populateTagsMenu(QMenu &menu, Note *referenceNote)
         ++i;
     }
 
-    menu.addSeparator();
+    m_tagsMenu->addSeparator();
 
     // I don't like how this is implemented; but I can't think of a better way
     // to do this, so I will have to leave it for now
-    KAction *act =  new KAction(i18n("&Assign new Tag..."), &menu);
-    act->setData(1);
-    menu.addAction(act);
+    m_tagsMenu->addAction(tr("&Assign new Tag..."));
+    m_tagsMenu->addAction(KIcon("edit-delete"), tr("&Remove All"));
+    m_tagsMenu->addAction(KIcon("configure"), tr("&Customize..."));
 
-    act = new KAction(KIcon("edit-delete"), i18n("&Remove All"), &menu);
-    act->setData(2);
-    menu.addAction(act);
-
-    act = new KAction(KIcon("configure"), i18n("&Customize..."), &menu);
-    act->setData(3);
-    menu.addAction(act);
-
-    act->setEnabled(enable);
-    if (!currentBasket()->selectedNotesHaveTags())
-        act->setEnabled(false);
-
-    connect(&menu, SIGNAL(triggered(QAction *)), currentBasket(), SLOT(toggledTagInMenu(QAction *)));
-    connect(&menu, SIGNAL(aboutToHide()),  currentBasket(), SLOT(unlockHovering()));
-    connect(&menu, SIGNAL(aboutToHide()),  currentBasket(), SLOT(disableNextClick()));
-}
-
-void BNPView::connectTagsMenu()
-{
-    connect(popupMenu("tags"), SIGNAL(aboutToShow()), this, SLOT(populateTagsMenu()));
-    connect(popupMenu("tags"), SIGNAL(aboutToHide()), this, SLOT(disconnectTagsMenu()));
+    connect(m_tagsMenu, SIGNAL(triggered(QAction *)), currentBasket(), SLOT(toggledTagInMenu(QAction *)));
+    connect(m_tagsMenu, SIGNAL(aboutToHide()),  currentBasket(), SLOT(unlockHovering()));
+    connect(m_tagsMenu, SIGNAL(aboutToHide()),  currentBasket(), SLOT(disableNextClick()));
 }
 
 /*
@@ -2597,41 +2524,11 @@ void BNPView::connectTagsMenu()
  * So we disconnect at hide event to ensure only one connection: the next show event will not connects another time.
  */
 
-void BNPView::showEvent(QShowEvent*)
-{
-    if (isPart())
-        QTimer::singleShot(0, this, SLOT(connectTagsMenu()));
-
-    if (m_firstShow) {
-        m_firstShow = false;
-        onFirstShow();
-    }
-    if (isPart()/*TODO: && !LikeBack::enabledBar()*/) {
-        Global::likeBack->enableBar();
-    }
-}
-
-void BNPView::hideEvent(QHideEvent*)
-{
-    if (isPart()) {
-        disconnect(popupMenu("tags"), SIGNAL(aboutToShow()), this, SLOT(populateTagsMenu()));
-        disconnect(popupMenu("tags"), SIGNAL(aboutToHide()), this, SLOT(disconnectTagsMenu()));
-    }
-
-    if (isPart())
-        Global::likeBack->disableBar();
-}
-
 void BNPView::disconnectTagsMenu()
 {
-    QTimer::singleShot(0, this, SLOT(disconnectTagsMenuDelayed()));
-}
-
-void BNPView::disconnectTagsMenuDelayed()
-{
-    disconnect(m_lastOpenedTagsMenu, SIGNAL(triggered(QAction *)), currentBasket(), SLOT(toggledTagInMenu(QAction *)));
-    disconnect(m_lastOpenedTagsMenu, SIGNAL(aboutToHide()),  currentBasket(), SLOT(unlockHovering()));
-    disconnect(m_lastOpenedTagsMenu, SIGNAL(aboutToHide()),  currentBasket(), SLOT(disableNextClick()));
+    disconnect(m_tagsMenu, SIGNAL(triggered(QAction *)), currentBasket(), SLOT(toggledTagInMenu(QAction *)));
+    disconnect(m_tagsMenu, SIGNAL(aboutToHide()),  currentBasket(), SLOT(unlockHovering()));
+    disconnect(m_tagsMenu, SIGNAL(aboutToHide()),  currentBasket(), SLOT(disableNextClick()));
 }
 
 void BNPView::loadCrossReference(QString link)

@@ -21,6 +21,7 @@
 #ifndef ARCHIVE_H
 #define ARCHIVE_H
 
+#include <QCoreApplication>
 #include <QtCore/QList>
 #include <QtCore/QMap>
 
@@ -30,7 +31,7 @@ class Tag;
 class QString;
 class QStringList;
 class QDomNode;
-class QProgressBar;
+class QProgressDialog;
 class QDomElement;
 
 class KTar;
@@ -41,12 +42,13 @@ class KProgress;
  */
 class Archive
 {
+    Q_DECLARE_TR_FUNCTIONS(Archive)
 public:
     static void save(BasketScene *basket, bool withSubBaskets, const QString &destination);
     static void open(const QString &path);
 private:
     // Convenient Methods for Saving:
-    static void saveBasketToArchive(BasketScene *basket, bool recursive, KTar *tar, QStringList &backgrounds, const QString &tempFolder, QProgressBar *progress);
+    static void saveBasketToArchive(BasketScene *basket, bool recursive, KTar *tar, QStringList &backgrounds, const QString &tempFolder, QProgressDialog *dialog);
     static void listUsedTags(BasketScene *basket, bool recursive, QList<Tag*> &list);
     // Convenient Methods for Loading:
     static void renameBasketFolders(const QString &extractionFolder, QMap<QString, QString> &mergedStates);

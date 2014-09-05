@@ -21,9 +21,9 @@
 #ifndef TAG_H
 #define TAG_H
 
-#include <QtCore/QList>
-
-#include <KDE/KAction>
+#include <QAction>
+#include <QCoreApplication>
+#include <QList>
 
 class QColor;
 class QFont;
@@ -37,6 +37,7 @@ class Tag;
   */
 class State
 {
+    Q_DECLARE_TR_FUNCTIONS(State)
 public:
     /// LIST OF STATES:
     typedef QList<State*> List;
@@ -170,12 +171,13 @@ private:
   */
 class Tag
 {
+    Q_DECLARE_TR_FUNCTIONS(Tag)
 public:
     /// LIST OF ALL TAGS IN THE APPLICATION:
     typedef QList<Tag*> List;
     static Tag::List all;
     static State* stateForId(const QString &id);
-    static Tag* tagForKAction(KAction *action);
+    static Tag* tagForKAction(QAction *action);
     static Tag* tagSimilarTo(Tag *tagToTest);
     static QMap<QString, QString> loadTags(const QString &path = QString()/*, bool merge = false*/); /// << Load the tags contained in the XML file @p path or those in the application settings if @p path isEmpty(). If @p merge is true and a tag with the id of a tag that should be loaded already exist, the tag will get a new id. Otherwise, the tag will be dismissed.
     static void saveTags();
@@ -238,7 +240,7 @@ private:
  * @author Kelvie Wong
  * Based off of StateMenuItem by Sébastien Laoût
  */
-class StateAction : public KToggleAction
+class StateAction : public QAction
 {
     Q_OBJECT
     Q_DISABLE_COPY(StateAction);
