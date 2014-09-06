@@ -35,18 +35,14 @@ class QTextCharFormat;
 class QToolBar;
 class QComboBox;
 class QTextEdit;
-
-class KIconButton;
-class KUrlRequester;
-class KToggleAction;
-class KToolBar;
-class KColorCombo;
+class QToolButton;
 
 class FontSizeCombo;
 class Note;
 class RunCommandRequester;
 class FocusWidgetFilter;
 class BasketListViewItem;
+class KColorCombo2;
 
 /** The base class for every note editor.
   * Scenario:
@@ -259,9 +255,9 @@ protected slots:
 private:
     LinkContent   *m_noteContent;
     bool           m_isAutoModified;
-    KUrlRequester *m_url;
+//    KUrlRequester *m_url;
     QLineEdit     *m_title;
-    KIconButton   *m_icon;
+    QToolButton   *m_icon;
     QPushButton   *m_autoTitle;
     QPushButton   *m_autoIcon;
 };
@@ -303,7 +299,7 @@ private:
     LauncherContent     *m_noteContent;
     RunCommandRequester *m_command;
     QLineEdit           *m_name;
-    KIconButton         *m_icon;
+    QToolButton         *m_icon;
 };
 
 /** This class manage toolbars for the inline editors.
@@ -327,7 +323,7 @@ public:
     QPalette palette() const;
     QFontComboBox     *richTextFont;
     FontSizeCombo     *richTextFontSize;
-    KColorCombo       *richTextColor;
+    KColorCombo2       *richTextColor;
     QAction     *richTextBold;
     QAction     *richTextItalic;
     QAction     *richTextUnderline;

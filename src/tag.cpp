@@ -20,8 +20,6 @@
 
 #include "tag.h"
 
-#include <KDE/KIconLoader>
-
 #include <QtCore/QDir>
 #include <QtCore/QList>
 #include <QtCore/QTextStream>

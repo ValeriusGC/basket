@@ -91,9 +91,6 @@ QPixmap indentPixmap(const QPixmap &source, int depth, int deltaX = 0);
 /** Delete the folder @p folderOrFile recursively (to remove sub-folders and child files too).
   */
 void deleteRecursively(const QString &folderOrFile);
-/** Trash the folder @p folderOrFile recursively (to move sub-folders and child files to the Trash, too).
-  */
-void trashRecursively(const QString &folderOrFile);
 /** Delete the metadata of file or folder @p folderOrFile from Nepomuk, recursively.
   */
 void deleteMetadataRecursively(const QString &folderOrFile);

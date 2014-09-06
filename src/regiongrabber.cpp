@@ -24,9 +24,6 @@
 #include <QtGui/QDesktopWidget>
 #include <QtGui/QToolTip>
 
-#include <KDE/KLocale>
-#include <KDE/KWindowSystem>
-
 RegionGrabber::RegionGrabber() :
         QWidget(0), selection(), mouseDown(false), newSelection(false),
         handleSize(10), mouseOverHandle(0), idleTimer(),
@@ -40,7 +37,8 @@ RegionGrabber::RegionGrabber() :
     << &LHandle << &THandle << &RHandle << &BHandle;
     setMouseTracking(true);
     setWindowFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint | Qt::X11BypassWindowManagerHint);
-    int timeout = KWindowSystem::compositingActive() ? 200 : 50;
+//    int timeout = KWindowSystem::compositingActive() ? 200 : 50;
+    int timeout = 50;
     QTimer::singleShot(timeout, this, SLOT(init()));
     connect(&idleTimer, SIGNAL(timeout()), this, SLOT(displayHelp()));
     idleTimer.start(3000);
@@ -100,7 +98,7 @@ void RegionGrabber::paintEvent(QPaintEvent* e)
     if (showHelp) {
         painter.setPen(textColor);
         painter.setBrush(textBackgroundColor);
-        QString helpText = i18n("Select a region using the mouse. To take the snapshot, press the Enter key. Press Esc to quit.");
+        QString helpText = tr("Select a region using the mouse. To take the snapshot, press the Enter key. Press Esc to quit.");
         QRect textRect = painter.boundingRect(rect().adjusted(2, 2, -2, -2), Qt::TextWordWrap, helpText);
         textRect.adjust(-2, -2, 4, 2);
         painter.drawRect(textRect);

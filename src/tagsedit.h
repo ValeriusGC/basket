@@ -21,7 +21,7 @@
 #ifndef TAGEDIT_H
 #define TAGEDIT_H
 
-#include <KDE/KDialog>
+#include <QDialog>
 
 #include <QtCore/QList>
 #include <QtGui/QItemDelegate>
@@ -36,12 +36,11 @@ class QHBoxLayout;
 class QLabel;
 class QLineEdit;
 class QTreeWidget;
+class QToolButton;
+class QPushButton;
 
 class QKeyEvent;
 class QMouseEvent;
-
-class KIconButton;
-class KPushButton;
 
 class FontSizeCombo;
 class KColorCombo2;
@@ -125,7 +124,7 @@ signals:
 /**
   * @author Sébastien Laoût
   */
-class TagsEditDialog : public KDialog
+class TagsEditDialog : public QDialog
 {
     Q_OBJECT
 public:
@@ -164,9 +163,9 @@ private:
     void saveTagTo(Tag *tag);
     void ensureCurrentItemVisible();
     TagListView   *m_tags;
-    KPushButton   *m_moveUp;
-    KPushButton   *m_moveDown;
-    KPushButton   *m_deleteTag;
+    QPushButton   *m_moveUp;
+    QPushButton   *m_moveDown;
+    QPushButton   *m_deleteTag;
     QLineEdit     *m_tagName;
     QCheckBox     *m_inherit;
     QGroupBox     *m_tagBox;
@@ -175,7 +174,7 @@ private:
     QHBoxLayout   *m_stateBoxLayout;
     QLabel        *m_stateNameLabel;
     QLineEdit     *m_stateName;
-    KIconButton   *m_emblem;
+    QToolButton   *m_emblem;
     QPushButton   *m_removeEmblem;
     QPushButton   *m_bold;
     QPushButton   *m_underline;

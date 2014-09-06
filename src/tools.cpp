@@ -34,9 +34,7 @@
 #include <QtGui/QFontInfo>
 #include <QtGui/QTextDocument>  //For Qt::convertFromPlainText and Qt::WhiteSpaceNormal.
 #include <QDebug>
-
-#include <KDE/KIO/CopyJob>      //For KIO::trash
-#include <KDE/KUrl>
+#include <QUrl>
 
 #include "debugwindow.h"
 #include "config.h"
@@ -547,15 +545,6 @@ void Tools::deleteMetadataRecursively(const QString &folderOrFile)
                 deleteMetadataRecursively(folderOrFile + "/" + *it);
     }
 }
-
-void Tools::trashRecursively(const QString &folderOrFile)
-{
-    if (folderOrFile.isEmpty())
-        return;
-
-    KIO::trash( KUrl(folderOrFile), KIO::HideProgressInfo );
-}
-
 
 QString Tools::fileNameForNewFile(const QString &wantedName, const QString &destFolder)
 {

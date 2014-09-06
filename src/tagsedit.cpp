@@ -37,13 +37,9 @@
 #include <QtGui/QVBoxLayout>
 #include <QMessageBox>
 #include <QLineEdit>
-
-#include <KDE/KApplication>
-#include <KDE/KIconButton>
-#include <KDE/KIconLoader>
-#include <KDE/KLocale>
-#include <KDE/KPushButton>
-#include <KDE/KSeparator>
+#include <QApplication>
+#include <QToolButton>
+#include <QPushButton>
 
 #include "tag.h"
 #include "kcolorcombo2.h"
@@ -231,7 +227,7 @@ void TagListViewItem::setup()
     QBrush brush;
 
     bool withIcon = m_stateCopy || (m_tagCopy && !m_tagCopy->isMultiState());
-    brush.setColor(isSelected() ? kapp->palette().color(QPalette::Highlight)  :
+    brush.setColor(isSelected() ? qApp->palette().color(QPalette::Highlight)  :
                    (withIcon && state->backgroundColor().isValid() ? state->backgroundColor() :
                     treeWidget()->viewport()->palette().color(treeWidget()->viewport()->backgroundRole())));
     setBackground(1, brush);
@@ -303,32 +299,30 @@ TagListViewItem* TagListView::lastItem() const
 /** class TagsEditDialog: */
 
 TagsEditDialog::TagsEditDialog(QWidget *parent, State *stateToEdit, bool addNewTag)
-        : KDialog(parent)
+        : QDialog(parent)
         ,  m_loading(false)
 {
     // KDialog options
-    setCaption(tr("Customize Tags"));
-    setButtons(Ok | Cancel);
-    setDefaultButton(Ok);
+    setWindowTitle(tr("Customize Tags"));
+//    setButtons(Ok | Cancel);
+//    setDefaultButton(Ok);
     setObjectName("CustomizeTags");
     setModal(true);
-    showButtonSeparator(true);
-    connect(this, SIGNAL(okClicked()), SLOT(slotOk()));
-    connect(this, SIGNAL(cancelClicked()), SLOT(slotCancel()));
+//    showButtonSeparator(true);
+//    connect(this, SIGNAL(okClicked()), SLOT(slotOk()));
+//    connect(this, SIGNAL(cancelClicked()), SLOT(slotCancel()));
 
-    setMainWidget(new QWidget(this));
-
-    QHBoxLayout *layout = new QHBoxLayout(mainWidget());
+    QHBoxLayout *layout = new QHBoxLayout(this);
 
     /* Left part: */
 
-    QPushButton *newTag     = new QPushButton(tr("Ne&w Tag"),   mainWidget());
-    QPushButton *newState   = new QPushButton(tr("New St&ate"), mainWidget());
+    QPushButton *newTag     = new QPushButton(tr("Ne&w Tag"),   this);
+    QPushButton *newState   = new QPushButton(tr("New St&ate"), this);
 
     connect(newTag,   SIGNAL(clicked()), this, SLOT(newTag()));
     connect(newState, SIGNAL(clicked()), this, SLOT(newState()));
 
-    m_tags = new TagListView(mainWidget());
+    m_tags = new TagListView(this);
     m_tags->header()->hide();
     m_tags->setRootIsDecorated(false);
     //m_tags->addColumn("");
@@ -337,9 +331,9 @@ TagsEditDialog::TagsEditDialog(QWidget *parent, State *stateToEdit, bool addNewT
 
     m_tags->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    m_moveUp    = new KPushButton(KGuiItem("", "arrow-up"),   mainWidget());
-    m_moveDown  = new KPushButton(KGuiItem("", "arrow-down"), mainWidget());
-    m_deleteTag = new KPushButton(KGuiItem("", "edit-delete"), mainWidget());
+    m_moveUp    = new QPushButton(QIcon("://icons/arrow-up.png"), tr("Up"),  this);
+    m_moveDown  = new QPushButton(QIcon("://icons/arrow-down.png"), tr("Down"), this);
+    m_deleteTag = new QPushButton(QIcon("://icons/edit-delete.png"), tr("Delete"), this);
 
     m_moveUp->setToolTip(tr("Move Up (Ctrl+Shift+Up)"));
     m_moveDown->setToolTip(tr("Move Down (Ctrl+Shift+Down)"));
@@ -364,7 +358,7 @@ TagsEditDialog::TagsEditDialog(QWidget *parent, State *stateToEdit, bool addNewT
 
     /* Right part: */
 
-    QWidget *rightWidget = new QWidget(mainWidget());
+    QWidget *rightWidget = new QWidget(this);
 
     m_tagBox             = new QGroupBox(tr("Tag"), rightWidget);
     m_tagBoxLayout       = new QHBoxLayout;
@@ -409,10 +403,9 @@ TagsEditDialog::TagsEditDialog(QWidget *parent, State *stateToEdit, bool addNewT
     m_stateNameLabel->setBuddy(m_stateName);
 
     QWidget *emblemWidget = new QWidget(stateWidget);
-    m_emblem = new KIconButton(emblemWidget);
-    m_emblem->setIconType(KIconLoader::NoGroup, KIconLoader::Action);
-    m_emblem->setIconSize(16);
-    m_emblem->setIcon("edit-delete");
+    m_emblem = new QToolButton(emblemWidget);
+    m_emblem->setIconSize(QSize(16,16));
+    m_emblem->setIcon(QIcon("://icons/edit-delete.png"));
     m_removeEmblem = new QPushButton(QCoreApplication::translate("Remove tag emblem", "Remo&ve"), emblemWidget);
     QLabel *emblemLabel = new QLabel(tr("&Emblem:"), stateWidget);
     emblemLabel->setBuddy(m_emblem);
@@ -423,7 +416,7 @@ TagsEditDialog::TagsEditDialog(QWidget *parent, State *stateToEdit, bool addNewT
     height = qMax(height, m_removeEmblem->sizeHint().height());
     m_emblem->setFixedSize(height, height); // Make it square
     m_removeEmblem->setFixedHeight(height);
-    m_emblem->resetIcon();
+    m_emblem->setIcon(QIcon());
 
     QHBoxLayout *emblemLayout = new QHBoxLayout(emblemWidget);
     emblemLayout->addWidget(m_emblem);
@@ -528,7 +521,7 @@ TagsEditDialog::TagsEditDialog(QWidget *parent, State *stateToEdit, bool addNewT
     textEquivalentGrid->addLayout(onEveryLinesHelpLayout,   1, 2);
     textEquivalentGrid->setColumnStretch(/*col=*/3, /*stretch=*/255);
 
-    KSeparator *separator = new KSeparator(Qt::Horizontal, stateWidget);
+//    KSeparator *separator = new KSeparator(Qt::Horizontal, stateWidget);
 
     QGridLayout *stateGrid = new QGridLayout(stateWidget);
     stateGrid->addWidget(m_stateNameLabel, 0, 0);
@@ -545,7 +538,7 @@ TagsEditDialog::TagsEditDialog(QWidget *parent, State *stateToEdit, bool addNewT
     stateGrid->addWidget(m_font, 3, 1, 1, 4);
     stateGrid->addWidget(fontSizeLabel, 3, 5);
     stateGrid->addWidget(m_fontSize, 3, 6);
-    stateGrid->addWidget(separator, 4, 0, 1, 7);
+//    stateGrid->addWidget(separator, 4, 0, 1, 7);
     stateGrid->addLayout(textEquivalentGrid, 5, 0, 1, 7);
 
     QVBoxLayout *rightLayout = new QVBoxLayout(rightWidget);
@@ -1022,7 +1015,7 @@ void TagsEditDialog::renameIt()
 
 void TagsEditDialog::removeEmblem()
 {
-    m_emblem->resetIcon();
+    m_emblem->setIcon(QIcon());
     modified();
 }
 
@@ -1051,7 +1044,7 @@ void TagsEditDialog::modified()
     if (m_tags->currentItem()->parent())
         m_tags->currentItem()->parent()->setup();
 
-    m_removeEmblem->setEnabled(!m_emblem->icon().isEmpty() && !m_tags->currentItem()->isEmblemObligatory());
+    m_removeEmblem->setEnabled(!m_emblem->icon().isNull() && !m_tags->currentItem()->isEmblemObligatory());
     m_onEveryLines->setEnabled(!m_textEquivalent->text().isEmpty());
 }
 
@@ -1120,7 +1113,7 @@ void TagsEditDialog::loadBlankState()
 {
     QFont defaultFont;
     m_stateName->setText("");
-    m_emblem->resetIcon();
+    m_emblem->setIcon(QIcon());
     m_removeEmblem->setEnabled(false);
     m_backgroundColor->setColor(QColor());
     m_bold->setChecked(false);
@@ -1140,9 +1133,9 @@ void TagsEditDialog::loadStateFrom(State *state)
 {
     m_stateName->setText(state->name());
     if (state->emblem().isEmpty())
-        m_emblem->resetIcon();
+        m_emblem->setIcon(QIcon());
     else
-        m_emblem->setIcon(state->emblem());
+        m_emblem->setIcon(QIcon(state->emblem()));
     m_removeEmblem->setEnabled(!state->emblem().isEmpty() && !m_tags->currentItem()->isEmblemObligatory());
     m_backgroundColor->setColor(state->backgroundColor());
     m_bold->setChecked(state->bold());
@@ -1175,7 +1168,7 @@ void TagsEditDialog::loadTagFrom(Tag *tag)
 void TagsEditDialog::saveStateTo(State *state)
 {
     state->setName(m_stateName->text());
-    state->setEmblem(m_emblem->icon());
+    state->setEmblem(m_emblem->icon().name());
     state->setBackgroundColor(m_backgroundColor->color());
     state->setBold(m_bold->isChecked());
     state->setUnderline(m_underline->isChecked());

@@ -33,10 +33,7 @@
 #include <QTextEdit>
 #include <QCoreApplication>
 #include <QDialogButtonBox>
-
-#include <KDE/KStandardDirs>
-#include <KDE/KLocale>
-#include <KDE/KFileDialog>
+#include <QFileDialog>
 
 #include "basketscene.h"
 #include "basketfactory.h"
@@ -272,7 +269,7 @@ void SoftwareImporters::finishImport(BasketScene *basket)
 
 void SoftwareImporters::importKJots()
 {
-    QString dirPath = KStandardDirs::locateLocal("appdata", "") + "/../kjots/"; // I think the assumption is good
+    QString dirPath = QString();// TODO qt5 KStandardDirs::locateLocal("appdata", "") + "/../kjots/"; // I think the assumption is good
     QDir dir(dirPath, QString::null, QDir::Name | QDir::IgnoreCase, QDir::Files | QDir::NoSymLinks);
 
     QStringList list = dir.entryList();
@@ -353,7 +350,7 @@ void SoftwareImporters::importKJots()
 
 void SoftwareImporters::importKNotes()
 {
-    QString dirPath = KStandardDirs::locateLocal("appdata", "") + "/../knotes/"; // I thing the assumption is good
+    QString dirPath = QString(); // TODO qt5 KStandardDirs::locateLocal("appdata", "") + "/../knotes/"; // I thing the assumption is good
     QDir dir(dirPath, QString::null, QDir::Name | QDir::IgnoreCase, QDir::Files | QDir::NoSymLinks);
 
     QStringList list = dir.entryList();
@@ -516,8 +513,7 @@ void SoftwareImporters::importTomboy()
 void SoftwareImporters::importJreepadFile(){
     typedef QPair<BasketScene *, QDomElement> basketAndElementPair;
 
-    QString fileName = KFileDialog::getOpenFileName(KUrl("kfiledialog:///:ImportJreepadFile"),
-                                                    "*.xml|XML files");
+    QString fileName = QFileDialog::getOpenFileName(0, "", "XML files (*.xml)");
     if (fileName.isEmpty()) {
         return;
     }
@@ -571,7 +567,7 @@ void SoftwareImporters::importJreepadFile(){
 
 void SoftwareImporters::importTextFile()
 {
-    QString fileName = KFileDialog::getOpenFileName(KUrl("kfiledialog:///:ImportTextFile"),  "*|All files");
+    QString fileName = QFileDialog::getOpenFileName(0, "",  "All files (*)");
     if (fileName.isEmpty())
         return;
 
@@ -611,8 +607,9 @@ void SoftwareImporters::importTextFile()
   */
 void SoftwareImporters::importKnowIt()
 {
-    KUrl url = KFileDialog::getOpenUrl(KUrl("kfiledialog:///:ImportKnowIt"),
-                                       "*.kno|KnowIt files\n*|All files");
+//    KUrl url = QFileDialog::getOpenUrl(KUrl("kfiledialog:///:ImportKnowIt"), TODO replace qt5
+//                                       "*.kno|KnowIt files\n*|All files");
+    QUrl url = QUrl();
     if (!url.isEmpty()) {
         QFile file(url.path());
         QFileInfo info(url.path());
@@ -714,7 +711,7 @@ void SoftwareImporters::importKnowIt()
 
 void SoftwareImporters::importTuxCards()
 {
-    QString fileName = KFileDialog::getOpenFileName(KUrl("kfiledialog:///:ImportTuxCards"),  "*|All files");
+    QString fileName = QFileDialog::getOpenFileName(0, "",  "All files (*)");
     if (fileName.isEmpty())
         return;
 

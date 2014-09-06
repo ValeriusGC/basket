@@ -32,20 +32,13 @@
 #include <QMessageBox>
 #include <QDebug>
 #include <QLineEdit>
+#include <QColor>
 #include <QColorDialog>
 #include <QDialogButtonBox>
-
-#include <KDE/KApplication>
-#include <KDE/KUrlRequester>
-#include <KDE/KColorCombo>
-#include <KDE/KService>
-#include <KDE/KConfig>
-#include <KDE/KLocale>
-#include <KDE/KToolBar>
-#include <KDE/KIconButton>
-#include <KDE/KToggleAction>
-#include <KDE/KDesktopFile>
-#include <KDE/KLineEdit>
+#include <QApplication>
+#include <QToolButton>
+#include <QPushButton>
+#include <QPointer>
 
 #include "notecontent.h"
 #include "notefactory.h"
@@ -56,6 +49,7 @@
 #include "tools.h"
 #include "variouswidgets.h"
 #include "focusedwidgets.h"
+#include "kcolorcombo2.h"
 
 /** class NoteEditor: */
 
@@ -327,7 +321,7 @@ HtmlEditor::HtmlEditor(HtmlContent *htmlContent, QWidget *parent)
 
     connect(InlineEditors::instance()->richTextFont,     SIGNAL(editTextChanged(const QString&)), textEdit, SLOT(setFontFamily(const QString&)));
     connect(InlineEditors::instance()->richTextFontSize, SIGNAL(sizeChanged(qreal)),            textEdit, SLOT(setFontPointSize(qreal)));
-    connect(InlineEditors::instance()->richTextColor,    SIGNAL(activated(const QColor&)),    textEdit, SLOT(setTextColor(const QColor&)));
+    connect(InlineEditors::instance()->richTextColor,    SIGNAL(changed(QColor)),    textEdit, SLOT(setTextColor(QColor)));
 
     connect(InlineEditors::instance()->focusWidgetFilter, SIGNAL(escapePressed()),  textEdit, SLOT(setFocus()));
     connect(InlineEditors::instance()->focusWidgetFilter, SIGNAL(returnPressed()), textEdit, SLOT(setFocus()));
@@ -687,17 +681,17 @@ LinkEditDialog::LinkEditDialog(LinkContent *contentNote, QWidget *parent/*, QKey
 
     QWidget *wid = new QWidget(this);
     QHBoxLayout *hLay = new QHBoxLayout(wid);
-    m_icon = new KIconButton(wid);
+    m_icon = new QToolButton(wid);
     QLabel *label3 = new QLabel(this);
     label3->setText(tr("&Icon:"));
     label3->setBuddy(m_icon);
 
     if(m_noteContent->url().isEmpty()){
-      m_url = new  KUrlRequester(KUrl(""), wid);
-      m_url->setMode(KFile::File | KFile::ExistingOnly);
+//      m_url = new  KUrlRequester(KUrl(""), wid);
+//      m_url->setMode(KFile::File | KFile::ExistingOnly);
     }else{ 
-      m_url = new KUrlRequester(m_noteContent->url().prettyUrl(), wid);
-      m_url->setMode(KFile::File | KFile::ExistingOnly);
+//      m_url = new KUrlRequester(m_noteContent->url().prettyUrl(), wid);
+//      m_url->setMode(KFile::File | KFile::ExistingOnly);
     }
     
     if(m_noteContent->title().isEmpty()){
@@ -706,12 +700,11 @@ LinkEditDialog::LinkEditDialog(LinkContent *contentNote, QWidget *parent/*, QKey
       m_title->setText(m_noteContent->title());
     }
     
-    KUrl filteredURL = NoteFactory::filteredURL(KUrl(m_url->lineEdit()->text()));//KURIFilter::self()->filteredURI(KUrl(m_url->lineEdit()->text()));
-    m_icon->setIconType(KIconLoader::NoGroup, KIconLoader::MimeType);
-    m_icon->setIconSize(LinkLook::lookForURL(filteredURL)->iconSize());
+//    KUrl filteredURL = NoteFactory::filteredURL(KUrl(m_url->lineEdit()->text()));//KURIFilter::self()->filteredURI(KUrl(m_url->lineEdit()->text()));
+//    m_icon->setIconSize(QSize(LinkLook::lookForURL(filteredURL)->iconSize(),LinkLook::lookForURL(filteredURL)->iconSize()));
     m_autoIcon = new QPushButton(tr("Auto"), wid); // Create before to know size here:
     /* Icon button: */
-    m_icon->setIcon(m_noteContent->icon());
+    m_icon->setIcon(QIcon(m_noteContent->icon()));
     int minSize = m_autoIcon->sizeHint().height();
     // Make the icon button at least the same heigh than the other buttons for a better alignment (nicer to the eyes):
     if (m_icon->sizeHint().height() < minSize)
@@ -725,13 +718,13 @@ LinkEditDialog::LinkEditDialog(LinkContent *contentNote, QWidget *parent/*, QKey
     hLay->addWidget(m_autoIcon);
     hLay->addStretch();
 
-    m_url->lineEdit()->setMinimumWidth(m_url->lineEdit()->fontMetrics().maxWidth()*20);
+//    m_url->lineEdit()->setMinimumWidth(m_url->lineEdit()->fontMetrics().maxWidth()*20);
     m_title->setMinimumWidth(m_title->fontMetrics().maxWidth()*20);
 
     //m_url->setShowLocalProtocol(true);
     QLabel *label1 = new QLabel(this);
     label1->setText(tr("Ta&rget:"));
-    label1->setBuddy(m_url);
+//    label1->setBuddy(m_url);
 
     QLabel *label2 = new QLabel(this);
     label2->setText(tr("&Title:"));
@@ -740,12 +733,12 @@ LinkEditDialog::LinkEditDialog(LinkContent *contentNote, QWidget *parent/*, QKey
     layout->addWidget(label1,  0, 0, Qt::AlignVCenter);
     layout->addWidget(label2,  1, 0, Qt::AlignVCenter);
     layout->addWidget(label3,  2, 0, Qt::AlignVCenter);
-    layout->addWidget(m_url,   0, 1, Qt::AlignVCenter);
+//    layout->addWidget(m_url,   0, 1, Qt::AlignVCenter);
     layout->addWidget(wid1,    1, 1, Qt::AlignVCenter);
     layout->addWidget(wid,     2, 1, Qt::AlignVCenter);
 
     m_isAutoModified = false;
-    connect(m_url,   SIGNAL(editTextChanged(const QString&)), this, SLOT(urlChanged(const QString&)));
+//    connect(m_url,   SIGNAL(editTextChanged(const QString&)), this, SLOT(urlChanged(const QString&)));
     connect(m_title, SIGNAL(editTextChanged(const QString&)), this, SLOT(doNotAutoTitle(const QString&)));
     connect(m_icon,  SIGNAL(iconChanged(QString))       , this, SLOT(doNotAutoIcon(QString)));
     connect(m_autoTitle, SIGNAL(clicked()), this, SLOT(guessTitle()));
@@ -757,6 +750,7 @@ LinkEditDialog::LinkEditDialog(LinkContent *contentNote, QWidget *parent/*, QKey
     policy.setVerticalStretch(255);
     stretchWidget->setSizePolicy(policy); // Make it fill ALL vertical space
     layout->addWidget(stretchWidget, 3, 1, Qt::AlignVCenter);
+    layout->addWidget(buttonBox, 3, 1, Qt::AlignRight);
 
     
    
@@ -774,13 +768,13 @@ LinkEditDialog::~LinkEditDialog()
 void LinkEditDialog::ensurePolished()
 {
     QDialog::ensurePolished();
-    if (m_url->lineEdit()->text().isEmpty()) {
-        m_url->setFocus();
-        m_url->lineEdit()->end(false);
-    } else {
-        m_title->setFocus();
-        m_title->end(false);
-    }
+//    if (m_url->lineEdit()->text().isEmpty()) {
+//        m_url->setFocus();
+//        m_url->lineEdit()->end(false);
+//    } else {
+//        m_title->setFocus();
+//        m_title->end(false);
+//    }
 }
 
 
@@ -790,13 +784,13 @@ void LinkEditDialog::urlChanged(const QString&)
 //  guessTitle();
 //  guessIcon();
     // Optimization (filter only once):
-    KUrl filteredURL = NoteFactory::filteredURL(KUrl(m_url->url()));//KURIFilter::self()->filteredURI(KUrl(m_url->url()));
-    if (m_autoIcon->isChecked())
-        m_icon->setIcon(NoteFactory::iconForURL(filteredURL));
-    if (m_autoTitle->isChecked()) {
-        m_title->setText(NoteFactory::titleForURL(filteredURL));
-        m_autoTitle->setChecked(true); // Because the setText() will disable it!
-    }
+//    KUrl filteredURL = NoteFactory::filteredURL(KUrl(m_url->url()));//KURIFilter::self()->filteredURI(KUrl(m_url->url()));
+//    if (m_autoIcon->isChecked())
+//        m_icon->setIcon(QIcon(NoteFactory::iconForURL(filteredURL)));
+//    if (m_autoTitle->isChecked()) {
+//        m_title->setText(NoteFactory::titleForURL(filteredURL));
+//        m_autoTitle->setChecked(true); // Because the setText() will disable it!
+//    }
 }
 
 void LinkEditDialog::doNotAutoTitle(const QString&)
@@ -815,32 +809,32 @@ void LinkEditDialog::doNotAutoIcon(QString)
 void LinkEditDialog::guessIcon()
 {
     if (m_autoIcon->isChecked()) {
-        KUrl filteredURL = NoteFactory::filteredURL(KUrl(m_url->url()));//KURIFilter::self()->filteredURI(KUrl(m_url->url()));
-        m_icon->setIcon(NoteFactory::iconForURL(filteredURL));
+//        KUrl filteredURL = NoteFactory::filteredURL(KUrl(m_url->url()));//KURIFilter::self()->filteredURI(KUrl(m_url->url()));
+//        m_icon->setIcon(QIcon(NoteFactory::iconForURL(filteredURL)));
     }
 }
 
 void LinkEditDialog::guessTitle()
 {
     if (m_autoTitle->isChecked()) {
-        KUrl filteredURL = NoteFactory::filteredURL(KUrl(m_url->url()));//KURIFilter::self()->filteredURI(KUrl(m_url->url()));
-        m_title->setText(NoteFactory::titleForURL(filteredURL));
-        m_autoTitle->setChecked(true); // Because the setText() will disable it!
+//        KUrl filteredURL = NoteFactory::filteredURL(KUrl(m_url->url()));//KURIFilter::self()->filteredURI(KUrl(m_url->url()));
+//        m_title->setText(NoteFactory::titleForURL(filteredURL));
+//        m_autoTitle->setChecked(true); // Because the setText() will disable it!
     }
 }
 
 void LinkEditDialog::slotOk()
 {
-    KUrl filteredURL = NoteFactory::filteredURL(KUrl(m_url->url()));//KURIFilter::self()->filteredURI(KUrl(m_url->url()));
-    m_noteContent->setLink(filteredURL, m_title->text(), m_icon->icon(), m_autoTitle->isChecked(), m_autoIcon->isChecked());
-    m_noteContent->setEdited();
+//    KUrl filteredURL = NoteFactory::filteredURL(KUrl(m_url->url()));//KURIFilter::self()->filteredURI(KUrl(m_url->url()));
+//    m_noteContent->setLink(filteredURL, m_title->text(), m_icon->icon().name(), m_autoTitle->isChecked(), m_autoIcon->isChecked());
+//    m_noteContent->setEdited();
 
     /* Change icon size if link look have changed */
-    LinkLook *linkLook = LinkLook::lookForURL(filteredURL);
-    QString icon = m_icon->icon();             // When we change size, icon isn't changed and keep it's old size
+//    LinkLook *linkLook = LinkLook::lookForURL(filteredURL);
+    QString icon = m_icon->icon().name();             // When we change size, icon isn't changed and keep it's old size
     m_icon->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum); // Reset size policy
-    m_icon->setIconSize(linkLook->iconSize()); //  So I store it's name and reload it after size change !
-    m_icon->setIcon(icon);
+//    m_icon->setIconSize(QSize(linkLook->iconSize(), linkLook->iconSize())); //  So I store it's name and reload it after size change !
+    m_icon->setIcon(QIcon(icon));
     int minSize = m_autoIcon->sizeHint().height();
     // Make the icon button at least the same heigh than the other buttons for a better alignment (nicer to the eyes):
     if (m_icon->sizeHint().height() < minSize)
@@ -968,24 +962,23 @@ LauncherEditDialog::LauncherEditDialog(LauncherContent *contentNote, QWidget *pa
     //QGridLayout *layout = new QGridLayout(page, /*nRows=*/4, /*nCols=*/2, /*margin=*/0, spacingHint());
     QGridLayout *layout = new QGridLayout(this);
 
-    KService service(contentNote->fullPath());
+//    KService service(contentNote->fullPath());
 
-    m_command = new RunCommandRequester(service.exec(), tr("Choose a command to run:"), this);
-    m_name    = new QLineEdit(service.name(), this);
+    m_command = new RunCommandRequester(contentNote->fullPath(), tr("Choose a command to run:"), this);// TODO service.exec
+    m_name    = new QLineEdit(contentNote->fullPath(), this); // TODO service.name
 
     QWidget *wid = new QWidget(this);
     QHBoxLayout *hLay = new QHBoxLayout(wid);
-    m_icon = new KIconButton(wid);
+    m_icon = new QToolButton(wid);
 
     QLabel *label = new QLabel(this);
     label->setText(tr("&Icon:"));
     label->setBuddy(m_icon);
 
-    m_icon->setIconType(KIconLoader::NoGroup, KIconLoader::Application);
-    m_icon->setIconSize(LinkLook::launcherLook->iconSize());
+    m_icon->setIconSize(QSize(LinkLook::launcherLook->iconSize(), LinkLook::launcherLook->iconSize()));
     QPushButton *guessButton = new QPushButton(tr("&Guess"), wid);
     /* Icon button: */
-    m_icon->setIcon(service.icon());
+    m_icon->setIcon(QIcon(contentNote->fullPath())); // TODO service.icon
     int minSize = guessButton->sizeHint().height();
     // Make the icon button at least the same heigh than the other buttons for a better alignment (nicer to the eyes):
     if (m_icon->sizeHint().height() < minSize)
@@ -1047,22 +1040,22 @@ void LauncherEditDialog::slotOk()
     // TODO: Remember if a string has been modified AND IS DIFFERENT FROM THE
     // ORIGINAL!
 
-    KDesktopFile dtFile(m_noteContent->fullPath());
-    KConfigGroup grp = dtFile.desktopGroup();
-    grp.writeEntry("Exec", m_command->runCommand());
-    grp.writeEntry("Name", m_name->text());
-    grp.writeEntry("Icon", m_icon->icon());
+//    KDesktopFile dtFile(m_noteContent->fullPath()); TODO recreate
+//    KConfigGroup grp = dtFile.desktopGroup();
+//    grp.writeEntry("Exec", m_command->runCommand());
+//    grp.writeEntry("Name", m_name->text());
+//    grp.writeEntry("Icon", m_icon->icon().name());
 
     // Just for faster feedback: conf object will save to disk (and then
     // m_note->loadContent() called)
-    m_noteContent->setLauncher(m_name->text(), m_icon->icon(),
+    m_noteContent->setLauncher(m_name->text(), m_icon->icon().name(),
                                m_command->runCommand());
     m_noteContent->setEdited();
 }
 
 void LauncherEditDialog::guessIcon()
 {
-    m_icon->setIcon(NoteFactory::iconForCommand(m_command->runCommand()));
+    m_icon->setIcon(QIcon(NoteFactory::iconForCommand(m_command->runCommand())));
 }
 
 /** class InlineEditors: */
@@ -1114,7 +1107,7 @@ void InlineEditors::initToolBars(QToolBar *editbar)
     a->setText(tr("Font Size"));
     a->setShortcut(Qt::Key_F7);
 
-    richTextColor = new KColorCombo(Global::mainWin);
+    richTextColor = new KColorCombo2(QColor(Qt::black), QColor(Qt::black), Global::mainWin);
     richTextColor->installEventFilter(focusWidgetFilter);
     richTextColor->setFixedWidth(richTextColor->sizeHint().height() * 2);
     richTextColor->setColor(textColor);
@@ -1229,6 +1222,6 @@ void InlineEditors::disableRichTextToolBar()
 
 QPalette InlineEditors::palette() const
 {
-    return kapp->palette();
+    return qApp->palette();
 }
 

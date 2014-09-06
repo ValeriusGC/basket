@@ -34,12 +34,7 @@
 #include <QLineEdit>
 #include <QPointer>
 #include <QSettings>
-
-#include <KDE/KGlobal>
-#include <KDE/KLocale>
-#include <KDE/KAboutData>
-#include <KDE/KMimeType>
-#include <KDE/KTabWidget>
+#include <QTabWidget>
 
 #include "kgpgme.h"
 #include "basketscene.h"
@@ -862,13 +857,13 @@ NotesAppearancePage::NotesAppearancePage(QWidget * parent)
         : QWidget(parent)
 {
     QVBoxLayout *layout = new QVBoxLayout(this);
-    KTabWidget *tabs = new KTabWidget(this);
+    QTabWidget *tabs = new QTabWidget(this);
     layout->addWidget(tabs);
 
     m_soundLook       = new LinkLookEditWidget(this, tr("Conference audio record"),                         "folder-sound",       tabs);
     m_fileLook        = new LinkLookEditWidget(this, tr("Annual report"),                                   "folder-documents",    tabs);
     m_localLinkLook   = new LinkLookEditWidget(this, tr("Home folder"),                                     "user-home", tabs);
-    m_networkLinkLook = new LinkLookEditWidget(this, "www.kde.org",             KMimeType::iconNameForUrl(KUrl("http://www.kde.org")), tabs);
+    m_networkLinkLook = new LinkLookEditWidget(this, "www.kde.org",             "", tabs); // TODO qt5 KMimeType::iconNameForUrl(KUrl("http://www.kde.org")), tabs);
     m_launcherLook    = new LinkLookEditWidget(this, tr("Launch %1").arg(qApp->applicationName()), "basket",      tabs);
     m_crossReferenceLook=new LinkLookEditWidget(this, tr("Another basket"), "basket", tabs);
 

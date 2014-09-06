@@ -1431,7 +1431,7 @@ void BNPView::checkCleanup() {
         DEBUG_WIN << "<font color='red'>" + topDirEntry + " does not belong to any basket!</font>";
         //Tools::deleteRecursively(Global::basketsFolder() + "/" + topDirEntry);
         //DEBUG_WIN << "<font color='red'>\t" + topDirEntry + " removed!</font>";
-        Tools::trashRecursively(Global::basketsFolder() + "/" + topDirEntry);
+        Tools::deleteRecursively(Global::basketsFolder() + "/" + topDirEntry);
         DEBUG_WIN << "<font color='red'>\t" + topDirEntry + " trashed!</font>";
         foreach(subDirEntry, fileList) {
             fileInfo.setFile(Global::basketsFolder() + "/" + subDirEntry);
@@ -1445,7 +1445,7 @@ void BNPView::checkCleanup() {
         DEBUG_WIN << "<font color='red'>" + subDirEntry + " does not belong to any note!</font>";
         //Tools::deleteRecursively(Global::basketsFolder() + "/" + subDirEntry);
         //DEBUG_WIN << "<font color='red'>\t" + subDirEntry + " removed!</font>";
-        Tools::trashRecursively(Global::basketsFolder() + "/" + subDirEntry);
+        Tools::deleteRecursively(Global::basketsFolder() + "/" + subDirEntry);
         DEBUG_WIN << "<font color='red'>\t" + subDirEntry + " trashed!</font>";
     }
     DEBUG_WIN << "Check, cleanup and reindexing completed";
