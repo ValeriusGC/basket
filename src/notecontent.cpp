@@ -214,47 +214,47 @@ NoteType::Id UnknownContent::type() const
 
 QString TextContent::typeName() const
 {
-    return i18n("Plain Text");
+    return tr("Plain Text");
 }
 QString HtmlContent::typeName() const
 {
-    return i18n("Text");
+    return tr("Text");
 }
 QString ImageContent::typeName() const
 {
-    return i18n("Image");
+    return tr("Image");
 }
 QString AnimationContent::typeName() const
 {
-    return i18n("Animation");
+    return tr("Animation");
 }
 QString SoundContent::typeName() const
 {
-    return i18n("Sound");
+    return tr("Sound");
 }
 QString FileContent::typeName() const
 {
-    return i18n("File");
+    return tr("File");
 }
 QString LinkContent::typeName() const
 {
-    return i18n("Link");
+    return tr("Link");
 }
 QString CrossReferenceContent::typeName() const
 {
-    return i18n("Cross Reference");
+    return tr("Cross Reference");
 }
 QString LauncherContent::typeName() const
 {
-    return i18n("Launcher");
+    return tr("Launcher");
 }
 QString ColorContent::typeName() const
 {
-    return i18n("Color");
+    return tr("Color");
 }
 QString UnknownContent::typeName() const
 {
-    return i18n("Unknown");
+    return tr("Unknown");
 }
 
 QString TextContent::lowerTypeName() const
@@ -627,47 +627,47 @@ bool UnknownContent::match(const FilterData &data)
 
 QString TextContent::editToolTipText() const
 {
-    return i18n("Edit this plain text");
+    return tr("Edit this plain text");
 }
 QString HtmlContent::editToolTipText() const
 {
-    return i18n("Edit this text");
+    return tr("Edit this text");
 }
 QString ImageContent::editToolTipText() const
 {
-    return i18n("Edit this image");
+    return tr("Edit this image");
 }
 QString AnimationContent::editToolTipText() const
 {
-    return i18n("Edit this animation");
+    return tr("Edit this animation");
 }
 QString SoundContent::editToolTipText() const
 {
-    return i18n("Edit the file name of this sound");
+    return tr("Edit the file name of this sound");
 }
 QString FileContent::editToolTipText() const
 {
-    return i18n("Edit the name of this file");
+    return tr("Edit the name of this file");
 }
 QString LinkContent::editToolTipText() const
 {
-    return i18n("Edit this link");
+    return tr("Edit this link");
 }
 QString CrossReferenceContent::editToolTipText() const
 {
-    return i18n("Edit this cross reference");
+    return tr("Edit this cross reference");
 }
 QString LauncherContent::editToolTipText() const
 {
-    return i18n("Edit this launcher");
+    return tr("Edit this launcher");
 }
 QString ColorContent::editToolTipText() const
 {
-    return i18n("Edit this color");
+    return tr("Edit this color");
 }
 QString UnknownContent::editToolTipText() const
 {
-    return i18n("Edit this unknown object");
+    return tr("Edit this unknown object");
 }
 
 QString TextContent::cssClass() const
@@ -1014,12 +1014,12 @@ QString TextContent::linkAt(const QPointF &/*pos*/)
 QString TextContent::messageWhenOpening(OpenMessage where)
 {
     switch (where) {
-    case OpenOne:               return i18n("Opening plain text...");
-    case OpenSeveral:           return i18n("Opening plain texts...");
-    case OpenOneWith:           return i18n("Opening plain text with...");
-    case OpenSeveralWith:       return i18n("Opening plain texts with...");
-    case OpenOneWithDialog:     return i18n("Open plain text with:");
-    case OpenSeveralWithDialog: return i18n("Open plain texts with:");
+    case OpenOne:               return tr("Opening plain text...");
+    case OpenSeveral:           return tr("Opening plain texts...");
+    case OpenOneWith:           return tr("Opening plain text with...");
+    case OpenSeveralWith:       return tr("Opening plain texts with...");
+    case OpenOneWithDialog:     return tr("Open plain text with:");
+    case OpenSeveralWithDialog: return tr("Open plain texts with:");
     default:                    return "";
     }
 }
@@ -1124,12 +1124,12 @@ QString HtmlContent::linkAt(const QPointF &pos)
 QString HtmlContent::messageWhenOpening(OpenMessage where)
 {
     switch (where) {
-    case OpenOne:               return i18n("Opening text...");
-    case OpenSeveral:           return i18n("Opening texts...");
-    case OpenOneWith:           return i18n("Opening text with...");
-    case OpenSeveralWith:       return i18n("Opening texts with...");
-    case OpenOneWithDialog:     return i18n("Open text with:");
-    case OpenSeveralWithDialog: return i18n("Open texts with:");
+    case OpenOne:               return tr("Opening text...");
+    case OpenSeveral:           return tr("Opening texts...");
+    case OpenOneWith:           return tr("Opening text with...");
+    case OpenSeveralWith:       return tr("Opening texts with...");
+    case OpenOneWithDialog:     return tr("Open text with:");
+    case OpenSeveralWithDialog: return tr("Open texts with:");
     default:                    return "";
     }
 }
@@ -1249,19 +1249,19 @@ bool ImageContent::saveToFile()
 
 void ImageContent::toolTipInfos(QStringList *keys, QStringList *values)
 {
-    keys->append(i18n("Size"));
-    values->append(i18n("%1 by %2 pixels", QString::number(m_pixmapItem.pixmap().width()), QString::number(m_pixmapItem.pixmap().height())));
+    keys->append(tr("Size"));
+    values->append(tr("%1 by %2 pixels").arg(QString::number(m_pixmapItem.pixmap().width()), QString::number(m_pixmapItem.pixmap().height())));
 }
 
 QString ImageContent::messageWhenOpening(OpenMessage where)
 {
     switch (where) {
-    case OpenOne:               return i18n("Opening image...");
-    case OpenSeveral:           return i18n("Opening images...");
-    case OpenOneWith:           return i18n("Opening image with...");
-    case OpenSeveralWith:       return i18n("Opening images with...");
-    case OpenOneWithDialog:     return i18n("Open image with:");
-    case OpenSeveralWithDialog: return i18n("Open images with:");
+    case OpenOne:               return tr("Opening image...");
+    case OpenSeveral:           return tr("Opening images...");
+    case OpenOneWith:           return tr("Opening image with...");
+    case OpenSeveralWith:       return tr("Opening images with...");
+    case OpenOneWithDialog:     return tr("Open image with:");
+    case OpenSeveralWithDialog: return tr("Open images with:");
     default:                    return "";
     }
 }
@@ -1285,7 +1285,7 @@ void ImageContent::exportToHTML(HTMLExporter *exporter, int /*indent*/)
         qreal scale = contentWidth / m_pixmapItem.pixmap().width();
         width  = m_pixmapItem.pixmap().width()  * scale;
         height = m_pixmapItem.pixmap().height() * scale;
-        exporter->stream << "<a href=\"" << exporter->dataFolderName << imageName << "\" title=\"" << i18n("Click for full size view") << "\">";
+        exporter->stream << "<a href=\"" << exporter->dataFolderName << imageName << "\" title=\"" << tr("Click for full size view") << "\">";
     }
 
     exporter->stream << "<img src=\"" << exporter->dataFolderName << imageName
@@ -1377,12 +1377,12 @@ bool AnimationContent::saveToFile()
 QString AnimationContent::messageWhenOpening(OpenMessage where)
 {
     switch (where) {
-    case OpenOne:               return i18n("Opening animation...");
-    case OpenSeveral:           return i18n("Opening animations...");
-    case OpenOneWith:           return i18n("Opening animation with...");
-    case OpenSeveralWith:       return i18n("Opening animations with...");
-    case OpenOneWithDialog:     return i18n("Open animation with:");
-    case OpenSeveralWithDialog: return i18n("Open animations with:");
+    case OpenOne:               return tr("Opening animation...");
+    case OpenSeveral:           return tr("Opening animations...");
+    case OpenOneWith:           return tr("Opening animation with...");
+    case OpenSeveralWith:       return tr("Opening animations with...");
+    case OpenOneWithDialog:     return tr("Open animation with:");
+    case OpenSeveralWithDialog: return tr("Open animations with:");
     default:                    return "";
     }
 }
@@ -1457,12 +1457,12 @@ void FileContent::toolTipInfos(QStringList *keys, QStringList *values)
     uint size = QFileInfo(fullPath()).size();
     QString humanFileSize = KIO::convertSize((KIO::filesize_t)size);
 
-    keys->append(i18n("Size"));
+    keys->append(tr("Size"));
     values->append(humanFileSize);
 
     KMimeType::Ptr mime = KMimeType::findByUrl(KUrl(fullPath()));
     if (mime) {
-        keys->append(i18n("Type"));
+        keys->append(tr("Type"));
         values->append(mime->comment());
     }
 
@@ -1505,7 +1505,7 @@ QRectF FileContent::zoneRect(int zone, const QPointF &/*pos*/)
 
 QString FileContent::zoneTip(int zone)
 {
-    return (zone == Note::Custom0 ? i18n("Open this file") : QString());
+    return (zone == Note::Custom0 ? tr("Open this file") : QString());
 }
 
 Qt::CursorShape FileContent::cursorFromZone(int zone) const
@@ -1525,12 +1525,12 @@ int FileContent::xEditorIndent()
 QString FileContent::messageWhenOpening(OpenMessage where)
 {
     switch (where) {
-    case OpenOne:               return i18n("Opening file...");
-    case OpenSeveral:           return i18n("Opening files...");
-    case OpenOneWith:           return i18n("Opening file with...");
-    case OpenSeveralWith:       return i18n("Opening files with...");
-    case OpenOneWithDialog:     return i18n("Open file with:");
-    case OpenSeveralWithDialog: return i18n("Open files with:");
+    case OpenOne:               return tr("Opening file...");
+    case OpenSeveral:           return tr("Opening files...");
+    case OpenOneWith:           return tr("Opening file with...");
+    case OpenSeveralWith:       return tr("Opening files with...");
+    case OpenOneWithDialog:     return tr("Open file with:");
+    case OpenSeveralWithDialog: return tr("Open files with:");
     default:                    return "";
     }
 }
@@ -1612,7 +1612,7 @@ void SoundContent::stateChanged(Phonon::State newState, Phonon::State oldState)
 
 QString SoundContent::zoneTip(int zone)
 {
-    return (zone == Note::Custom0 ? i18n("Open this sound") : QString());
+    return (zone == Note::Custom0 ? tr("Open this sound") : QString());
 }
 
 void SoundContent::setHoveredZone(int oldZone, int newZone)
@@ -1639,12 +1639,12 @@ void SoundContent::setHoveredZone(int oldZone, int newZone)
 QString SoundContent::messageWhenOpening(OpenMessage where)
 {
     switch (where) {
-    case OpenOne:               return i18n("Opening sound...");
-    case OpenSeveral:           return i18n("Opening sounds...");
-    case OpenOneWith:           return i18n("Opening sound with...");
-    case OpenSeveralWith:       return i18n("Opening sounds with...");
-    case OpenOneWithDialog:     return i18n("Open sound with:");
-    case OpenSeveralWithDialog: return i18n("Open sounds with:");
+    case OpenOne:               return tr("Opening sound...");
+    case OpenSeveral:           return tr("Opening sounds...");
+    case OpenOneWith:           return tr("Opening sound with...");
+    case OpenSeveralWith:       return tr("Opening sounds with...");
+    case OpenOneWithDialog:     return tr("Open sound with:");
+    case OpenSeveralWithDialog: return tr("Open sounds with:");
     default:                    return "";
     }
 }
@@ -1688,7 +1688,7 @@ void LinkContent::saveToNode(QDomDocument &doc, QDomElement &content)
 
 void LinkContent::toolTipInfos(QStringList *keys, QStringList *values)
 {
-    keys->append(i18n("Target"));
+    keys->append(tr("Target"));
     values->append(m_url.prettyUrl());
 }
 
@@ -1711,7 +1711,7 @@ QRectF LinkContent::zoneRect(int zone, const QPointF &/*pos*/)
 
 QString LinkContent::zoneTip(int zone)
 {
-    return (zone == Note::Custom0 ? i18n("Open this link") : QString());
+    return (zone == Note::Custom0 ? tr("Open this link") : QString());
 }
 
 Qt::CursorShape LinkContent::cursorFromZone(int zone) const
@@ -1738,15 +1738,15 @@ KUrl LinkContent::urlToOpen(bool /*with*/)
 QString LinkContent::messageWhenOpening(OpenMessage where)
 {
     if (url().isEmpty())
-        return i18n("Link have no URL to open.");
+        return tr("Link have no URL to open.");
 
     switch (where) {
-    case OpenOne:               return i18n("Opening link target...");
-    case OpenSeveral:           return i18n("Opening link targets...");
-    case OpenOneWith:           return i18n("Opening link target with...");
-    case OpenSeveralWith:       return i18n("Opening link targets with...");
-    case OpenOneWithDialog:     return i18n("Open link target with:");
-    case OpenSeveralWithDialog: return i18n("Open link targets with:");
+    case OpenOne:               return tr("Opening link target...");
+    case OpenSeveral:           return tr("Opening link targets...");
+    case OpenOneWith:           return tr("Opening link target with...");
+    case OpenSeveralWith:       return tr("Opening link targets with...");
+    case OpenOneWithDialog:     return tr("Open link target with:");
+    case OpenSeveralWithDialog: return tr("Open link targets with:");
     default:                    return "";
     }
 }
@@ -1957,7 +1957,7 @@ void CrossReferenceContent::saveToNode(QDomDocument &doc, QDomElement &content)
 
 void CrossReferenceContent::toolTipInfos(QStringList *keys, QStringList *values)
 {
-    keys->append(i18n("Target"));
+    keys->append(tr("Target"));
     values->append(m_url.prettyUrl());
 }
 
@@ -1980,7 +1980,7 @@ QRectF CrossReferenceContent::zoneRect(int zone, const QPointF &/*pos*/)
 
 QString CrossReferenceContent::zoneTip(int zone)
 {
-    return (zone == Note::Custom0 ? i18n("Open this link") : QString());
+    return (zone == Note::Custom0 ? tr("Open this link") : QString());
 }
 
 Qt::CursorShape CrossReferenceContent::cursorFromZone(int zone) const
@@ -1993,7 +1993,7 @@ Qt::CursorShape CrossReferenceContent::cursorFromZone(int zone) const
 QString CrossReferenceContent::statusBarMessage(int zone)
 {
     if (zone == Note::Custom0 || zone == Note::Content)
-        return i18n("Link to %1").arg(this->title());
+        return tr("Link to %1").arg(this->title());
     else
         return "";
 }
@@ -2006,10 +2006,10 @@ KUrl CrossReferenceContent::urlToOpen(bool /*with*/)
 QString CrossReferenceContent::messageWhenOpening(OpenMessage where)
 {
     if (url().isEmpty())
-        return i18n("Link has no basket to open.");
+        return tr("Link has no basket to open.");
 
     switch (where) {
-    case OpenOne:               return i18n("Opening basket...");
+    case OpenOne:               return tr("Opening basket...");
     default:                    return "";
     }
 }
@@ -2115,14 +2115,14 @@ void LauncherContent::toolTipInfos(QStringList *keys, QStringList *values)
 
     QString exec = service.exec();
     if (service.terminal())
-        exec = i18n("%1 <i>(run in terminal)</i>", exec);
+        exec = tr("%1 <i>(run in terminal)</i>").arg(exec);
 
     if (!service.comment().isEmpty() && service.comment() != service.name()) {
-        keys->append(i18n("Comment"));
+        keys->append(tr("Comment"));
         values->append(service.comment());
     }
 
-    keys->append(i18n("Command"));
+    keys->append(tr("Command"));
     values->append(exec);
 }
 
@@ -2145,7 +2145,7 @@ QRectF LauncherContent::zoneRect(int zone, const QPointF &/*pos*/)
 
 QString LauncherContent::zoneTip(int zone)
 {
-    return (zone == Note::Custom0 ? i18n("Launch this application") : QString());
+    return (zone == Note::Custom0 ? tr("Launch this application") : QString());
 }
 
 Qt::CursorShape LauncherContent::cursorFromZone(int zone) const
@@ -2166,11 +2166,11 @@ KUrl LauncherContent::urlToOpen(bool with)
 QString LauncherContent::messageWhenOpening(OpenMessage where)
 {
     if (KService(fullPath()).exec().isEmpty())
-        return i18n("The launcher have no command to run.");
+        return tr("The launcher have no command to run.");
 
     switch (where) {
-    case OpenOne:               return i18n("Launching application...");
-    case OpenSeveral:           return i18n("Launching applications...");
+    case OpenOne:               return tr("Launching application...");
+    case OpenSeveral:           return tr("Launching applications...");
     case OpenOneWith:
     case OpenSeveralWith:
     case OpenOneWithDialog:
@@ -2283,11 +2283,11 @@ void ColorContent::toolTipInfos(QStringList *keys, QStringList *values)
     int hue, saturation, value;
     color().getHsv(&hue, &saturation, &value);
 
-    keys->append(i18nc("RGB Colorspace: Red/Green/Blue", "RGB"));
-    values->append(i18n("<i>Red</i>: %1, <i>Green</i>: %2, <i>Blue</i>: %3,", QString::number(color().red()), QString::number(color().green()), QString::number(color().blue())));
+    keys->append(QCoreApplication::translate("RGB Colorspace: Red/Green/Blue", "RGB"));
+    values->append(tr("<i>Red</i>: %1, <i>Green</i>: %2, <i>Blue</i>: %3,").arg(QString::number(color().red()), QString::number(color().green()), QString::number(color().blue())));
 
-    keys->append(i18nc("HSV Colorspace: Hue/Saturation/Value", "HSV"));
-    values->append(i18n("<i>Hue</i>: %1, <i>Saturation</i>: %2, <i>Value</i>: %3,", QString::number(hue), QString::number(saturation), QString::number(value)));
+    keys->append(QCoreApplication::translate("HSV Colorspace: Hue/Saturation/Value", "HSV"));
+    values->append(tr("<i>Hue</i>: %1, <i>Saturation</i>: %2, <i>Value</i>: %3,").arg(QString::number(hue), QString::number(saturation), QString::number(value)));
 
     static QString cssColors[] = {
         "aqua",    "00ffff",
@@ -2440,7 +2440,7 @@ void ColorContent::toolTipInfos(QStringList *keys, QStringList *values)
     bool cssColorFound = false;
     for (int i = 0; i < 2*16; i += 2) {
         if (colorHex == cssColors[i+1]) {
-            keys->append(i18n("CSS Color Name"));
+            keys->append(tr("CSS Color Name"));
             values->append(cssColors[i]);
             cssColorFound = true;
             break;
@@ -2450,14 +2450,14 @@ void ColorContent::toolTipInfos(QStringList *keys, QStringList *values)
     if (!cssColorFound)
         for (int i = 0; i < 2*124; i += 2) {
             if (colorHex == cssExtendedColors[i+1]) {
-                keys->append(i18n("CSS Extended Color Name"));
+                keys->append(tr("CSS Extended Color Name"));
                 values->append(cssExtendedColors[i]);
                 break;
             }
         }
 
-    keys->append(i18n("Is Web Color"));
-    values->append(Tools::isWebColor(color()) ? i18n("Yes") : i18n("No"));
+    keys->append(tr("Is Web Color"));
+    values->append(Tools::isWebColor(color()) ? tr("Yes") : tr("No"));
 
 }
 

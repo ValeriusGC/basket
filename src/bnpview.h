@@ -34,6 +34,7 @@
 class QDomDocument;
 class QDomElement;
 
+class QAction;
 class QStackedWidget;
 class QPixmap;
 class QTimer;
@@ -45,9 +46,6 @@ class QMenu;
 class QEvent;
 class QHideEvent;
 class QShowEvent;
-
-class QAction;
-class KTar;
 
 class DesktopColorPicker;
 class RegionGrabber;
@@ -310,8 +308,6 @@ public:
     void showMainWindow();
     QToolBar    *m_mainbar;
     QToolBar    *m_editbar; // TODO private
-    QMenu       *m_tagsMenu;
-    QMenu       *m_insertMenu;
 
     // TODO: dcop calls -- dbus these
 public Q_SLOTS:

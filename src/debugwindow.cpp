@@ -33,7 +33,7 @@ DebugWindow::DebugWindow(QWidget *parent)
         : QWidget(parent)
 {
     Global::debugWindow = this;
-    setWindowTitle(i18n("Debug Window"));
+    setWindowTitle(tr("Debug Window"));
 
     layout      = new QVBoxLayout(this);
     textBrowser = new KTextBrowser(this);

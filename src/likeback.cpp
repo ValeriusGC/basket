@@ -22,8 +22,6 @@
 #include "likeback_p.h"
 
 #include <KDE/KApplication>
-#include <KDE/KAction>
-#include <KDE/KActionCollection>
 #include <KDE/KIcon>
 #include <KDE/KLocale>
 
@@ -77,28 +75,28 @@ LikeBackBar::LikeBackBar(LikeBack *likeBack)
 
     m_likeButton = new QToolButton(this);
     m_likeButton->setIcon(likeIconSet);
-    m_likeButton->setText("<p>" + i18n("Send application developers a comment about something you like"));
+    m_likeButton->setText("<p>" + tr("Send application developers a comment about something you like"));
     m_likeButton->setAutoRaise(true);
     connect(m_likeButton, SIGNAL(clicked()), this, SLOT(clickedLike()));
     layout->addWidget(m_likeButton);
 
     m_dislikeButton = new QToolButton(this);
     m_dislikeButton->setIcon(dislikeIconSet);
-    m_dislikeButton->setText("<p>" + i18n("Send application developers a comment about something you dislike"));
+    m_dislikeButton->setText("<p>" + tr("Send application developers a comment about something you dislike"));
     m_dislikeButton->setAutoRaise(true);
     connect(m_dislikeButton, SIGNAL(clicked()), this, SLOT(clickedDislike()));
     layout->addWidget(m_dislikeButton);
 
     m_bugButton = new QToolButton(this);
     m_bugButton->setIcon(bugIconSet);
-    m_bugButton->setText("<p>" + i18n("Send application developers a comment about an improper behavior of the application"));
+    m_bugButton->setText("<p>" + tr("Send application developers a comment about an improper behavior of the application"));
     m_bugButton->setAutoRaise(true);
     connect(m_bugButton, SIGNAL(clicked()), this, SLOT(clickedBug()));
     layout->addWidget(m_bugButton);
 
     m_featureButton = new QToolButton(this);
     m_featureButton->setIcon(featureIconSet);
-    m_featureButton->setText("<p>" + i18n("Send application developers a comment about a new feature you desire"));
+    m_featureButton->setText("<p>" + tr("Send application developers a comment about a new feature you desire"));
     m_featureButton->setAutoRaise(true);
     connect(m_featureButton, SIGNAL(clicked()), this, SLOT(clickedFeature()));
     layout->addWidget(m_featureButton);
@@ -184,7 +182,6 @@ void LikeBackBar::clickedFeature()
 
 LikeBackPrivate::LikeBackPrivate()
         : bar(0)
-        , config(0)
         , buttons(LikeBack::DefaultButtons)
         , hostName()
         , remotePath()
@@ -203,26 +200,19 @@ LikeBackPrivate::~LikeBackPrivate()
 {
     delete bar;
     delete action;
-
-    config = 0;
 }
 
 /*************************************/
 /********** class LikeBack: **********/
 /*************************************/
 
-LikeBack::LikeBack(Button buttons, bool showBarByDefault, KConfig *config)
+LikeBack::LikeBack(Button buttons, bool showBarByDefault)
         : QObject()
 {
     // Initialize properties (1/2):
     d = new LikeBackPrivate();
     d->buttons          = buttons;
-    d->config           = config;
     d->showBarByDefault = showBarByDefault;
-
-    // Use default KApplication config if not provided:
-    if (d->config == 0)
-        d->config = KGlobal::config().data();
 
     // Initialize properties (2/2) [Needs aboutData to be set]:
     d->showBar          = userWantsToShowBar();
@@ -360,11 +350,6 @@ void LikeBack::execCommentDialogFromHelp()
 LikeBack::Button LikeBack::buttons()
 {
     return d->buttons;
-}
-
-KConfig* LikeBack::config()
-{
-    return d->config;
 }
 
 QAction* LikeBack::sendACommentAction(QMenu *parent)
@@ -528,10 +513,10 @@ void LikeBack::askEmailAddress()
 
     disableBar();
     QString email = KInputDialog::getText(
-                        i18n("Email Address"),
-                        "<p><b>" + i18n("Please provide your email address.") + "</b></p>" +
-                        "<p>" + i18n("It will only be used to contact you back if more information is needed about your comments, ask you how to reproduce the bugs you report, send bug corrections for you to test, etc.") + "</p>" +
-                        "<p>" + i18n("The email address is optional. If you do not provide any, your comments will be sent anonymously.") + "</p>",
+                        tr("Email Address"),
+                        "<p><b>" + tr("Please provide your email address.") + "</b></p>" +
+                        "<p>" + tr("It will only be used to contact you back if more information is needed about your comments, ask you how to reproduce the bugs you report, send bug corrections for you to test, etc.") + "</p>" +
+                        "<p>" + tr("The email address is optional. If you do not provide any, your comments will be sent anonymously.") + "</p>",
                         currentEmailAddress, &ok, kapp->activeWindow(), &emailValidator);
     enableBar();
 
@@ -627,7 +612,7 @@ LikeBackDialog::LikeBackDialog(LikeBack::Button reason, const QString &initialCo
     pageLayout->addWidget(introduction);
 
     // The comment group:
-    QGroupBox *box = new QGroupBox(i18n("Send Application Developers a Comment About:"), this);
+    QGroupBox *box = new QGroupBox(tr("Send Application Developers a Comment About:"), this);
     QVBoxLayout* boxLayout = new QVBoxLayout;
     box->setLayout(boxLayout);
     pageLayout->addWidget(box);
@@ -645,7 +630,7 @@ LikeBackDialog::LikeBackDialog(LikeBack::Button reason, const QString &initialCo
         QLabel *likeIcon = new QLabel(buttons);
         likeIcon->setPixmap(likePixmap);
         likeIcon->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-        likeButton = new QRadioButton(i18n("Something you &like"), buttons);
+        likeButton = new QRadioButton(tr("Something you &like"), buttons);
         buttonsGrid->addWidget(likeIcon,   /*row=*/0, /*column=*/0);
         buttonsGrid->addWidget(likeButton, /*row=*/0, /*column=*/1);
     }
@@ -657,7 +642,7 @@ LikeBackDialog::LikeBackDialog(LikeBack::Button reason, const QString &initialCo
         QLabel *dislikeIcon = new QLabel(buttons);
         dislikeIcon->setPixmap(dislikePixmap);
         dislikeIcon->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-        dislikeButton = new QRadioButton(i18n("Something you &dislike"), buttons);
+        dislikeButton = new QRadioButton(tr("Something you &dislike"), buttons);
         buttonsGrid->addWidget(dislikeIcon,   /*row=*/1, /*column=*/0);
         buttonsGrid->addWidget(dislikeButton, /*row=*/1, /*column=*/1);
     }
@@ -669,7 +654,7 @@ LikeBackDialog::LikeBackDialog(LikeBack::Button reason, const QString &initialCo
         QLabel *bugIcon = new QLabel(buttons);
         bugIcon->setPixmap(bugPixmap);
         bugIcon->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-        bugButton = new QRadioButton(i18n("An improper &behavior of this application"), buttons);
+        bugButton = new QRadioButton(tr("An improper &behavior of this application"), buttons);
         buttonsGrid->addWidget(bugIcon,   /*row=*/2, /*column=*/0);
         buttonsGrid->addWidget(bugButton, /*row=*/2, /*column=*/1);
     }
@@ -680,7 +665,7 @@ LikeBackDialog::LikeBackDialog(LikeBack::Button reason, const QString &initialCo
         QLabel *featureIcon = new QLabel(buttons);
         featureIcon->setPixmap(featurePixmap);
         featureIcon->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-        featureButton = new QRadioButton(i18n("A new &feature you desire"), buttons);
+        featureButton = new QRadioButton(tr("A new &feature you desire"), buttons);
         buttonsGrid->addWidget(featureIcon,   /*row=*/3, /*column=*/0);
         buttonsGrid->addWidget(featureButton, /*row=*/3, /*column=*/1);
     }
@@ -715,7 +700,7 @@ LikeBackDialog::~LikeBackDialog()
 
 QString LikeBackDialog::introductionText()
 {
-    QString text = "<p>" + i18n("Please provide a brief description of your opinion of %1.", qApp->applicationName()) + " ";
+    QString text = "<p>" + tr("Please provide a brief description of your opinion of %1.").arg(qApp->applicationName()) + " ";
 
     QString languagesMessage = "";
     if (!m_likeBack->acceptedLocales().isEmpty() && !m_likeBack->acceptedLanguagesMessage().isEmpty()) {
@@ -728,21 +713,21 @@ QString LikeBackDialog::introductionText()
         }
     } else {
         if (!KGlobal::locale()->language().startsWith(QLatin1String("en")))
-            languagesMessage = i18n("Please write in English.");
+            languagesMessage = tr("Please write in English.");
     }
 
     if (!languagesMessage.isEmpty())
         // TODO: Replace the URL with a localized one:
         text += languagesMessage + " " +
-                i18n("You may be able to use an <a href=\"%1\">online translation tool</a>."
-                     , "http://www.google.com/language_tools?hl=" + KGlobal::locale()->language()) + " ";
+                tr("You may be able to use an <a href=\"%1\">online translation tool</a>.")
+                .arg("http://www.google.com/language_tools?hl=" + KGlobal::locale()->language()) + " ";
 
     // If both "I Like" and "I Dislike" buttons are shown and one is clicked:
     if ((m_likeBack->buttons() & LikeBack::Like) && (m_likeBack->buttons() & LikeBack::Dislike))
-        text += i18n("To make the comments you send more useful in improving this application, try to send the same amount of positive and negative comments.") + " ";
+        text += tr("To make the comments you send more useful in improving this application, try to send the same amount of positive and negative comments.") + " ";
 
     if (!(m_likeBack->buttons() & LikeBack::Feature))
-        text += i18n("Do <b>not</b> ask for new features: your requests will be ignored.");
+        text += tr("Do <b>not</b> ask for new features: your requests will be ignored.");
 
     return text;
 }

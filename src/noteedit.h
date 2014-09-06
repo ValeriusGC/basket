@@ -21,7 +21,7 @@
 #ifndef NOTEEDIT_H
 #define NOTEEDIT_H
 
-#include <KDE/KDialog>
+#include <QDialog>
 #include <QLineEdit>
 
 #include "notecontent.h"
@@ -40,8 +40,6 @@ class KIconButton;
 class KUrlRequester;
 class KToggleAction;
 class KToolBar;
-class KAction;
-class KActionCollection;
 class KColorCombo;
 
 class FontSizeCombo;
@@ -243,7 +241,7 @@ protected:
 /** The dialog to edit Link Note content.
   * @author Sébastien Laoût
   */
-class LinkEditDialog : public KDialog
+class LinkEditDialog : public QDialog
 {
     Q_OBJECT
 public:
@@ -271,7 +269,7 @@ private:
 /** The dialog to edit cross reference content.
   * @author Brian C. Milco
   */
-class CrossReferenceEditDialog : public KDialog
+class CrossReferenceEditDialog : public QDialog
 {
     Q_OBJECT
 public:
@@ -291,7 +289,7 @@ private:
 /** The dialog to edit Launcher Note content.
   * @author Sébastien Laoût
   */
-class LauncherEditDialog : public KDialog
+class LauncherEditDialog : public QDialog
 {
     Q_OBJECT
 public:

@@ -35,9 +35,9 @@
 #include <QtGui/QPixmapCache>
 #include <QtGui/QToolTip>
 #include <QDebug>
+#include <QLocale>
 
 #include <KDE/KIconLoader>
-#include <KDE/KLocale>
 #include <KDE/KStringHandler>
 
 #include "global.h"
@@ -269,12 +269,12 @@ QPixmap BasketListViewItem::foundCountPixmap(bool isLoading, int countFound, boo
     QString text;
     if (childrenAreLoading) {
         if (countChildsFound > 0)
-            text = i18n("%1+%2+", QString::number(countFound), QString::number(countChildsFound));
+            text = QCoreApplication::tr("%1+%2+").arg(QString::number(countFound), QString::number(countChildsFound));
         else
-            text = i18n("%1+", QString::number(countFound));
+            text = QCoreApplication::tr("%1+").arg(QString::number(countFound));
     } else {
         if (countChildsFound > 0)
-            text = i18n("%1+%2", QString::number(countFound), QString::number(countChildsFound));
+            text = QCoreApplication::tr("%1+%2").arg(QString::number(countFound), QString::number(countChildsFound));
         else if (countFound > 0)
             text = QString::number(countFound);
         else

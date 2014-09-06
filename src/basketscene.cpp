@@ -57,6 +57,7 @@
 #include <QDebug>
 #include <QTextEdit>
 #include <QCoreApplication>
+#include <QMenu>
 
 #include <KDE/KStyle>
 #include <KDE/KApplication>
@@ -68,7 +69,6 @@
 #include <KDE/KAboutData>
 #include <KDE/KSaveFile>
 #include <KDE/KAuthorized>
-#include <KDE/KMenu>
 #include <KDE/KIconLoader>
 #include <KDE/KRun>
 #include <KDE/KDirWatch>
@@ -94,6 +94,7 @@
 #include "tools.h"
 #include "debugwindow.h"
 #include "focusedwidgets.h"
+#include "mainwindow.h"
 
 #include "config.h"
 
@@ -310,10 +311,10 @@ void BasketScene::preparePlug(Note *note)
 
     // If some notes don't match (are hidden), tell it to the user:
     if (m_loaded && founds < count) {
-        if (count == 1)          postMessage(i18n("The new note does not match the filter and is hidden."));
-        else if (founds == count - 1) postMessage(i18n("A new note does not match the filter and is hidden."));
-        else if (founds > 0)          postMessage(i18n("Some new notes do not match the filter and are hidden."));
-        else                          postMessage(i18n("The new notes do not match the filter and are hidden."));
+        if (count == 1)          postMessage(tr("The new note does not match the filter and is hidden."));
+        else if (founds == count - 1) postMessage(tr("A new note does not match the filter and is hidden."));
+        else if (founds > 0)          postMessage(tr("Some new notes do not match the filter and are hidden."));
+        else                          postMessage(tr("The new notes do not match the filter and are hidden."));
     }
 }
 
@@ -1392,9 +1393,9 @@ void BasketScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
         m_posToInsert     = event->scenePos();
 
         QMenu menu(m_view);
-        menu.addActions(Global::bnpView->m_insertMenu->actions());
+        menu.addActions(Global::mainWin->m_insertMenu->actions());
 
-        // i18n: Verbs (for the "insert" menu)
+        // tr: Verbs (for the "insert" menu)
         if (zone == Note::TopGroup || zone == Note::BottomGroup)
             menu.setTitle(tr("Group"));
         else
@@ -1816,7 +1817,7 @@ void BasketScene::blindDrop(QGraphicsSceneDragDropEvent* event)
             insertCreatedNote(note);
             //unselectAllBut(note);
             if (Settings::usePassivePopup())
-                Global::bnpView->showPassiveDropped(i18n("Dropped to basket <i>%1</i>"));
+                Global::bnpView->showPassiveDropped(tr("Dropped to basket <i>%1</i>"));
         }
     }
     save();
@@ -1842,7 +1843,7 @@ void BasketScene::blindDrop(const QMimeData *mimeData, Qt::DropAction dropAction
             insertCreatedNote(note);
             //unselectAllBut(note);
             if (Settings::usePassivePopup())
-                Global::bnpView->showPassiveDropped(i18n("Dropped to basket <i>%1</i>"));
+                Global::bnpView->showPassiveDropped(tr("Dropped to basket <i>%1</i>"));
         }
     }
     save();
@@ -2699,7 +2700,7 @@ void BasketScene::tooltipEvent(QHelpEvent *event)
     Note *note = noteAt(contentPos);
 
     if (!note && isFreeLayout()) {
-        message = i18n("Insert note here\nRight click for more options");
+        message = tr("Insert note here\nRight click for more options");
         QRectF itRect;
         for (QList<QRectF>::iterator it = m_blankAreas.begin(); it != m_blankAreas.end(); ++it) {
             itRect = QRectF(0, 0, m_view->viewport()->width(), m_view->viewport()->height()).intersect(*it);
@@ -2717,37 +2718,37 @@ void BasketScene::tooltipEvent(QHelpEvent *event)
         Note::Zone zone = note->zoneAt(contentPos - QPointF(note->x(), note->y()));
         switch (zone) {
         case Note::Resizer:       message = (note->isColumn() ?
-                                                 i18n("Resize those columns") :
+                                                 tr("Resize those columns") :
                                                  (note->isGroup() ?
-                                                  i18n("Resize this group") :
-                                                  i18n("Resize this note")));                 break;
-        case Note::Handle:        message = i18n("Select or move this note");           break;
-        case Note::Group:         message = i18n("Select or move this group");          break;
-        case Note::TagsArrow:     message = i18n("Assign or remove tags from this note");
+                                                  tr("Resize this group") :
+                                                  tr("Resize this note")));                 break;
+        case Note::Handle:        message = tr("Select or move this note");           break;
+        case Note::Group:         message = tr("Select or move this group");          break;
+        case Note::TagsArrow:     message = tr("Assign or remove tags from this note");
             if (note->states().count() > 0) {
-                message = "<qt><nobr>" + message + "</nobr><br>" + i18n("<b>Assigned Tags</b>: %1");
+                message = "<qt><nobr>" + message + "</nobr><br>" + tr("<b>Assigned Tags</b>: %1");
                 QString tagsString = "";
                 for (State::List::iterator it = note->states().begin(); it != note->states().end(); ++it) {
                     QString tagName = "<nobr>" + Tools::textToHTMLWithoutP((*it)->fullName()) + "</nobr>";
                     if (tagsString.isEmpty())
                         tagsString = tagName;
                     else
-                        tagsString = i18n("%1, %2", tagsString, tagName);
+                        tagsString = tr("%1, %2").arg(tagsString, tagName);
                 }
                 message = message.arg(tagsString);
             }
             break;
         case Note::Custom0:       message = note->content()->zoneTip(zone);             break; //"Open this link/Open this file/Open this sound file/Launch this application"
         case Note::GroupExpander: message = (note->isFolded() ?
-                                                 i18n("Expand this group") :
-                                                 i18n("Collapse this group"));               break;
+                                                 tr("Expand this group") :
+                                                 tr("Collapse this group"));               break;
         case Note::Link:
         case Note::Content:       message = note->content()->editToolTipText();         break;
         case Note::TopInsert:
-        case Note::BottomInsert:  message = i18n("Insert note here\nRight click for more options");              break;
-        case Note::TopGroup:      message = i18n("Group note with the one below\nRight click for more options"); break;
-        case Note::BottomGroup:   message = i18n("Group note with the one above\nRight click for more options"); break;
-        case Note::BottomColumn:  message = i18n("Insert note here\nRight click for more options");              break;
+        case Note::BottomInsert:  message = tr("Insert note here\nRight click for more options");              break;
+        case Note::TopGroup:      message = tr("Group note with the one below\nRight click for more options"); break;
+        case Note::BottomGroup:   message = tr("Group note with the one above\nRight click for more options"); break;
+        case Note::BottomColumn:  message = tr("Insert note here\nRight click for more options");              break;
         case Note::None:          message = "** Zone NONE: internal error **";                                   break;
         default:
             if (zone >= Note::Emblem0)
@@ -2762,8 +2763,8 @@ void BasketScene::tooltipEvent(QHelpEvent *event)
             QStringList values;
 
             note->content()->toolTipInfos(&keys, &values);
-            keys.append(i18n("Added"));
-            keys.append(i18n("Last Modification"));
+            keys.append(tr("Added"));
+            keys.append(tr("Last Modification"));
             values.append(note->addedStringDate());
             values.append(note->lastModificationStringDate());
 
@@ -2771,12 +2772,12 @@ void BasketScene::tooltipEvent(QHelpEvent *event)
             QStringList::iterator key;
             QStringList::iterator value;
             for (key = keys.begin(), value = values.begin(); key != keys.end() && value != values.end(); ++key, ++value)
-                message += "<br>" + i18nc("of the form 'key: value'", "<b>%1</b>: %2", *key, *value);
+                message += "<br>" + QCoreApplication::translate("of the form 'key: value'", "<b>%1</b>: %2").arg(*key, *value);
             message += "</nobr></qt>";
         } else if (m_inserterSplit && (zone == Note::TopInsert || zone == Note::BottomInsert))
-            message += "\n" + i18n("Click on the right to group instead of insert");
+            message += "\n" + tr("Click on the right to group instead of insert");
         else if (m_inserterSplit && (zone == Note::TopGroup || zone == Note::BottomGroup))
-            message += "\n" + i18n("Click on the left to insert instead of group");
+            message += "\n" + tr("Click on the left to insert instead of group");
 
         rect = note->zoneRect(zone, contentPos - QPoint(note->x(), note->y()));
 
@@ -3010,16 +3011,16 @@ void BasketScene::drawForeground ( QPainter * painter, const QRectF & rect )
 
 #ifdef HAVE_LIBGPGME
             m_button = new QPushButton(m_decryptBox);
-            m_button->setText(i18n("&Unlock"));
+            m_button->setText(tr("&Unlock"));
             layout->addWidget(m_button, 1, 2);
             connect(m_button, SIGNAL(clicked()), this, SLOT(unlock()));
 #endif
             QLabel* label = new QLabel(m_decryptBox);
-            QString text = "<b>" + i18n("Password protected basket.") + "</b><br/>";
+            QString text = "<b>" + tr("Password protected basket.") + "</b><br/>";
 #ifdef HAVE_LIBGPGME
-            label->setText(text + i18n("Press Unlock to access it."));
+            label->setText(text + tr("Press Unlock to access it."));
 #else
-            label->setText(text + i18n("Encryption is not supported by<br/>this version of %1.", KGlobal::mainComponent().aboutData()->programName()));
+            label->setText(text + tr("Encryption is not supported by<br/>this version of %1.").arg(qApp->applicationName()));
 #endif
             label->setAlignment(Qt::AlignTop);
             layout->addWidget(label, 0, 1, 1, 2);
@@ -3031,7 +3032,7 @@ void BasketScene::drawForeground ( QPainter * painter, const QRectF & rect )
             layout->addItem(spacer, 1, 1);
 
             label = new QLabel("<small>" +
-                               i18n("To make baskets stay unlocked, change the automatic<br>"
+                               tr("To make baskets stay unlocked, change the automatic<br>"
                                     "locking duration in the application settings.") + "</small>",
                                m_decryptBox);
             label->setAlignment(Qt::AlignTop);
@@ -3062,7 +3063,7 @@ void BasketScene::drawForeground ( QPainter * painter, const QRectF & rect )
         QPixmap pixmap(m_view->viewport()->width(), m_view->viewport()->height()); // TODO: Clip it to asked size only!
         QPainter painter2(&pixmap);
         QTextDocument rt;
-        rt.setHtml(QString("<center>%1</center>").arg(i18n("Loading...")));
+        rt.setHtml(QString("<center>%1</center>").arg(tr("Loading...")));
         rt.setTextWidth(m_view->viewport()->width());
         int hrt = rt.size().height();
         painter2.fillRect(0, 0, m_view->viewport()->width(), m_view->viewport()->height(), brush);
@@ -3210,24 +3211,24 @@ void BasketScene::popupEmblemMenu(Note *note, int emblemNumber)
     QKeySequence sequence = tag->shortcut();
     bool sequenceOnDelete = (nextState == 0 && !tag->shortcut().isEmpty());
 
-    KMenu menu(m_view);
+    QMenu menu(m_view);
     if (tag->countStates() == 1) {
-        menu.addTitle(/*SmallIcon(state->icon()), */tag->name());
-        KAction* act;
-        act = new KAction(KIcon("edit-delete"), i18n("&Remove"), &menu);
+        menu.setTitle(/*SmallIcon(state->icon()), */tag->name());
+        QAction* act;
+        act = new QAction(KIcon("edit-delete"), tr("&Remove"), &menu);
         act->setData(1);
         menu.addAction(act);
-        act = new KAction(KIcon("configure"),  i18n("&Customize..."), &menu);
+        act = new QAction(KIcon("configure"),  tr("&Customize..."), &menu);
         act->setData(2);
         menu.addAction(act);
 
         menu.addSeparator();
 
-        act = new KAction(KIcon("search-filter"),     i18n("&Filter by this Tag"), &menu);
+        act = new QAction(KIcon("search-filter"),     tr("&Filter by this Tag"), &menu);
         act->setData(3);
         menu.addAction(act);
     } else {
-        menu.addTitle(tag->name());
+        menu.setTitle(tag->name());
         QList<State*>::iterator it;
         State *currentState;
 
@@ -3254,15 +3255,15 @@ void BasketScene::popupEmblemMenu(Note *note, int emblemNumber)
 
         menu.addSeparator();
 
-        KAction *act = new KAction(&menu);
+        QAction *act = new QAction(&menu);
         act->setIcon(KIcon("edit-delete"));
-        act->setText(i18n("&Remove"));
+        act->setText(tr("&Remove"));
         act->setShortcut(sequenceOnDelete ? sequence : QKeySequence());
         act->setData(1);
         menu.addAction(act);
-        act = new KAction(
+        act = new QAction(
             KIcon("configure"),
-            i18n("&Customize..."),
+            tr("&Customize..."),
             &menu
         );
         act->setData(2);
@@ -3270,21 +3271,22 @@ void BasketScene::popupEmblemMenu(Note *note, int emblemNumber)
 
         menu.addSeparator();
 
-        act = new KAction(KIcon("search-filter"),
-                          i18n("&Filter by this Tag"),
+        act = new QAction(KIcon("search-filter"),
+                          tr("&Filter by this Tag"),
                           &menu);
         act->setData(3);
         menu.addAction(act);
-        act = new KAction(
+        act = new QAction(
             KIcon("search-filter"),
-            i18n("Filter by this &State"),
+            tr("Filter by this &State"),
             &menu);
         act->setData(4);
         menu.addAction(act);
     }
     if (sequenceOnDelete && tag->countStates() != 1) {
         // Not sure if this is equivalent to menu.setAccel(sequence, 1);
-        menu.actionAt(QPoint(0, 1))->setShortcut(sequence);
+        if(menu.actionAt(QPoint(0, 1)))
+            menu.actionAt(QPoint(0,1))->setShortcut(sequence);
     }
 
     connect(&menu, SIGNAL(triggered(QAction *)), this, SLOT(toggledStateInMenu(QAction *)));
@@ -3363,9 +3365,9 @@ void BasketScene::popupTagsMenu(Note *note)
     m_tagPopupNote = note;
 
     Global::bnpView->populateTagsMenu(note);
-    Global::bnpView->m_tagsMenu->setTitle(tr("Tags"));
+    Global::mainWin->m_tagsMenu->setTitle(tr("Tags"));
     m_lockedHovering = true;
-    Global::bnpView->m_tagsMenu->popup(QCursor::pos());
+    Global::mainWin->m_tagsMenu->popup(QCursor::pos());
 }
 
 void BasketScene::unlockHovering()
@@ -4031,9 +4033,9 @@ void BasketScene::doCopy(CopyMode copyMode)
 
         switch (copyMode) {
         default:
-        case CopyToClipboard: emit postMessage(i18np("Copied note to clipboard.", "Copied notes to clipboard.", countCopied)); break;
-        case CutToClipboard:  emit postMessage(i18np("Cut note to clipboard.",    "Cut notes to clipboard.",    countCopied)); break;
-        case CopyToSelection: emit postMessage(i18np("Copied note to selection.", "Copied notes to selection.", countCopied)); break;
+        case CopyToClipboard: emit postMessage(tr("Copied note(s) to clipboard.", 0, countCopied)); break;
+        case CutToClipboard:  emit postMessage(tr("Cut note(s) to clipboard.", 0,    countCopied)); break;
+        case CopyToSelection: emit postMessage(tr("Copied note(s) to selection.", 0, countCopied)); break;
         }
     }
 }
@@ -4079,7 +4081,7 @@ void BasketScene::noteOpen(Note *note)
     QString message = note->content()->messageWhenOpening(NoteContent::OpenOne /*NoteContent::OpenSeveral*/);
     if (url.isEmpty()) {
         if (message.isEmpty())
-            emit postMessage(i18n("Unable to open this note.") /*"Unable to open those notes."*/);
+            emit postMessage(tr("Unable to open this note.") /*"Unable to open those notes."*/);
         else {
             int result = QMessageBox::warning(m_view, QString(), message, QMessageBox::Ok | QMessageBox::Cancel);
             if (result == QMessageBox::Ok)
@@ -4106,7 +4108,7 @@ void BasketScene::noteOpen(Note *note)
 bool KRun__displayOpenWithDialog(const KUrl::List& lst, QWidget *window, bool tempFiles, const QString &text)
 {
     if (kapp && !KAuthorized::authorizeKAction("openwith")) {
-        QMessageBox::information(window, QString(), QCoreApplication::tr("You are not authorized to open this file.")); // TODO: Better message, i18n freeze :-(
+        QMessageBox::information(window, QString(), QCoreApplication::tr("You are not authorized to open this file.")); // TODO: Better message, tr freeze :-(
         return false;
     }
     KOpenWithDialog l(lst, text, QString::null, 0L);
@@ -4131,7 +4133,7 @@ void BasketScene::noteOpenWith(Note *note)
     QString message = note->content()->messageWhenOpening(NoteContent::OpenOneWith /*NoteContent::OpenSeveralWith*/);
     QString text    = note->content()->messageWhenOpening(NoteContent::OpenOneWithDialog /*NoteContent::OpenSeveralWithDialog*/);
     if (url.isEmpty())
-        emit postMessage(i18n("Unable to open this note.") /*"Unable to open those notes."*/);
+        emit postMessage(tr("Unable to open this note.") /*"Unable to open those notes."*/);
     else if (KRun__displayOpenWithDialog(url, m_view->window(), false, text))
         emit postMessage(message); // "Opening link target with..." / "Opening note file with..."
 }
@@ -4148,7 +4150,7 @@ void BasketScene::noteSaveAs()
     if (url.isEmpty())
         return;
 
-    QString fileName = KFileDialog::getSaveFileName(url.fileName(), note->content()->saveAsFilters(), m_view, i18n("Save to File"));
+    QString fileName = KFileDialog::getSaveFileName(url.fileName(), note->content()->saveAsFilters(), m_view, tr("Save to File"));
     // TODO: Ask to overwrite !
     if (fileName.isEmpty())
         return;
@@ -5124,9 +5126,9 @@ bool BasketScene::loadFromFile(const QString &fullPath, QByteArray *array)
             // cache password used in symmetric encryption.
             m_gpg->setUseGnuPGAgent(Settings::useGnuPGAgent() && m_encryptionType == PrivateKeyEncryption);
             if (m_encryptionType == PrivateKeyEncryption)
-                m_gpg->setText(i18n("Please enter the password for the following private key:"), false);
+                m_gpg->setText(tr("Please enter the password for the following private key:"), false);
             else
-                m_gpg->setText(i18n("Please enter the password for the basket <b>%1</b>:", basketName()), false); // Used when decrypting
+                m_gpg->setText(tr("Please enter the password for the basket <b>%1</b>:").arg(basketName()), false); // Used when decrypting
             return m_gpg->decrypt(tmp, array);
         }
 #else
@@ -5167,7 +5169,7 @@ bool BasketScene::saveToFile(const QString& fullPath, const QByteArray& array, u
             // public key doesn't need password
             m_gpg->setText("", false);
         } else
-            m_gpg->setText(i18n("Please assign a password to the basket <b>%1</b>:", basketName()), true); // Used when defining a new password
+            m_gpg->setText(tr("Please assign a password to the basket <b>%1</b>:").arg(basketName()), true); // Used when defining a new password
 
         success = m_gpg->encrypt(array, length, &tmp, key);
         length = tmp.size();
@@ -5222,7 +5224,7 @@ bool BasketScene::saveToFile(const QString& fullPath, const QByteArray& array, u
 
         if (!success) {
             if (!dialog) {
-                dialog = new DiskErrorDialog(i18n("Error while saving"),
+                dialog = new DiskErrorDialog(tr("Error while saving"),
                                              saveFile.errorString(),
                                              kapp->activeWindow());
             }

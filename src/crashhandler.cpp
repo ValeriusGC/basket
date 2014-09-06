@@ -58,14 +58,14 @@ Crash::crashHandler(int /*signal*/)
 //            debug() << "amaroK is crashing...\n";
 
         QString subject = "[basket-crash] " VERSION " ";
-        QString body = i18n(
+        QString body = tr(
                            "%1 has crashed! We're sorry about this.\n"
                            "\n"
                            "But, all is not lost! You could potentially help us fix the crash. "
                            "Information describing the crash is below, so just click send, "
                            "or if you have time, write a brief description of how the crash happened first.\n\n"
-                           "Many thanks.", KGlobal::mainComponent().aboutData()->programName()) + "\n\n";
-        body += "\n\n\n\n\n\n" + i18n(
+                           "Many thanks.").arg(qApp->applicationName()) + "\n\n";
+        body += "\n\n\n\n\n\n" + tr(
                     "The information below is to help the developers identify the problem, "
                     "please do not modify it.") + "\n\n\n\n";
 
@@ -185,10 +185,10 @@ Crash::crashHandler(int /*signal*/)
                 /*attachURLs*/  QStringList(),
                 /*startup_id*/  "");
         } else {
-            qDebug() << "\n" + i18n("%1 has crashed! We're sorry about this.\n\n"
+            qDebug() << "\n" + tr("%1 has crashed! We're sorry about this.\n\n"
                                     "But, all is not lost! Perhaps an upgrade is already available "
-                                    "which fixes the problem. Please check your distribution's software repository.",
-                                    KGlobal::mainComponent().aboutData()->programName());
+                                    "which fixes the problem. Please check your distribution's software repository.").arg(
+                                    qApp->applicationName());
         }
 
         //_exit() exits immediately, otherwise this

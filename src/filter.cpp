@@ -53,20 +53,20 @@ FilterBar::FilterBar(QWidget *parent)
 
     m_resetButton        = new QToolButton(this);
     m_resetButton->setIcon(resetIcon);
-    m_resetButton->setText(i18n("Reset Filter"));//, /*groupText=*/"", this, SLOT(reset()), 0);
+    m_resetButton->setText(tr("Reset Filter"));//, /*groupText=*/"", this, SLOT(reset()), 0);
     m_resetButton->setAutoRaise(true);
-    //new KToolBarButton("locationbar_erase", /*id=*/1230, this, /*name=*/0, i18n("Reset Filter"));
+    //new KToolBarButton("locationbar_erase", /*id=*/1230, this, /*name=*/0, tr("Reset Filter"));
     m_lineEdit = new QLineEdit(this);
     QLabel *label = new QLabel(this);
-    label->setText(i18n("&Filter: "));
+    label->setText(tr("&Filter: "));
     label->setBuddy(m_lineEdit);
     m_tagsBox = new QComboBox(this);
     QLabel *label2 = new QLabel(this);
-    label2->setText(i18n("T&ag: "));
+    label2->setText(tr("T&ag: "));
     label2->setBuddy(m_tagsBox);
     m_inAllBasketsButton = new QToolButton(this);
     m_inAllBasketsButton->setIcon(inAllIcon);
-    m_inAllBasketsButton->setText(i18n("Filter All Baskets"));//, /*groupText=*/"", this, SLOT(inAllBaskets()), 0);
+    m_inAllBasketsButton->setText(tr("Filter All Baskets"));//, /*groupText=*/"", this, SLOT(inAllBaskets()), 0);
     m_inAllBasketsButton->setAutoRaise(true);
 
     // Configure the Tags combobox:
@@ -146,8 +146,8 @@ void FilterBar::repopulateTagsCombo()
     m_statesMap.clear();
 
     m_tagsBox->addItem("");
-    m_tagsBox->addItem(i18n("(Not tagged)"));
-    m_tagsBox->addItem(i18n("(Tagged)"));
+    m_tagsBox->addItem(tr("(Not tagged)"));
+    m_tagsBox->addItem(tr("(Tagged)"));
 
     int index = 3;
     Tag     *tag;

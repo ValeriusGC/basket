@@ -23,7 +23,6 @@
 
 #include <QDialog>
 
-class KUrlRequester;
 class QCheckBox;
 class QString;
 
@@ -51,7 +50,7 @@ protected slots:
     void accept();
 private:
     BasketScene    *m_basket;
-    KUrlRequester *m_url;
+//    KUrlRequester *m_url;
     QCheckBox     *m_embedLinkedFiles;
     QCheckBox     *m_embedLinkedFolders;
     QCheckBox     *m_erasePreviousFiles;

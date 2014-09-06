@@ -401,7 +401,7 @@ GeneralPage::GeneralPage(QWidget * parent)
     m_treeOnLeft->addItem(tr("On right"));
 
     label = new QLabel(this);
-    label->setText(i18n("&Basket tree position:"));
+    label->setText(tr("&Basket tree position:"));
     label->setBuddy(m_treeOnLeft);
 
     gl->addWidget(label, 0, 0);
@@ -414,7 +414,7 @@ GeneralPage::GeneralPage(QWidget * parent)
     m_filterOnTop->addItem(tr("On bottom"));
 
     label = new QLabel(this);
-    label->setText(i18n("&Filter bar position:"));
+    label->setText(tr("&Filter bar position:"));
     label->setBuddy(m_filterOnTop);
 
     gl->addWidget(label,         1, 0);
@@ -423,7 +423,7 @@ GeneralPage::GeneralPage(QWidget * parent)
 
     // Use balloons to Report Results of Global Actions:
     hLay = new QHBoxLayout(0);
-    m_usePassivePopup = new QCheckBox(i18n("&Use balloons to report results of global actions"), this);
+    m_usePassivePopup = new QCheckBox(tr("&Use balloons to report results of global actions"), this);
     connect(m_usePassivePopup, SIGNAL(stateChanged(int)), this, SLOT(changed()));
     hLabel = new HelpLabel(
         tr("What are global actions?"),
@@ -439,12 +439,12 @@ GeneralPage::GeneralPage(QWidget * parent)
     layout->addLayout(hLay);
 
     // System Tray Icon:
-    QGroupBox *gbSys = new QGroupBox(i18n("System Tray Icon"), this);
+    QGroupBox *gbSys = new QGroupBox(tr("System Tray Icon"), this);
     layout->addWidget(gbSys);
     QVBoxLayout *sysLay = new QVBoxLayout(gbSys);
 
     // Dock in System Tray:
-    m_useSystray = new QCheckBox(i18n("&Dock in system tray"), gbSys);
+    m_useSystray = new QCheckBox(tr("&Dock in system tray"), gbSys);
     sysLay->addWidget(m_useSystray);
     connect(m_useSystray, SIGNAL(stateChanged(int)), this, SLOT(changed()));
 
@@ -453,7 +453,7 @@ GeneralPage::GeneralPage(QWidget * parent)
     sysLay->addWidget(m_systray);
 
     // Show Current Basket Icon in System Tray Icon:
-    m_showIconInSystray = new QCheckBox(i18n("&Show current basket icon in system tray icon"), m_systray);
+    m_showIconInSystray = new QCheckBox(tr("&Show current basket icon in system tray icon"), m_systray);
     subSysLay->addWidget(m_showIconInSystray);
     connect(m_showIconInSystray, SIGNAL(stateChanged(int)), this, SLOT(changed()));
 
@@ -545,49 +545,49 @@ BasketsPage::BasketsPage(QWidget * parent)
 
     // Appearance:
 
-    QGroupBox *appearanceBox = new QGroupBox(i18n("Appearance"), this);
+    QGroupBox *appearanceBox = new QGroupBox(tr("Appearance"), this);
     QVBoxLayout* appearanceLayout = new QVBoxLayout;
     appearanceBox->setLayout(appearanceLayout);
     layout->addWidget(appearanceBox);
 
-    m_playAnimations = new QCheckBox(i18n("Ani&mate changes in baskets"), appearanceBox);
+    m_playAnimations = new QCheckBox(tr("Ani&mate changes in baskets"), appearanceBox);
     appearanceLayout->addWidget(m_playAnimations);
     connect(m_playAnimations, SIGNAL(stateChanged(int)), this, SLOT(changed()));
 
-    m_showNotesToolTip = new QCheckBox(i18n("&Show tooltips in baskets"), appearanceBox);
+    m_showNotesToolTip = new QCheckBox(tr("&Show tooltips in baskets"), appearanceBox);
     appearanceLayout->addWidget(m_showNotesToolTip);
     connect(m_showNotesToolTip, SIGNAL(stateChanged(int)), this, SLOT(changed()));
 
-    m_bigNotes = new QCheckBox(i18n("&Big notes"), appearanceBox);
+    m_bigNotes = new QCheckBox(tr("&Big notes"), appearanceBox);
     appearanceLayout->addWidget(m_bigNotes);
     connect(m_bigNotes, SIGNAL(stateChanged(int)), this, SLOT(changed()));
 
     // Behavior:
 
-    QGroupBox *behaviorBox = new QGroupBox(i18n("Behavior"), this);
+    QGroupBox *behaviorBox = new QGroupBox(tr("Behavior"), this);
     QVBoxLayout* behaviorLayout = new QVBoxLayout;
     behaviorBox->setLayout(behaviorLayout);
     layout->addWidget(behaviorBox);
 
-    m_autoBullet = new QCheckBox(i18n("&Transform lines starting with * or - to lists in text editors"), behaviorBox);
+    m_autoBullet = new QCheckBox(tr("&Transform lines starting with * or - to lists in text editors"), behaviorBox);
     behaviorLayout->addWidget(m_autoBullet);
     connect(m_autoBullet, SIGNAL(stateChanged(int)), this, SLOT(changed()));
 
-    m_confirmNoteDeletion = new QCheckBox(i18n("Ask confirmation before &deleting notes"), behaviorBox);
+    m_confirmNoteDeletion = new QCheckBox(tr("Ask confirmation before &deleting notes"), behaviorBox);
     behaviorLayout->addWidget(m_confirmNoteDeletion);
     connect(m_confirmNoteDeletion, SIGNAL(stateChanged(int)), this, SLOT(changed()));
 
     QWidget *widget = new QWidget(behaviorBox);
     behaviorLayout->addWidget(widget);
     hLay = new QHBoxLayout(widget);
-    m_exportTextTags = new QCheckBox(i18n("&Export tags in texts"), widget);
+    m_exportTextTags = new QCheckBox(tr("&Export tags in texts"), widget);
     connect(m_exportTextTags, SIGNAL(stateChanged(int)), this, SLOT(changed()));
 
     hLabel = new HelpLabel(
-        i18n("When does this apply?"),
-        "<p>" + i18n("It does apply when you copy and paste, or drag and drop notes to a text editor.") + "</p>" +
-        "<p>" + i18n("If enabled, this property lets you paste the tags as textual equivalents.") + "<br>" +
-        i18n("For instance, a list of notes with the <b>To Do</b> and <b>Done</b> tags are exported as lines preceded by <b>[ ]</b> or <b>[x]</b>, "
+        tr("When does this apply?"),
+        "<p>" + tr("It does apply when you copy and paste, or drag and drop notes to a text editor.") + "</p>" +
+        "<p>" + tr("If enabled, this property lets you paste the tags as textual equivalents.") + "<br>" +
+        tr("For instance, a list of notes with the <b>To Do</b> and <b>Done</b> tags are exported as lines preceded by <b>[ ]</b> or <b>[x]</b>, "
              "representing an empty checkbox and a checked box.") + "</p>" +
         "<p align='center'><img src=\":/images/tag_export_help.png\"></p>",
         widget);
@@ -598,12 +598,12 @@ BasketsPage::BasketsPage(QWidget * parent)
     m_groupOnInsertionLineWidget = new QWidget(behaviorBox);
     behaviorLayout->addWidget(m_groupOnInsertionLineWidget);
     QHBoxLayout *hLayV = new QHBoxLayout(m_groupOnInsertionLineWidget);
-    m_groupOnInsertionLine = new QCheckBox(i18n("&Group a new note when clicking on the right of the insertion line"), m_groupOnInsertionLineWidget);
+    m_groupOnInsertionLine = new QCheckBox(tr("&Group a new note when clicking on the right of the insertion line"), m_groupOnInsertionLineWidget);
     HelpLabel *helpV = new HelpLabel(
-        i18n("How to group a new note?"),
-        i18n("<p>When this option is enabled, the insertion-line not only allows you to insert notes at the cursor position, but also allows you to group a new note with the one under the cursor:</p>") +
+        tr("How to group a new note?"),
+        tr("<p>When this option is enabled, the insertion-line not only allows you to insert notes at the cursor position, but also allows you to group a new note with the one under the cursor:</p>") +
         "<p align='center'><img src=\":/images/insertion_help.png\"></p>" +
-        i18n("<p>Place your mouse between notes, where you want to add a new one.<br>"
+        tr("<p>Place your mouse between notes, where you want to add a new one.<br>"
              "Click on the <b>left</b> of the insertion-line middle-mark to <b>insert</b> a note.<br>"
              "Click on the <b>right</b> to <b>group</b> a note, with the one <b>below or above</b>, depending on where your mouse is.</p>"),
         m_groupOnInsertionLineWidget);
@@ -633,17 +633,17 @@ BasketsPage::BasketsPage(QWidget * parent)
     m_middleAction->addItem(tr("Import icon"));
 
     QLabel *labelM = new QLabel(widget);
-    labelM->setText(i18n("&Shift+middle-click anywhere:"));
+    labelM->setText(tr("&Shift+middle-click anywhere:"));
     labelM->setBuddy(m_middleAction);
 
     ga->addWidget(labelM,                                          0, 0);
     ga->addWidget(m_middleAction,                                  0, 1);
-    ga->addWidget(new QLabel(i18n("at cursor position"), widget),  0, 2);
+    ga->addWidget(new QLabel(tr("at cursor position"), widget),  0, 2);
     connect(m_middleAction, SIGNAL(activated(int)), this, SLOT(changed()));
 
     // Protection:
 
-    QGroupBox *protectionBox = new QGroupBox(i18n("Password Protection"), this);
+    QGroupBox *protectionBox = new QGroupBox(tr("Password Protection"), this);
     QVBoxLayout* protectionLayout = new QVBoxLayout;
     layout->addWidget(protectionBox);
     protectionBox->setLayout(protectionLayout);
@@ -652,13 +652,13 @@ BasketsPage::BasketsPage(QWidget * parent)
 
     // Re-Lock timeout configuration
     hLay = new QHBoxLayout(widget);
-    m_enableReLockTimeoutMinutes = new QCheckBox(i18n("A&utomatically lock protected baskets when closed for"), widget);
+    m_enableReLockTimeoutMinutes = new QCheckBox(tr("A&utomatically lock protected baskets when closed for"), widget);
     hLay->addWidget(m_enableReLockTimeoutMinutes);
     m_reLockTimeoutMinutes = new QLineEdit(widget);
     m_reLockTimeoutMinutes->setValidator(new QIntValidator(0, 1000000, this));
     m_reLockTimeoutMinutes->setToolTip(tr("minutes"));
     hLay->addWidget(m_reLockTimeoutMinutes);
-    //label = new QLabel(i18n("minutes"), this);
+    //label = new QLabel(tr("minutes"), this);
     //hLay->addWidget(label);
     hLay->addStretch();
 //  layout->addLayout(hLay);
@@ -667,7 +667,7 @@ BasketsPage::BasketsPage(QWidget * parent)
     connect(m_enableReLockTimeoutMinutes, SIGNAL(toggled(bool)),     m_reLockTimeoutMinutes, SLOT(setEnabled(bool)));
 
 #ifdef HAVE_LIBGPGME
-    m_useGnuPGAgent = new QCheckBox(i18n("Use GnuPG agent for &private/public key protected baskets"), protectionBox);
+    m_useGnuPGAgent = new QCheckBox(tr("Use GnuPG agent for &private/public key protected baskets"), protectionBox);
     protectionLayout->addWidget(m_useGnuPGAgent);
 //  hLay->addWidget(m_useGnuPGAgent);
     connect(m_useGnuPGAgent, SIGNAL(stateChanged(int)), this, SLOT(changed()));
@@ -746,12 +746,12 @@ NewNotesPage::NewNotesPage(QWidget * parent)
     m_newNotesPlace = new QComboBox(this);
 
     label = new QLabel(this);
-    label->setText(i18n("&Place of new notes:"));
+    label->setText(tr("&Place of new notes:"));
     label->setBuddy(m_newNotesPlace);
 
-    m_newNotesPlace->addItem(i18n("On top"));
-    m_newNotesPlace->addItem(i18n("On bottom"));
-    m_newNotesPlace->addItem(i18n("At current note"));
+    m_newNotesPlace->addItem(tr("On top"));
+    m_newNotesPlace->addItem(tr("On bottom"));
+    m_newNotesPlace->addItem(tr("At current note"));
     hLay->addWidget(label);
     hLay->addWidget(m_newNotesPlace);
     hLay->addStretch();
@@ -768,7 +768,7 @@ NewNotesPage::NewNotesPage(QWidget * parent)
     connect(m_imgSizeX, SIGNAL(valueChanged(int)), this, SLOT(changed()));
 
     label = new QLabel(this);
-    label->setText(i18n("&New images size:"));
+    label->setText(tr("&New images size:"));
     label->setBuddy(m_imgSizeX);
 
     hLay->addWidget(label);
@@ -779,14 +779,14 @@ NewNotesPage::NewNotesPage(QWidget * parent)
     connect(m_imgSizeY, SIGNAL(valueChanged(int)), this, SLOT(changed()));
 
     label = new QLabel(this);
-    label->setText(i18n("&by"));
+    label->setText(tr("&by"));
     label->setBuddy(m_imgSizeY);
 
     hLay->addWidget(label);
     hLay->addWidget(m_imgSizeY);
-    label = new QLabel(i18n("pixels"), this);
+    label = new QLabel(tr("pixels"), this);
     hLay->addWidget(label);
-    m_pushVisualize = new QPushButton(i18n("&Visualize..."), this);
+    m_pushVisualize = new QPushButton(tr("&Visualize..."), this);
     hLay->addWidget(m_pushVisualize);
     hLay->addStretch();
     layout->addLayout(hLay);
@@ -794,12 +794,12 @@ NewNotesPage::NewNotesPage(QWidget * parent)
 
     // View File Content:
 
-    QGroupBox* buttonGroup = new QGroupBox(i18n("View Content of Added Files for the Following Types"), this);
+    QGroupBox* buttonGroup = new QGroupBox(tr("View Content of Added Files for the Following Types"), this);
     QVBoxLayout* buttonLayout = new QVBoxLayout;
-    m_viewTextFileContent  = new QCheckBox(i18n("&Plain text"),         buttonGroup);
-    m_viewHtmlFileContent  = new QCheckBox(i18n("&HTML page"),          buttonGroup);
-    m_viewImageFileContent = new QCheckBox(i18n("&Image or animation"), buttonGroup);
-    m_viewSoundFileContent = new QCheckBox(i18n("&Sound"),              buttonGroup);
+    m_viewTextFileContent  = new QCheckBox(tr("&Plain text"),         buttonGroup);
+    m_viewHtmlFileContent  = new QCheckBox(tr("&HTML page"),          buttonGroup);
+    m_viewImageFileContent = new QCheckBox(tr("&Image or animation"), buttonGroup);
+    m_viewSoundFileContent = new QCheckBox(tr("&Sound"),              buttonGroup);
 
     buttonLayout->addWidget(m_viewTextFileContent);
     buttonLayout->addWidget(m_viewHtmlFileContent);
@@ -872,12 +872,12 @@ NotesAppearancePage::NotesAppearancePage(QWidget * parent)
     m_launcherLook    = new LinkLookEditWidget(this, tr("Launch %1").arg(qApp->applicationName()), "basket",      tabs);
     m_crossReferenceLook=new LinkLookEditWidget(this, tr("Another basket"), "basket", tabs);
 
-    tabs->addTab(m_soundLook,       i18n("&Sounds"));
-    tabs->addTab(m_fileLook,        i18n("&Files"));
-    tabs->addTab(m_localLinkLook,   i18n("&Local Links"));
-    tabs->addTab(m_networkLinkLook, i18n("&Network Links"));
-    tabs->addTab(m_launcherLook,    i18n("Launc&hers"));
-    tabs->addTab(m_crossReferenceLook, i18n("&Cross References"));
+    tabs->addTab(m_soundLook,       tr("&Sounds"));
+    tabs->addTab(m_fileLook,        tr("&Files"));
+    tabs->addTab(m_localLinkLook,   tr("&Local Links"));
+    tabs->addTab(m_networkLinkLook, tr("&Network Links"));
+    tabs->addTab(m_launcherLook,    tr("Launc&hers"));
+    tabs->addTab(m_crossReferenceLook, tr("&Cross References"));
 
     load();
 }
@@ -916,39 +916,39 @@ ApplicationsPage::ApplicationsPage(QWidget * parent)
     /* Applications page */
     QVBoxLayout *layout = new QVBoxLayout(this);
 
-    m_htmlUseProg  = new QCheckBox(i18n("Open &text notes with a custom application:"), this);
-    m_htmlProg     = new RunCommandRequester("", i18n("Open text notes with:"), this);
+    m_htmlUseProg  = new QCheckBox(tr("Open &text notes with a custom application:"), this);
+    m_htmlProg     = new RunCommandRequester("", tr("Open text notes with:"), this);
     QHBoxLayout *hLayH = new QHBoxLayout;
     hLayH->insertSpacing(-1, 20);
     hLayH->addWidget(m_htmlProg);
     connect(m_htmlUseProg, SIGNAL(stateChanged(int)), this, SLOT(changed()));
     connect(m_htmlProg->lineEdit(), SIGNAL(textChanged(const QString &)), this, SLOT(changed()));
 
-    m_imageUseProg = new QCheckBox(i18n("Open &image notes with a custom application:"), this);
-    m_imageProg    = new RunCommandRequester("", i18n("Open image notes with:"), this);
+    m_imageUseProg = new QCheckBox(tr("Open &image notes with a custom application:"), this);
+    m_imageProg    = new RunCommandRequester("", tr("Open image notes with:"), this);
     QHBoxLayout *hLayI = new QHBoxLayout;
     hLayI->insertSpacing(-1, 20);
     hLayI->addWidget(m_imageProg);
     connect(m_imageUseProg, SIGNAL(stateChanged(int)), this, SLOT(changed()));
     connect(m_imageProg->lineEdit(), SIGNAL(textChanged(const QString &)), this, SLOT(changed()));
 
-    m_animationUseProg = new QCheckBox(i18n("Open a&nimation notes with a custom application:"), this);
-    m_animationProg    = new RunCommandRequester("", i18n("Open animation notes with:"), this);
+    m_animationUseProg = new QCheckBox(tr("Open a&nimation notes with a custom application:"), this);
+    m_animationProg    = new RunCommandRequester("", tr("Open animation notes with:"), this);
     QHBoxLayout *hLayA = new QHBoxLayout;
     hLayA->insertSpacing(-1, 20);
     hLayA->addWidget(m_animationProg);
     connect(m_animationUseProg, SIGNAL(stateChanged(int)), this, SLOT(changed()));
     connect(m_animationProg->lineEdit(), SIGNAL(textChanged(const QString &)), this, SLOT(changed()));
 
-    m_soundUseProg = new QCheckBox(i18n("Open so&und notes with a custom application:"), this);
-    m_soundProg    = new RunCommandRequester("", i18n("Open sound notes with:"), this);
+    m_soundUseProg = new QCheckBox(tr("Open so&und notes with a custom application:"), this);
+    m_soundProg    = new RunCommandRequester("", tr("Open sound notes with:"), this);
     QHBoxLayout *hLayS = new QHBoxLayout;
     hLayS->insertSpacing(-1, 20);
     hLayS->addWidget(m_soundProg);
     connect(m_soundUseProg, SIGNAL(stateChanged(int)), this, SLOT(changed()));
     connect(m_soundProg->lineEdit(), SIGNAL(textChanged(const QString &)), this, SLOT(changed()));
 
-    QString whatsthis = i18n(
+    QString whatsthis = tr(
                             "<p>If checked, the application defined below will be used when opening that type of note.</p>"
                             "<p>Otherwise, the application you've configured in Konqueror will be used.</p>");
 
@@ -957,7 +957,7 @@ ApplicationsPage::ApplicationsPage(QWidget * parent)
     m_animationUseProg->setWhatsThis(whatsthis);
     m_soundUseProg->setWhatsThis(whatsthis);
 
-    whatsthis = i18n(
+    whatsthis = tr(
                     "<p>Define the application to use for opening that type of note instead of the "
                     "application configured in Konqueror.</p>");
 
@@ -977,8 +977,8 @@ ApplicationsPage::ApplicationsPage(QWidget * parent)
 
     QHBoxLayout *hLay = new QHBoxLayout;
     HelpLabel *hl1 = new HelpLabel(
-        i18n("How to change the application used to open Web links?"),
-        i18n("<p>When opening Web links, they are opened in different applications, depending on the content of the link "
+        tr("How to change the application used to open Web links?"),
+        tr("<p>When opening Web links, they are opened in different applications, depending on the content of the link "
              "(a Web page, an image, a PDF document...), such as if they were files on your computer.</p>"
              "<p>Here is how to do if you want every Web addresses to be opened in your Web browser. "
              "It is useful if you are not using KDE (if you are using eg. GNOME, XFCE...).</p>"
@@ -996,8 +996,8 @@ ApplicationsPage::ApplicationsPage(QWidget * parent)
 
     hLay = new QHBoxLayout;
     HelpLabel *hl2 = new HelpLabel(
-        i18n("How to change the applications used to open files and links?"),
-        i18n("<p>Here is how to set the application to be used for each type of file. "
+        tr("How to change the applications used to open files and links?"),
+        tr("<p>Here is how to set the application to be used for each type of file. "
              "This also applies to Web links if you choose not to open them systematically in a Web browser (see the first help link). "
              "The default settings should be good enough for you, but this tip is useful if you are using GNOME, XFCE, or another environment than KDE.</p>"
              "<p>This is an example of how to open HTML pages in your Web browser (and keep using the other applications for other addresses or files). "

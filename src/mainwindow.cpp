@@ -21,14 +21,15 @@
 #include "mainwindow.h"
 
 #include <QApplication>
+#include <QDebug>
+#include <QDesktopWidget>
 #include <QLocale>
+#include <QMenuBar>
+#include <QMessageBox>
 #include <QMoveEvent>
 #include <QResizeEvent>
 #include <QStatusBar>
 #include <QToolBar>
-#include <QMenuBar>
-#include <QDesktopWidget>
-#include <QMessageBox>
 
 #include "about.h"
 #include "settings.h"
@@ -41,33 +42,34 @@
 MainWindow::MainWindow(QWidget *parent)
         : QMainWindow(parent), m_quit(false)
 {
+    Global::mainWin = this;
+    setupActions();
+    setupMenus();
+
     BasketStatusBar* bar = new BasketStatusBar(statusBar());
+
     m_mainToolBar = addToolBar("Main");
     m_editToolBar = addToolBar("Edit");
+
     m_baskets = new BNPView(this, "BNPViewApp", this, bar, m_mainToolBar, m_editToolBar);
+    connect(m_baskets,      SIGNAL(setWindowCaption(const QString &)), this, SLOT(setCaption(const QString &)));
+
     bar->setupStatusBar();
 
     setCentralWidget(m_baskets);
 
-    setupActions();
     statusBar()->show();
     statusBar()->setSizeGripEnabled(true);
 
-//    setAutoSaveSettings(/*groupName=*/QString::fromLatin1("MainWindow"), /*saveWindowSize=*//*FIXME:false:Why was it false??*/true);
-
 //    m_actShowToolbar->setChecked(m_mainToolBar->isVisible());
 //    m_actShowStatusbar->setChecked(statusBar()->isVisible());
-    connect(m_baskets,      SIGNAL(setWindowCaption(const QString &)), this, SLOT(setCaption(const QString &)));
-
-//  InlineEditors::instance()->richTextToolBar();
-//    setStandardToolBarMenuEnabled(true);
-
-//    KConfigGroup group = KGlobal::config()->group(autoSaveGroup());
-//    applyMainWindowSettings(group);
 
     // Temp, settings
     menuBar()->addAction("Settings", this, SLOT(showSettingsDialog()));
     menuBar()->addAction("About", this, SLOT(showAboutDialog()));
+    connect(m_tagsMenu, SIGNAL(aboutToShow()), Global::bnpView, SLOT(populateTagsMenu(Note*)));
+    connect(m_tagsMenu, SIGNAL(aboutToHide()), Global::bnpView, SLOT(disconnectTagsMenu()));
+    ensurePolished();
 }
 
 MainWindow::~MainWindow()
@@ -85,21 +87,16 @@ void MainWindow::setupActions()
     QAction *a = NULL;
 
     // Ctrl+Shift+W only works when started standalone:
-    QWidget *basketMainWindow =
-        qobject_cast<QMainWindow *>(Global::bnpView->parent());
-
     int modifier = Qt::CTRL + Qt::ALT + Qt::SHIFT;
 
-    if (basketMainWindow) {
-        a = new QAction(this->parent());
-        connect(a, SIGNAL(triggered()), Global::systemTray, SLOT(toggleActive()));
-        a->setText(tr("Show/hide main window"));
-        a->setStatusTip(
-            tr("Allows you to show main Window if it is hidden, and to hide "
-                 "it if it is shown."));
-        a->setShortcut(QKeySequence(modifier + Qt::Key_W));
-        a->setShortcutContext(Qt::ApplicationShortcut);
-    }
+    a = new QAction(this->parent());
+    connect(a, SIGNAL(triggered()), Global::systemTray, SLOT(toggleActive()));
+    a->setText(tr("Show/hide main window"));
+    a->setStatusTip(
+        tr("Allows you to show main Window if it is hidden, and to hide "
+             "it if it is shown."));
+    a->setShortcut(QKeySequence(modifier + Qt::Key_W));
+    a->setShortcutContext(Qt::ApplicationShortcut);
 
     a = new QAction(this->parent());
     connect(a, SIGNAL(triggered()), Global::bnpView, SLOT(globalPasteInCurrentBasket()));
@@ -226,6 +223,17 @@ void MainWindow::setupActions()
 //    actAppConfig = KStandardAction::preferences(this, SLOT(showSettingsDialog()), ac);
 }
 
+void MainWindow::setupMenus()
+{
+    m_basketMenu = menuBar()->addMenu("&Basket");
+    m_editMenu = menuBar()->addMenu("&Edit");
+    m_goMenu = menuBar()->addMenu("&Go");
+    m_noteMenu = menuBar()->addMenu("&Note");
+    m_tagsMenu = menuBar()->addMenu("&Tags");
+    m_insertMenu = menuBar()->addMenu("&Insert");
+    m_helpMenu = menuBar()->addMenu("&Help");
+}
+
 void MainWindow::toggleToolBar()
 {
     if (m_mainToolBar->isVisible())
@@ -242,15 +250,10 @@ void MainWindow::toggleStatusBar()
         statusBar()->hide();
     else
         statusBar()->show();
-
-//    KConfigGroup group = KGlobal::config()->group(autoSaveGroup());
-//    saveMainWindowSettings(group);
 }
 
 void MainWindow::configureToolbars()
 {
-//    KConfigGroup group = KGlobal::config()->group(autoSaveGroup());
-//    saveMainWindowSettings(group);
 }
 
 void MainWindow::configureNotifications()
@@ -258,14 +261,6 @@ void MainWindow::configureNotifications()
     // TODO
     // KNotifyDialog *dialog = new KNotifyDialog(this, "KNotifyDialog", false);
     // dialog->show();
-}
-
-void MainWindow::slotNewToolbarConfig() // This is called when OK or Apply is clicked
-{
-    // TODO: Does this do anything?
-//    plugActionList(QString::fromLatin1("go_baskets_list"), actBasketsList);
-//    KConfigGroup group = KGlobal::config()->group(autoSaveGroup());
-//    applyMainWindowSettings(group);
 }
 
 void MainWindow::showSettingsDialog()
@@ -288,25 +283,25 @@ void MainWindow::ensurePolished()
     //  - Set size to sizeHint()
     //  - Keep the window manager placing the window where it want and save this
     if (Settings::mainWindowSize().isEmpty()) {
-//      kDebug() << "Main Window Position: Initial Set in show()";
+        qDebug() << "Main Window Position: Initial Set in show()";
         int defaultWidth  = qApp->desktop()->width()  * 5 / 6;
         int defaultHeight = qApp->desktop()->height() * 5 / 6;
         resize(defaultWidth, defaultHeight); // sizeHint() is bad (too small) and we want the user to have a good default area size
         shouldSave = true;
     } else {
-//      kDebug() << "Main Window Position: Recall in show(x="
-//                << Settings::mainWindowPosition().x() << ", y=" << Settings::mainWindowPosition().y()
-//                << ", width=" << Settings::mainWindowSize().width() << ", height=" << Settings::mainWindowSize().height()
-//                << ")";
-        //move(Settings::mainWindowPosition());
-        //resize(Settings::mainWindowSize());
+        qDebug() << "Main Window Position: Recall in show(x="
+                 << Settings::mainWindowPosition().x() << ", y=" << Settings::mainWindowPosition().y()
+                 << ", width=" << Settings::mainWindowSize().width() << ", height=" << Settings::mainWindowSize().height()
+                 << ")";
+        move(Settings::mainWindowPosition());
+        resize(Settings::mainWindowSize());
     }
 
     if (shouldSave) {
-//      kDebug() << "Main Window Position: Save size and position in show(x="
-//                << pos().x() << ", y=" << pos().y()
-//                << ", width=" << size().width() << ", height=" << size().height()
-//                << ")";
+        qDebug() << "Main Window Position: Save size and position in show(x="
+                 << pos().x() << ", y=" << pos().y()
+                 << ", width=" << size().width() << ", height=" << size().height()
+                 << ")";
         Settings::setMainWindowPosition(pos());
         Settings::setMainWindowSize(size());
         Settings::saveConfig();
@@ -315,24 +310,20 @@ void MainWindow::ensurePolished()
 
 void MainWindow::resizeEvent(QResizeEvent *event)
 {
-//  kDebug() << "Main Window Position: Save size in resizeEvent(width=" << size().width() << ", height=" << size().height() << ") ; isMaximized="
-//            << (isMaximized() ? "true" : "false");
+    qDebug() << "Main Window Position: Save size in resizeEvent(width=" << size().width() << ", height=" << size().height() << ") ; isMaximized="
+             << (isMaximized() ? "true" : "false");
     Settings::setMainWindowSize(size());
     Settings::saveConfig();
 
-    // Added to make it work (previous lines do not work):
-    //saveMainWindowSettings( KGlobal::config(), autoSaveGroup() );
     QMainWindow::resizeEvent(event);
 }
 
 void MainWindow::moveEvent(QMoveEvent *event)
 {
-//  kDebug() << "Main Window Position: Save position in moveEvent(x=" << pos().x() << ", y=" << pos().y() << ")";
+    qDebug() << "Main Window Position: Save position in moveEvent(x=" << pos().x() << ", y=" << pos().y() << ")";
     Settings::setMainWindowPosition(pos());
     Settings::saveConfig();
 
-    // Added to make it work (previous lines do not work):
-    //saveMainWindowSettings( KGlobal::config(), autoSaveGroup() );
     QMainWindow::moveEvent(event);
 }
 

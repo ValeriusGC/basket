@@ -23,10 +23,12 @@
 
 #include <QMainWindow>
 
+class QMenu;
+class QMoveEvent;
 class QResizeEvent;
 class QVBoxLayout;
-class QMoveEvent;
 class QWidget;
+
 class BNPView;
 
 /** The window that contain baskets, organized by tabs.
@@ -41,6 +43,8 @@ public:
     ~MainWindow();
 private:
     void setupActions();
+    void setupMenus();
+
 public slots:
     bool askForQuit();
     /** Settings **/
@@ -52,7 +56,6 @@ public slots:
     void showAboutDialog();
     void minimizeRestore();
     void quit();
-    void slotNewToolbarConfig();
 
 protected:
     bool queryExit();
@@ -62,24 +65,26 @@ protected:
 
 public:
     void ensurePolished();
+    // TODO make private
+    QMenu       *m_basketMenu;
+    QMenu       *m_editMenu;
+    QMenu       *m_goMenu;
+    QMenu       *m_noteMenu;
+    QMenu       *m_tagsMenu;
+    QMenu       *m_insertMenu;
+    QMenu       *m_helpMenu;
 
 private:
     // Settings actions :
 //    KToggleAction *m_actShowToolbar;
 //    KToggleAction *m_actShowStatusbar;
-    QAction       *actQuit;
-    QAction       *actAppConfig;
-    QList<QAction *> actBasketsList;
-
-private:
-    QVBoxLayout        *m_layout;
-    BNPView            *m_baskets;
+    QAction             *actQuit;
+    QAction             *actAppConfig;
+    BNPView             *m_baskets;
     bool                m_startDocked;
     bool                m_quit;
-
-private:
-    QToolBar *m_mainToolBar;
-    QToolBar *m_editToolBar;
+    QToolBar            *m_mainToolBar;
+    QToolBar            *m_editToolBar;
 };
 
 #endif // CONTAINER_H

@@ -23,6 +23,7 @@
 
 #include <QtCore/QObject>
 #include <QtGui/QGraphicsItem>
+#include <QCoreApplication>
 
 #include <KDE/KUrl>
 #include <KDE/KIO/AccessManager>
@@ -96,6 +97,7 @@ enum Id { Group = 255, Text = 1, Html, Image, Animation, Sound, File, Link, Cros
  */
 class NoteContent
 {
+    Q_DECLARE_TR_FUNCTIONS(NoteContent)
 public:
     // Constructor and destructor:
     explicit NoteContent(Note *parent, const QString &fileName = "");     /// << Constructor. Inherited notes should call it to initialize the parent note.

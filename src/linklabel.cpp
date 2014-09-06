@@ -577,10 +577,10 @@ LinkLookEditWidget::LinkLookEditWidget(QWidget *module, const QString exTitle, c
     QLabel      *label;
     QVBoxLayout *layout = new QVBoxLayout(this);
 
-    m_italic = new QCheckBox(i18n("I&talic"), this);
+    m_italic = new QCheckBox(tr("I&talic"), this);
     layout->addWidget(m_italic);
 
-    m_bold = new QCheckBox(i18n("&Bold"), this);
+    m_bold = new QCheckBox(tr("&Bold"), this);
     layout->addWidget(m_bold);
 
     QGridLayout *gl = new QGridLayout;
@@ -588,26 +588,26 @@ LinkLookEditWidget::LinkLookEditWidget(QWidget *module, const QString exTitle, c
     gl->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding), 1, /*2*/3);
 
     m_underlining = new QComboBox(this);
-    m_underlining->addItem(i18n("Always"));
-    m_underlining->addItem(i18n("Never"));
-    m_underlining->addItem(i18n("On mouse hovering"));
-    m_underlining->addItem(i18n("When mouse is outside"));
+    m_underlining->addItem(tr("Always"));
+    m_underlining->addItem(tr("Never"));
+    m_underlining->addItem(tr("On mouse hovering"));
+    m_underlining->addItem(tr("When mouse is outside"));
     label = new QLabel(this);
-    label->setText(i18n("&Underline:"));
+    label->setText(tr("&Underline:"));
     label->setBuddy(m_underlining);
     gl->addWidget(label, 0, 0);
     gl->addWidget(m_underlining, 0, 1);
 
     m_color = new KColorCombo2(QRgb(), this);
     label = new QLabel(this);
-    label->setText(i18n("Colo&r:"));
+    label->setText(tr("Colo&r:"));
     label->setBuddy(m_color);
     gl->addWidget(label,   1, 0);
     gl->addWidget(m_color, 1, 1);
 
     m_hoverColor = new KColorCombo2(QRgb(), this);
     label = new QLabel(this);
-    label->setText(i18n("&Mouse hover color:"));
+    label->setText(tr("&Mouse hover color:"));
     label->setBuddy(m_hoverColor);
     gl->addWidget(label,        2, 0);
     gl->addWidget(m_hoverColor, 2, 1);
@@ -616,22 +616,22 @@ LinkLookEditWidget::LinkLookEditWidget(QWidget *module, const QString exTitle, c
     m_iconSize = new IconSizeCombo(this);
     icoLay->addWidget(m_iconSize);
     label = new QLabel(this);
-    label->setText(i18n("&Icon size:"));
+    label->setText(tr("&Icon size:"));
     label->setBuddy(m_iconSize);
     gl->addWidget(label,  3, 0);
     gl->addItem(icoLay, 3, 1);
 
     m_preview = new QComboBox(this);
-    m_preview->addItem(i18n("None"));
-    m_preview->addItem(i18n("Icon size"));
-    m_preview->addItem(i18n("Twice the icon size"));
-    m_preview->addItem(i18n("Three times the icon size"));
+    m_preview->addItem(tr("None"));
+    m_preview->addItem(tr("Icon size"));
+    m_preview->addItem(tr("Twice the icon size"));
+    m_preview->addItem(tr("Three times the icon size"));
     m_label = new QLabel(this);
-    m_label->setText(i18n("&Preview:"));
+    m_label->setText(tr("&Preview:"));
     m_label->setBuddy(m_preview);
     m_hLabel = new HelpLabel(
-        i18n("You disabled preview but still see images?"),
-        i18n("<p>This is normal because there are several type of notes.<br>"
+        tr("You disabled preview but still see images?"),
+        tr("<p>This is normal because there are several type of notes.<br>"
              "This setting only applies to file and local link notes.<br>"
              "The images you see are image notes, not file notes.<br>"
              "File notes are generic documents, whereas image notes are pictures you can draw in.</p>"
@@ -639,15 +639,15 @@ LinkLookEditWidget::LinkLookEditWidget(QWidget *module, const QString exTitle, c
              "For instance, when dropping image or text files, image and text notes are created for them.<br>"
              "For type of files %2 does not understand, they are shown as generic file notes with just an icon or file preview and a filename.</p>"
              "<p>If you do not want the application to create notes depending on the content of the files you drop, "
-             "go to the \"General\" page and uncheck \"Image or animation\" in the \"View Content of Added Files for the Following Types\" group.</p>",
+             "go to the \"General\" page and uncheck \"Image or animation\" in the \"View Content of Added Files for the Following Types\" group.</p>").arg(
              // TODO: Note: you can resize down maximum size of images...
-             KGlobal::mainComponent().aboutData()->programName(), KGlobal::mainComponent().aboutData()->programName()),
+             qApp->applicationName(), qApp->applicationName()),
         this);
     gl->addWidget(m_label,   4, 0);
     gl->addWidget(m_preview, 4, 1);
     gl->addWidget(m_hLabel, 5, 1, 1, 2);
 
-    QGroupBox *gb = new QGroupBox(i18n("Example"), this);
+    QGroupBox *gb = new QGroupBox(tr("Example"), this);
     QHBoxLayout* gbLayout = new QHBoxLayout;
     gb->setLayout(gbLayout);
 

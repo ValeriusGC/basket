@@ -24,12 +24,12 @@
 #include "bnpview.h"
 #include "basketscene.h"
 
-#include <KDE/KLocale>
+#include <QCoreApplication>
 
 HistorySetBasket::HistorySetBasket(BasketScene *basket, QUndoCommand *parent)
         :QUndoCommand(parent)
 {
-    setText(i18n("Set current basket to %1").arg(basket->basketName()));
+    setText(QCoreApplication::tr("Set current basket to %1").arg(basket->basketName()));
     m_folderNameOld = Global::bnpView->currentBasket()->folderName();
     m_folderNameNew = basket->folderName();
 }

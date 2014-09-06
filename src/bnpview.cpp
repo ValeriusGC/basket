@@ -213,7 +213,7 @@ void BNPView::lateInit()
         }
         if (topLevelItemCount() <= 0) {
             // Create first basket:
-            BasketFactory::newBasket(/*icon=*/"", /*name=*/i18n("General"), /*backgroundImage=*/"", /*backgroundColor=*/QColor(), /*textColor=*/QColor(), /*templateName=*/"1column", /*createIn=*/0);
+            BasketFactory::newBasket(/*icon=*/"", /*name=*/tr("General"), /*backgroundImage=*/"", /*backgroundColor=*/QColor(), /*textColor=*/QColor(), /*templateName=*/"1column", /*createIn=*/0);
         }
     }
 
@@ -312,6 +312,7 @@ void BNPView::initialize()
     connect(m_history, SIGNAL(canUndoChanged(bool)), this, SLOT(canUndoRedoChanged()));
 
     setupActions();
+    InlineEditors::instance()->initToolBars(m_editbar);
 
     /// What's This Help for the tree:
     m_tree->setWhatsThis(tr(
@@ -330,7 +331,7 @@ void BNPView::setupActions()
     QMenu *m1, *m2 = NULL;
 
     /** Basket : **************************************************************/
-    m1 = m_guiClient->menuBar()->addMenu("&Basket");
+    m1 = Global::mainWin->m_basketMenu;
 
     m2 = m1->addMenu("&New");
 
@@ -398,7 +399,7 @@ void BNPView::setupActions()
     m_actHideWindow->setEnabled(Settings::useSystray()); // Init here !
 
     /** Edit : ****************************************************************/
-    m1 = m_guiClient->menuBar()->addMenu("&Edit");
+    m1 = Global::mainWin->m_editMenu;
 
     m_actCutNote  = m1->addAction(KIcon("edit-cut"), tr("C&ut"), this, SLOT(cutNote()), QKeySequence(QKeySequence::Cut));
     m_actCopyNote = m1->addAction(KIcon("edit-copy"), tr("&Copy"), this, SLOT(copyNote()), QKeySequence(QKeySequence::Copy));
@@ -425,7 +426,7 @@ void BNPView::setupActions()
     m_actResetFilter = m1->addAction(KIcon("edit-clear-locationbar-rtl"), tr("&Reset Filter"), this, SLOT(slotResetFilter()), QKeySequence("Ctrl+R"));
 
     /** Go : ******************************************************************/
-    m1 = m_guiClient->menuBar()->addMenu("&Go");
+    m1 = Global::mainWin->m_goMenu;
 
     m_actPreviousBasket = m1->addAction(KIcon("go-previous"), tr("&Previous Basket"), this, SLOT(goToPreviousBasket()), QKeySequence("Alt+Left"));
     m_actNextBasket = m1->addAction(KIcon("go-next"), tr("&Next Basket"), this, SLOT(goToNextBasket()), QKeySequence("Alt+Right"));
@@ -433,7 +434,7 @@ void BNPView::setupActions()
     m_actExpandBasket = m1->addAction(KIcon("go-down"), tr("&Expand Basket"), this, SLOT(expandBasket()), QKeySequence("Alt+Down"));
 
     /** Note : ****************************************************************/
-    m1 = m_guiClient->menuBar()->addMenu("&Note");
+    m1 = Global::mainWin->m_noteMenu;
 
     m_actEditNote = m1->addAction(tr("&Edit..."), this, SLOT(editNote()), QKeySequence("Return"));
     m_actOpenNote = m1->addAction(KIcon("window-new"), tr("&Open"), this, SLOT(openNote()), QKeySequence("F9"));
@@ -452,14 +453,8 @@ void BNPView::setupActions()
     m_actMoveNoteDown = m1->addAction(KIcon("arrow-down"), tr("Move &Down"), this, SLOT(moveNoteDown()), QKeySequence("Ctrl+Shift+Down"));
     m_actMoveOnBottom = m1->addAction(KIcon("arrow-down-double"), tr("Move on &Bottom"), this, SLOT(moveOnBottom()), QKeySequence("Ctrl+Shift+End"));
 
-    /** Tags : ****************************************************************/
-    m_tagsMenu = m_guiClient->menuBar()->addMenu("&Tags");
-    connect(m_tagsMenu, SIGNAL(aboutToShow()), this, SLOT(populateTagsMenu()));
-    connect(m_tagsMenu, SIGNAL(aboutToHide()), this, SLOT(disconnectTagsMenu()));
-
     /** Insert : **************************************************************/
-    m1 = m_guiClient->menuBar()->addMenu("&Insert");
-    m_insertMenu = m1;
+    m1 = Global::mainWin->m_insertMenu;
 
     QSignalMapper *insertEmptyMapper  = new QSignalMapper(this);
     QSignalMapper *insertWizardMapper = new QSignalMapper(this);
@@ -535,7 +530,7 @@ void BNPView::setupActions()
     m_insertActions.append(m_actGrabScreenshot);
 
     /** Help : ****************************************************************/
-    m1 = m_guiClient->menuBar()->addMenu("&Help");
+    m1 = Global::mainWin->m_helpMenu;
 
     m1->addAction(tr("&Welcome Baskets"), this, SLOT(addWelcomeBaskets()));
 
@@ -544,7 +539,7 @@ void BNPView::setupActions()
     Global::likeBack->setServer("basket.linux62.org", "/likeback/send.php");
 
 // There are too much comments, and people reading comments are more and more international, so we accept only English:
-//  Global::likeBack->setAcceptedLanguages(QStringList::split(";", "en;fr"), i18n("Please write in English or French."));
+//  Global::likeBack->setAcceptedLanguages(QStringList::split(";", "en;fr"), tr("Please write in English or French."));
 
 //  if (isPart())
 //      Global::likeBack->disableBar(); // See BNPView::shown() and BNPView::hide().
@@ -571,8 +566,6 @@ void BNPView::setupActions()
     m_mainbar->addSeparator();
     m_mainbar->addAction(m_actShowFilter);
     m_mainbar->addAction(m_actFilterAllBaskets);
-
-    InlineEditors::instance()->initToolBars(m_editbar);
 }
 
 BasketListViewItem* BNPView::topLevelItem(int i)
@@ -873,8 +866,8 @@ bool BNPView::convertTexts()
     bool convertedNotes = false;
     KProgressDialog dialog(
         /*parent=*/0,
-        /*caption=*/i18n("Plain Text Notes Conversion"),
-        /*text=*/i18n("Converting plain text notes to rich text ones...")
+        /*caption=*/tr("Plain Text Notes Conversion"),
+        /*text=*/tr("Converting plain text notes to rich text ones...")
     );
     dialog.setModal(true);
     dialog.progressBar()->setRange(0, basketCount());
@@ -1103,7 +1096,7 @@ void BNPView::removeBasket(BasketScene *basket)
 
     // If there is no basket anymore, add a new one:
     if (!nextBasketItem)
-        BasketFactory::newBasket(/*icon=*/"", /*name=*/i18n("General"), /*backgroundImage=*/"", /*backgroundColor=*/QColor(), /*textColor=*/QColor(), /*templateName=*/"1column", /*createIn=*/0);
+        BasketFactory::newBasket(/*icon=*/"", /*name=*/tr("General"), /*backgroundImage=*/"", /*backgroundColor=*/QColor(), /*textColor=*/QColor(), /*templateName=*/"1column", /*createIn=*/0);
     else // No need to save two times if we add a basket
         save();
 
@@ -1470,19 +1463,19 @@ void BNPView::notesStateChanged()
 
     // Update statusbar message :
     if (currentBasket()->isLocked())
-        setSelectionStatus(i18n("Locked"));
+        setSelectionStatus(tr("Locked"));
     else if (!basket->isLoaded())
-        setSelectionStatus(i18n("Loading..."));
+        setSelectionStatus(tr("Loading..."));
     else if (basket->count() == 0)
-        setSelectionStatus(i18n("No notes"));
+        setSelectionStatus(tr("No notes"));
     else {
-        QString count     = i18np("%1 note",     "%1 notes",    basket->count());
-        QString selecteds = i18np("%1 selected", "%1 selected", basket->countSelecteds());
-        QString showns    = (currentDecoratedBasket()->filterData().isFiltering ? i18n("all matches") : i18n("no filter"));
+        QString count     = tr("%1 note(s)", 0,    basket->count());
+        QString selecteds = tr("%1 selected").arg(basket->countSelecteds());
+        QString showns    = (currentDecoratedBasket()->filterData().isFiltering ? tr("all matches") : tr("no filter"));
         if (basket->countFounds() != basket->count())
-            showns = i18np("%1 match", "%1 matches", basket->countFounds());
+            showns = tr("%1 match(es)", 0, basket->countFounds());
         setSelectionStatus(
-            i18nc("e.g. '18 notes, 10 matches, 5 selected'", "%1, %2, %3", count, showns, selecteds));
+            QCoreApplication::translate("e.g. '18 notes, 10 matches, 5 selected'", "%1, %2, %3").arg(count, showns, selecteds));
     }
 
     if (currentBasket()->redirectEditActions()) {
@@ -1539,9 +1532,9 @@ void BNPView::updateNotesActions()
 
     // From the old Note::contextMenuEvent(...) :
     /*  if (useFile() || m_type == Link) {
-        m_type == Link ? i18n("&Open target")         : i18n("&Open")
-        m_type == Link ? i18n("Open target &with...") : i18n("Open &with...")
-        m_type == Link ? i18n("&Save target as...")   : i18n("&Save a copy as...")
+        m_type == Link ? tr("&Open target")         : tr("&Open")
+        m_type == Link ? tr("Open target &with...") : tr("Open &with...")
+        m_type == Link ? tr("&Save target as...")   : tr("&Save a copy as...")
             // If useFile() theire is always a file to open / open with / save, but :
         if (m_type == Link) {
                 if (url().prettyUrl().isEmpty() && runCommand().isEmpty())     // no URL nor runCommand :
@@ -1553,7 +1546,7 @@ void BNPView::updateNotesActions()
     }
     } else if (m_type != Color) {
         popupMenu->insertSeparator();
-        popupMenu->insertItem( KIcon("document-save-as"), i18n("&Save a copy as..."), this, SLOT(slotSaveAs()), 0, 10 );
+        popupMenu->insertItem( KIcon("document-save-as"), tr("&Save a copy as..."), this, SLOT(slotSaveAs()), 0, 10 );
     }*/
 }
 
@@ -1591,7 +1584,7 @@ void BNPView::colorPicked(const QColor &color)
         showMainWindow();
 
     if (Settings::usePassivePopup())
-        showPassiveDropped(i18n("Picked color to basket <i>%1</i>"));
+        showPassiveDropped(tr("Picked color to basket <i>%1</i>"));
 }
 
 void BNPView::colorPickingCanceled()
@@ -1605,7 +1598,7 @@ void BNPView::slotConvertTexts()
     /*
         int result = KMessageBox::questionYesNoCancel(
             this,
-            i18n(
+            tr(
                 "<p>This will convert every text notes into rich text notes.<br>"
                 "The content of the notes will not change and you will be able to apply formating to those notes.</p>"
                 "<p>This process cannot be reverted back: you will not be able to convert the rich text notes to plain text ones later.</p>"
@@ -1613,9 +1606,9 @@ void BNPView::slotConvertTexts()
                 "If nobody complain about not having plain text notes anymore, then the final version is likely to not support plain text notes anymore.</p>"
                 "<p><b>Which basket notes do you want to convert?</b></p>"
             ),
-            i18n("Convert Text Notes"),
-            KGuiItem(i18n("Only in the Current Basket")),
-            KGuiItem(i18n("In Every Baskets"))
+            tr("Convert Text Notes"),
+            KGuiItem(tr("Only in the Current Basket")),
+            KGuiItem(tr("In Every Baskets"))
         );
         if (result == KMessageBox::Cancel)
             return;
@@ -1647,7 +1640,7 @@ void BNPView::showHideFilterBar(bool show, bool switchFocus)
 void BNPView::insertEmpty(int type)
 {
     if (currentBasket()->isLocked()) {
-        showPassiveImpossible(i18n("Cannot add note."));
+        showPassiveImpossible(tr("Cannot add note."));
         return;
     }
     currentBasket()->insertEmptyNote(type);
@@ -1656,7 +1649,7 @@ void BNPView::insertEmpty(int type)
 void BNPView::insertWizard(int type)
 {
     if (currentBasket()->isLocked()) {
-        showPassiveImpossible(i18n("Cannot add note."));
+        showPassiveImpossible(tr("Cannot add note."));
         return;
     }
     currentBasket()->insertWizard(type);
@@ -1726,7 +1719,7 @@ void BNPView::screenshotGrabbed(const QPixmap &pixmap)
         showMainWindow();
 
     if (Settings::usePassivePopup())
-        showPassiveDropped(i18n("Grabbed screen zone to basket <i>%1</i>"));
+        showPassiveDropped(tr("Grabbed screen zone to basket <i>%1</i>"));
 }
 
 BasketScene* BNPView::basketForFolderName(const QString &folderName)
@@ -1881,10 +1874,10 @@ void BNPView::saveAsArchive()
     QString folder = settings.value("basketarchive/lastFolder", QDir::homePath()).toString() + "/";
     QString url = folder + QString(basket->basketName()).replace("/", "_") + ".baskets";
 
-    QString filter = "*.baskets|" + i18n("Basket Archives") + "\n*|" + i18n("All Files");
+    QString filter = "*.baskets|" + tr("Basket Archives") + "\n*|" + tr("All Files");
     QString destination = url;
     for (bool askAgain = true; askAgain;) {
-        destination = KFileDialog::getSaveFileName(destination, filter, this, i18n("Save as Basket Archive"));
+        destination = KFileDialog::getSaveFileName(destination, filter, this, tr("Save as Basket Archive"));
         if (destination.isEmpty()) // User canceled
             return;
         if (dir.exists(destination)) {
@@ -1899,7 +1892,7 @@ void BNPView::saveAsArchive()
         } else
             askAgain = false;
     }
-    bool withSubBaskets = true;//KMessageBox::questionYesNo(this, i18n("Do you want to export sub-baskets too?"), i18n("Save as Basket Archive")) == KMessageBox::Yes;
+    bool withSubBaskets = true;//KMessageBox::questionYesNo(this, tr("Do you want to export sub-baskets too?"), tr("Save as Basket Archive")) == KMessageBox::Yes;
 
     settings.setValue("basketarchive/lastFolder", KUrl(destination).directory());
 
@@ -1923,8 +1916,8 @@ void BNPView::delayedOpenBasket()
 
 void BNPView::openArchive()
 {
-    QString filter = "*.baskets|" + i18n("Basket Archives") + "\n*|" + i18n("All Files");
-    QString path = KFileDialog::getOpenFileName(KUrl(), filter, this, i18n("Open Basket Archive"));
+    QString filter = "*.baskets|" + tr("Basket Archives") + "\n*|" + tr("All Files");
+    QString path = KFileDialog::getOpenFileName(KUrl(), filter, this, tr("Open Basket Archive"));
     if (!path.isEmpty()) // User has not canceled
         Archive::open(path);
 }
@@ -2009,7 +2002,7 @@ void BNPView::pasteInCurrentBasket()
     currentBasket()->pasteNote();
 
     if (Settings::usePassivePopup())
-        showPassiveDropped(i18n("Clipboard content pasted to basket <i>%1</i>"));
+        showPassiveDropped(tr("Clipboard content pasted to basket <i>%1</i>"));
 }
 
 void BNPView::pasteSelInCurrentBasket()
@@ -2017,7 +2010,7 @@ void BNPView::pasteSelInCurrentBasket()
     currentBasket()->pasteNote(QClipboard::Selection);
 
     if (Settings::usePassivePopup())
-        showPassiveDropped(i18n("Selection pasted to basket <i>%1</i>"));
+        showPassiveDropped(tr("Selection pasted to basket <i>%1</i>"));
 }
 
 void BNPView::showPassiveDropped(const QString &title)
@@ -2029,7 +2022,7 @@ void BNPView::showPassiveDropped(const QString &title)
         QTimer::singleShot(c_delayTooltipTime, this, SLOT(showPassiveDroppedDelayed()));
         // DELAY IT BELOW:
     } else
-        showPassiveImpossible(i18n("No note was added."));
+        showPassiveImpossible(tr("No note was added."));
 }
 
 void BNPView::showPassiveDroppedDelayed()
@@ -2070,7 +2063,7 @@ void BNPView::showPassiveImpossible(const QString &message)
         if (Settings::useSystray()){
                 KPassivePopup::message(KPassivePopup::Boxed,
                                 QString("<font color=red>%1</font>")
-                                .arg(i18n("Basket <i>%1</i> is locked"))
+                                .arg(tr("Basket <i>%1</i> is locked"))
                                 .arg(Tools::textToHTMLWithoutP(currentBasket()->basketName())),
                                 message,
                                 KIconLoader::global()->loadIcon(
@@ -2082,7 +2075,7 @@ void BNPView::showPassiveImpossible(const QString &message)
         else{
                 KPassivePopup::message(KPassivePopup::Boxed,
                                 QString("<font color=red>%1</font>")
-                                .arg(i18n("Basket <i>%1</i> is locked"))
+                                .arg(tr("Basket <i>%1</i> is locked"))
                                 .arg(Tools::textToHTMLWithoutP(currentBasket()->basketName())),
                                 message,
                                 KIconLoader::global()->loadIcon(
@@ -2111,7 +2104,7 @@ void BNPView::showPassiveContent(bool forceShow/* = false*/)
     KPassivePopup::message(KPassivePopup::Boxed,
         "<qt>" + KDialog::makeStandardCaption(
             currentBasket()->isLocked() ? QString("%1 <font color=gray30>%2</font>")
-            .arg(Tools::textToHTMLWithoutP(currentBasket()->basketName()), i18n("(Locked)"))
+            .arg(Tools::textToHTMLWithoutP(currentBasket()->basketName()), tr("(Locked)"))
             : Tools::textToHTMLWithoutP(currentBasket()->basketName())
         ),
         message,
@@ -2125,7 +2118,7 @@ void BNPView::showPassiveContent(bool forceShow/* = false*/)
     KPassivePopup::message(KPassivePopup::Boxed,
         "<qt>" + KDialog::makeStandardCaption(
             currentBasket()->isLocked() ? QString("%1 <font color=gray30>%2</font>")
-            .arg(Tools::textToHTMLWithoutP(currentBasket()->basketName()), i18n("(Locked)"))
+            .arg(Tools::textToHTMLWithoutP(currentBasket()->basketName()), tr("(Locked)"))
             : Tools::textToHTMLWithoutP(currentBasket()->basketName())
         ),
         message,
@@ -2146,7 +2139,7 @@ void BNPView::showPassiveLoading(BasketScene *basket)
     if (Settings::useSystray()){
     KPassivePopup::message(KPassivePopup::Boxed,
         Tools::textToHTMLWithoutP(basket->basketName()),
-        i18n("Loading..."),
+        tr("Loading..."),
         KIconLoader::global()->loadIcon(
             basket->icon(), KIconLoader::NoGroup, 16, KIconLoader::DefaultState,
             QStringList(), 0L, true
@@ -2156,7 +2149,7 @@ void BNPView::showPassiveLoading(BasketScene *basket)
     else{
     KPassivePopup::message(KPassivePopup::Boxed,
         Tools::textToHTMLWithoutP(basket->basketName()),
-        i18n("Loading..."),
+        tr("Loading..."),
         KIconLoader::global()->loadIcon(
             basket->icon(), KIconLoader::NoGroup, 16, KIconLoader::DefaultState,
             QStringList(), 0L, true
@@ -2470,7 +2463,7 @@ void BNPView::populateTagsMenu(Note *note)
     currentBasket()->m_tagPopupNote = referenceNote;
     bool enable = currentBasket()->countSelecteds() > 0;
 
-    m_tagsMenu->clear();
+    Global::mainWin->m_tagsMenu->clear();
 
     QList<Tag*>::iterator it;
     Tag *currentTag;
@@ -2493,7 +2486,7 @@ void BNPView::populateTagsMenu(Note *note)
         if (referenceNote && referenceNote->hasTag(currentTag))
             mi->setChecked(true);
 
-        m_tagsMenu->addAction(mi);
+        Global::mainWin->m_tagsMenu->addAction(mi);
 
         if (!currentTag->shortcut().isEmpty())
             mi->setShortcut(sequence);
@@ -2502,17 +2495,17 @@ void BNPView::populateTagsMenu(Note *note)
         ++i;
     }
 
-    m_tagsMenu->addSeparator();
+    Global::mainWin->m_tagsMenu->addSeparator();
 
     // I don't like how this is implemented; but I can't think of a better way
     // to do this, so I will have to leave it for now
-    m_tagsMenu->addAction(tr("&Assign new Tag..."));
-    m_tagsMenu->addAction(KIcon("edit-delete"), tr("&Remove All"));
-    m_tagsMenu->addAction(KIcon("configure"), tr("&Customize..."));
+    Global::mainWin->m_tagsMenu->addAction(tr("&Assign new Tag..."));
+    Global::mainWin->m_tagsMenu->addAction(KIcon("edit-delete"), tr("&Remove All"));
+    Global::mainWin->m_tagsMenu->addAction(KIcon("configure"), tr("&Customize..."));
 
-    connect(m_tagsMenu, SIGNAL(triggered(QAction *)), currentBasket(), SLOT(toggledTagInMenu(QAction *)));
-    connect(m_tagsMenu, SIGNAL(aboutToHide()),  currentBasket(), SLOT(unlockHovering()));
-    connect(m_tagsMenu, SIGNAL(aboutToHide()),  currentBasket(), SLOT(disableNextClick()));
+    connect(Global::mainWin->m_tagsMenu, SIGNAL(triggered(QAction *)), currentBasket(), SLOT(toggledTagInMenu(QAction *)));
+    connect(Global::mainWin->m_tagsMenu, SIGNAL(aboutToHide()),  currentBasket(), SLOT(unlockHovering()));
+    connect(Global::mainWin->m_tagsMenu, SIGNAL(aboutToHide()),  currentBasket(), SLOT(disableNextClick()));
 }
 
 /*
@@ -2526,9 +2519,9 @@ void BNPView::populateTagsMenu(Note *note)
 
 void BNPView::disconnectTagsMenu()
 {
-    disconnect(m_tagsMenu, SIGNAL(triggered(QAction *)), currentBasket(), SLOT(toggledTagInMenu(QAction *)));
-    disconnect(m_tagsMenu, SIGNAL(aboutToHide()),  currentBasket(), SLOT(unlockHovering()));
-    disconnect(m_tagsMenu, SIGNAL(aboutToHide()),  currentBasket(), SLOT(disableNextClick()));
+    disconnect(Global::mainWin->m_tagsMenu, SIGNAL(triggered(QAction *)), currentBasket(), SLOT(toggledTagInMenu(QAction *)));
+    disconnect(Global::mainWin->m_tagsMenu, SIGNAL(aboutToHide()),  currentBasket(), SLOT(unlockHovering()));
+    disconnect(Global::mainWin->m_tagsMenu, SIGNAL(aboutToHide()),  currentBasket(), SLOT(disableNextClick()));
 }
 
 void BNPView::loadCrossReference(QString link)

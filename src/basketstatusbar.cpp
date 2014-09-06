@@ -74,7 +74,7 @@ void BasketStatusBar::setupStatusBar()
         m_basketStatus = static_cast<QLabel*>(lst.at(0));
     lst.clear();
 
-    m_selectionStatus = new QLabel(i18n("Loading..."), parent);
+    m_selectionStatus = new QLabel(tr("Loading..."), parent);
     addWidget(m_selectionStatus, 0, true);
 
     m_lockStatus = new QLabel(0/*this*/);
@@ -91,7 +91,7 @@ void BasketStatusBar::setupStatusBar()
     //m_savedStatus->setPixmap(m_savedStatusIconSet.pixmap(QIconSet::Small, QIconSet::Disabled));
     //m_savedStatus->setEnabled(false);
     addWidget(m_savedStatus, 0, true);
-    m_savedStatus->setToolTip("<p>" + i18n("Shows if there are changes that have not yet been saved."));
+    m_savedStatus->setToolTip("<p>" + tr("Shows if there are changes that have not yet been saved."));
 
 
 }
@@ -121,12 +121,12 @@ void BasketStatusBar::updateStatusBarHint()
     QString message = "";
 
     if (Global::bnpView->currentBasket()->isDuringDrag())
-        message = i18n("Ctrl+drop: copy, Shift+drop: move, Shift+Ctrl+drop: link.");
+        message = tr("Ctrl+drop: copy, Shift+drop: move, Shift+Ctrl+drop: link.");
 // Too much noise information:
 //  else if (currentBasket()->inserterShown() && currentBasket()->inserterSplit() && !currentBasket()->inserterGroup())
-//      message = i18n("Click to insert a note, right click for more options. Click on the right of the line to group instead of insert.");
+//      message = tr("Click to insert a note, right click for more options. Click on the right of the line to group instead of insert.");
 //  else if (currentBasket()->inserterShown() && currentBasket()->inserterSplit() && currentBasket()->inserterGroup())
-//      message = i18n("Click to group a note, right click for more options. Click on the left of the line to group instead of insert.");
+//      message = tr("Click to group a note, right click for more options. Click on the left of the line to group instead of insert.");
     else if (Global::debugWindow)
         message = "DEBUG: " + Global::bnpView->currentBasket()->folderName();
 
@@ -140,11 +140,11 @@ void BasketStatusBar::setLockStatus(bool isLocked)
 
     if (isLocked) {
         m_lockStatus->setPixmap(SmallIcon("encrypted.png"));
-        m_lockStatus->setToolTip(i18n(
+        m_lockStatus->setToolTip(tr(
                                      "<p>This basket is <b>locked</b>.<br>Click to unlock it.</p>").replace(" ", "&nbsp;"));
     } else {
         m_lockStatus->clear();
-        m_lockStatus->setToolTip(i18n(
+        m_lockStatus->setToolTip(tr(
                                      "<p>This basket is <b>unlocked</b>.<br>Click to lock it.</p>").replace(" ", "&nbsp;"));
     }
 }

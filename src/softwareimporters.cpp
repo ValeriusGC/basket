@@ -32,6 +32,7 @@
 #include <QMessageBox>
 #include <QTextEdit>
 #include <QCoreApplication>
+#include <QDialogButtonBox>
 
 #include <KDE/KStandardDirs>
 #include <KDE/KLocale>
@@ -48,26 +49,23 @@
 /** class TreeImportDialog: */
 
 TreeImportDialog::TreeImportDialog(QWidget *parent)
-        : KDialog(parent)
+        : QDialog(parent)
 {
-    QWidget *page = new QWidget(this);
-    QVBoxLayout *topLayout = new QVBoxLayout(page);
+    QVBoxLayout *topLayout = new QVBoxLayout(this);
 
-    // KDialog options
-    setCaption(i18n("Import Hierarchy"));
-    setButtons(Ok | Cancel);
-    setDefaultButton(Ok);
+    setWindowTitle(tr("Import Hierarchy"));
+    QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok
+                                     | QDialogButtonBox::Cancel);
     setObjectName("ImportHeirachy");
     setModal(true);
-    showButtonSeparator(false);
 
-    m_choices = new QGroupBox(i18n("How to Import the Notes?"), page);
+    m_choices = new QGroupBox(tr("How to Import the Notes?"), this);
     m_choiceLayout = new QVBoxLayout();
     m_choices->setLayout(m_choiceLayout);
 
-    m_hierarchy_choice = new QRadioButton(i18n("&Keep original hierarchy (all notes in separate baskets)"), m_choices);
-    m_separate_baskets_choice = new QRadioButton(i18n("&First level notes in separate baskets"),            m_choices);
-    m_one_basket_choice = new QRadioButton(i18n("&All notes in one basket"),                                m_choices);
+    m_hierarchy_choice = new QRadioButton(tr("&Keep original hierarchy (all notes in separate baskets)"), m_choices);
+    m_separate_baskets_choice = new QRadioButton(tr("&First level notes in separate baskets"),            m_choices);
+    m_one_basket_choice = new QRadioButton(tr("&All notes in one basket"),                                m_choices);
 
     m_hierarchy_choice->setChecked(true);
     m_choiceLayout->addWidget(m_hierarchy_choice);
@@ -76,8 +74,9 @@ TreeImportDialog::TreeImportDialog(QWidget *parent)
 
     topLayout->addWidget(m_choices);
     topLayout->addStretch(10);
+    topLayout->addWidget(buttonBox);
 
-    setMainWidget(page);
+    setLayout(topLayout);
 }
 
 TreeImportDialog::~TreeImportDialog()
@@ -97,29 +96,25 @@ int TreeImportDialog::choice()
 /** class TextFileImportDialog: */
 
 TextFileImportDialog::TextFileImportDialog(QWidget *parent)
-        : KDialog(parent)
+        : QDialog(parent)
 {
-    QWidget *page = new QWidget(this);
-    QVBoxLayout *topLayout = new QVBoxLayout(page);
+    QVBoxLayout *topLayout = new QVBoxLayout(this);
 
-    // KDialog options
-    setCaption(i18n("Import Text File"));
-    setButtons(Ok | Cancel);
-    setDefaultButton(Ok);
+    setWindowTitle(tr("Import Text File"));
+    QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok
+                                     | QDialogButtonBox::Cancel);
     setObjectName("ImportTextFile");
     setModal(true);
-    showButtonSeparator(false);
 
-
-    m_choices = new QGroupBox(i18n("Format of the Text File"), page);
+    m_choices = new QGroupBox(tr("Format of the Text File"), this);
     m_choiceLayout = new QVBoxLayout;
     m_choices->setLayout(m_choiceLayout);
 
-    m_emptyline_choice = new QRadioButton(i18n("Notes separated by an &empty line"), m_choices);
-    m_newline_choice = new QRadioButton(i18n("One &note per line"),                  m_choices);
-    m_dash_choice = new QRadioButton(i18n("Notes begin with a &dash (-)"),           m_choices);
-    m_star_choice = new QRadioButton(i18n("Notes begin with a &star (*)"),           m_choices);
-    m_anotherSeparator = new QRadioButton(i18n("&Use another separator:"),           m_choices);
+    m_emptyline_choice = new QRadioButton(tr("Notes separated by an &empty line"), m_choices);
+    m_newline_choice = new QRadioButton(tr("One &note per line"),                  m_choices);
+    m_dash_choice = new QRadioButton(tr("Notes begin with a &dash (-)"),           m_choices);
+    m_star_choice = new QRadioButton(tr("Notes begin with a &star (*)"),           m_choices);
+    m_anotherSeparator = new QRadioButton(tr("&Use another separator:"),           m_choices);
 
     m_choiceLayout->addWidget(m_emptyline_choice);
     m_choiceLayout->addWidget(m_newline_choice);
@@ -135,7 +130,7 @@ TextFileImportDialog::TextFileImportDialog(QWidget *parent)
     m_customSeparator = new QTextEdit(indentedTextEdit);
     hLayout->addWidget(m_customSeparator);
 
-    m_all_in_one_choice = new QRadioButton(i18n("&All in one note"),                  m_choices);
+    m_all_in_one_choice = new QRadioButton(tr("&All in one note"),                  m_choices);
     m_choiceLayout->addWidget(m_all_in_one_choice);
 
     m_emptyline_choice->setChecked(true);
@@ -143,7 +138,7 @@ TextFileImportDialog::TextFileImportDialog(QWidget *parent)
 
     connect(m_customSeparator, SIGNAL(textChanged()), this, SLOT(customSeparatorChanged()));
 
-    setMainWidget(page);
+    setLayout(topLayout);
 }
 
 TextFileImportDialog::~TextFileImportDialog()
@@ -284,7 +279,7 @@ void SoftwareImporters::importKJots()
     if (list.isEmpty())
         return;
 
-    BasketFactory::newBasket(/*icon=*/"kjots", /*name=*/i18n("From KJots"), /*backgroundImage=*/"", /*backgroundColor=*/QColor(), /*textColor=*/QColor(), /*templateName=*/"1column", /*createIn=*/0);
+    BasketFactory::newBasket(/*icon=*/"kjots", /*name=*/QCoreApplication::tr("From KJots"), /*backgroundImage=*/"", /*backgroundColor=*/QColor(), /*textColor=*/QColor(), /*templateName=*/"1column", /*createIn=*/0);
     BasketScene *kjotsBasket = Global::bnpView->currentBasket();
 
     for (QStringList::Iterator it = list.begin(); it != list.end(); ++it) {   // For each file
@@ -371,7 +366,7 @@ void SoftwareImporters::importKNotes()
             stream.setCodec("UTF-8");
 
             // First create a basket for it:
-            BasketFactory::newBasket(/*icon=*/"knotes", /*name=*/i18n("From KNotes"), /*backgroundImage=*/"", /*backgroundColor=*/QColor(), /*textColor=*/QColor(), /*templateName=*/"1column", /*createIn=*/0);
+            BasketFactory::newBasket(/*icon=*/"knotes", /*name=*/QCoreApplication::tr("From KNotes"), /*backgroundImage=*/"", /*backgroundColor=*/QColor(), /*textColor=*/QColor(), /*templateName=*/"1column", /*createIn=*/0);
             BasketScene *basket = Global::bnpView->currentBasket();
             basket->load();
 
@@ -442,7 +437,7 @@ void SoftwareImporters::importStickyNotes()
             continue;
 
         // First create a basket for it:
-        BasketFactory::newBasket(/*icon=*/"gnome", /*name=*/i18n("From Sticky Notes"), /*backgroundImage=*/"", /*backgroundColor=*/QColor(), /*textColor=*/QColor(), /*templateName=*/"1column", /*createIn=*/0);
+        BasketFactory::newBasket(/*icon=*/"gnome", /*name=*/QCoreApplication::tr("From Sticky Notes"), /*backgroundImage=*/"", /*backgroundColor=*/QColor(), /*textColor=*/QColor(), /*templateName=*/"1column", /*createIn=*/0);
         BasketScene *basket = Global::bnpView->currentBasket();
         basket->load();
 
@@ -492,7 +487,7 @@ void SoftwareImporters::importTomboy()
 
         if (basket == 0) {
             // First create a basket for it:
-            BasketFactory::newBasket(/*icon=*/"tomboy", /*name=*/i18n("From Tomboy"), /*backgroundImage=*/"", /*backgroundColor=*/QColor(), /*textColor=*/QColor(), /*templateName=*/"1column", /*createIn=*/0);
+            BasketFactory::newBasket(/*icon=*/"tomboy", /*name=*/QCoreApplication::tr("From Tomboy"), /*backgroundImage=*/"", /*backgroundColor=*/QColor(), /*textColor=*/QColor(), /*templateName=*/"1column", /*createIn=*/0);
             basket = Global::bnpView->currentBasket();
             basket->load();
         }
@@ -596,7 +591,7 @@ void SoftwareImporters::importTextFile()
                            );
 
         // First create a basket for it:
-        QString title = i18nc("From TextFile.txt", "From %1", KUrl(fileName).fileName());
+        QString title = QCoreApplication::translate("From TextFile.txt", "From %1").arg(KUrl(fileName).fileName());
         BasketFactory::newBasket(/*icon=*/"txt", title, /*backgroundImage=*/"", /*backgroundColor=*/QColor(), /*textColor=*/QColor(), /*templateName=*/"1column", /*createIn=*/0);
         BasketScene *basket = Global::bnpView->currentBasket();
         basket->load();
@@ -761,7 +756,7 @@ void SoftwareImporters::importTuxCardsNode(const QDomElement &element, BasketSce
         if (isEncrypted) {
             QMessageBox::information(0, QCoreApplication::tr("Encrypted Notes not Supported Yet"), QCoreApplication::tr("A note is encrypted. The importer does not yet support encrypted notes. Please remove the encryption with TuxCards and re-import the file."));
             isRichText = true;
-            content = i18n("<font color='red'><b>Encrypted note.</b><br>The importer do not support encrypted notes yet. Please remove the encryption with TuxCards and re-import the file.</font>");
+            content = QCoreApplication::tr("<font color='red'><b>Encrypted note.</b><br>The importer do not support encrypted notes yet. Please remove the encryption with TuxCards and re-import the file.</font>");
         }
 
         if (remainingHierarchy > 0) {

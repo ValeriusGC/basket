@@ -24,7 +24,6 @@
 #include <KDE/KFileDialog>
 #include <KDE/KLocale>
 #include <KDE/KVBox>
-#include <KDE/KLineEdit>
 
 #include <QtCore/QDir>
 #include <QtGui/QCheckBox>
@@ -51,15 +50,15 @@ ExporterDialog::ExporterDialog(BasketScene *basket, QWidget *parent, const char 
     connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
 
     QHBoxLayout *hLay = new QHBoxLayout();
-    m_url = new KUrlRequester(KUrl(""), this);
-    m_url->setWindowTitle(tr("HTML Page Filename"));
-    m_url->setFilter("text/html");
-    m_url->fileDialog()->setOperationMode(KFileDialog::Saving);
+//    m_url = new KUrlRequester(KUrl(""), this);
+//    m_url->setWindowTitle(tr("HTML Page Filename"));
+//    m_url->setFilter("text/html");
+//    m_url->fileDialog()->setOperationMode(KFileDialog::Saving);
     QLabel *fileLabel = new QLabel(this);
     fileLabel->setText(tr("&Filename:"));
-    fileLabel->setBuddy(m_url);
+//    fileLabel->setBuddy(m_url);
     hLay->addWidget(fileLabel);
-    hLay->addWidget(m_url);
+//    hLay->addWidget(m_url);
 
     m_embedLinkedFiles    = new QCheckBox(tr("&Embed linked local files"),              this);
     m_embedLinkedFolders  = new QCheckBox(tr("Embed &linked local folders"),            this);
@@ -68,7 +67,7 @@ ExporterDialog::ExporterDialog(BasketScene *basket, QWidget *parent, const char 
     m_formatForImpression->hide();
 
     load();
-    m_url->lineEdit()->setFocus();
+//    m_url->lineEdit()->setFocus();
 
     //showTile(true);
     // Add a stretch at the bottom:
@@ -94,9 +93,9 @@ void ExporterDialog::show()
 {
     QDialog::show();
 
-    QString lineEditText = m_url->lineEdit()->text();
-    int selectionStart = lineEditText.lastIndexOf("/") + 1;
-    m_url->lineEdit()->setSelection(selectionStart, lineEditText.length() - selectionStart - QString(".html").length());
+//    QString lineEditText = m_url->lineEdit()->text();
+//    int selectionStart = lineEditText.lastIndexOf("/") + 1;
+//    m_url->lineEdit()->setSelection(selectionStart, lineEditText.length() - selectionStart - QString(".html").length());
 }
 
 void ExporterDialog::load()
@@ -106,7 +105,7 @@ void ExporterDialog::load()
 
     QString folder = settings.value("lastFolder", QDir::homePath()).toString() + "/";
     QString url = folder + QString(m_basket->basketName()).replace("/", "_") + ".html";
-    m_url->setUrl(KUrl(url));
+//    m_url->setUrl(KUrl(url));
 
     m_embedLinkedFiles->setChecked(settings.value("embedLinkedFiles",    true).toBool());
     m_embedLinkedFolders->setChecked(settings.value("embedLinkedFolders",  false).toBool());
@@ -119,8 +118,8 @@ void ExporterDialog::save()
     QSettings settings;
     settings.beginGroup("htmlexport");
 
-    QString folder = KUrl(m_url->url()).directory();
-    settings.setValue("lastFolder",          folder);
+//    QString folder = KUrl(m_url->url()).directory();
+//    settings.setValue("lastFolder",          folder);
     settings.setValue("embedLinkedFiles",    m_embedLinkedFiles->isChecked());
     settings.setValue("embedLinkedFolders",  m_embedLinkedFolders->isChecked());
     settings.setValue("erasePreviousFiles",  m_erasePreviousFiles->isChecked());
@@ -134,7 +133,8 @@ void ExporterDialog::accept()
 
 QString ExporterDialog::filePath()
 {
-    return m_url->url().url();
+//    return m_url->url().url();
+    return QString();
 }
 
 bool ExporterDialog::embedLinkedFiles()

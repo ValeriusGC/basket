@@ -348,7 +348,7 @@ Note* NoteFactory::dropNote(const QMimeData *source, BasketScene *parent, bool f
     if (formats.size() == 0) {
         // TODO: add a parameter to say if it's from a clipboard paste, a selection paste, or a drop
         //       To be able to say "The clipboard/selection/drop is empty".
-//      KMessageBox::error(parent, i18n("There is no data to insert."), i18n("No Data"));
+//      KMessageBox::error(parent, tr("There is no data to insert."), tr("No Data"));
         return 0;
     }
 
@@ -540,21 +540,21 @@ Note* NoteFactory::dropURLs(KUrl::List urls, BasketScene *parent, Qt::DropAction
         if (shouldAsk) {
             KMenu menu(parent->graphicsView());
             QList<QAction *> actList;
-            actList << new KAction(KIcon("go-jump"),
-                                   i18n("&Move Here\tShift"),
+            actList << new QAction(KIcon("go-jump"),
+                                   QCoreApplication::tr("&Move Here\tShift"),
                                    &menu)
-            << new KAction(KIcon("edit-copy"),
-                           i18n("&Copy Here\tCtrl"),
+            << new QAction(KIcon("edit-copy"),
+                           QCoreApplication::tr("&Copy Here\tCtrl"),
                            &menu)
-            << new KAction(KIcon("insert-link"),
-                           i18n("&Link Here\tCtrl+Shift"),
+            << new QAction(KIcon("insert-link"),
+                           QCoreApplication::tr("&Link Here\tCtrl+Shift"),
                            &menu);
 
             foreach(QAction *a, actList)
             menu.addAction(a);
 
             menu.addSeparator();
-            menu.addAction(KIcon("dialog-cancel"), i18n("C&ancel\tEscape"));
+            menu.addAction(KIcon("dialog-cancel"), QCoreApplication::tr("C&ancel\tEscape"));
             int id = actList.indexOf(menu.exec(QCursor::pos()));
             switch (id) {
             case 0: action = Qt::MoveAction; break;
@@ -748,7 +748,7 @@ Note* NoteFactory::copyFileAndLoad(const KUrl &url, BasketScene *parent)
     if (Global::debugWindow)
         *Global::debugWindow << "copyFileAndLoad: " + url.prettyUrl() + " to " + fullPath;
 
-//  QString annotations = i18n("Original file: %1").arg(url.prettyUrl());
+//  QString annotations = tr("Original file: %1").arg(url.prettyUrl());
 //  parent->dontCareOfCreation(fullPath);
 
     KIO::CopyJob *copyJob = KIO::copy(url, KUrl(fullPath),
@@ -769,7 +769,7 @@ Note* NoteFactory::moveFileAndLoad(const KUrl &url, BasketScene *parent)
     if (Global::debugWindow)
         *Global::debugWindow << "moveFileAndLoad: " + url.prettyUrl() + " to " + fullPath;
 
-//  QString annotations = i18n("Original file: %1").arg(url.prettyUrl());
+//  QString annotations = tr("Original file: %1").arg(url.prettyUrl());
 //  parent->dontCareOfCreation(fullPath);
 
     KIO::CopyJob *copyJob = KIO::move(url, KUrl(fullPath),
@@ -1057,7 +1057,7 @@ Note* NoteFactory::importIcon(BasketScene *parent)
 {
     QString iconName = KIconDialog::getIcon(KIconLoader::Desktop, KIconLoader::Application, false, Settings::defIconSize());
     if (! iconName.isEmpty()) {
-        QPointer<IconSizeDialog> dialog = new IconSizeDialog(i18n("Import Icon as Image"), i18n("Choose the size of the icon to import as an image:"), iconName, Settings::defIconSize(), 0);
+        QPointer<IconSizeDialog> dialog = new IconSizeDialog(QCoreApplication::tr("Import Icon as Image"), QCoreApplication::tr("Choose the size of the icon to import as an image:"), iconName, Settings::defIconSize(), 0);
         dialog->exec();
         if (dialog->iconSize() > 0) {
             Settings::setDefIconSize(dialog->iconSize());
@@ -1071,7 +1071,7 @@ Note* NoteFactory::importIcon(BasketScene *parent)
 Note* NoteFactory::importFileContent(BasketScene *parent)
 {
     KUrl url = KFileDialog::getOpenUrl(KUrl(), "", parent->graphicsView(),
-                                       i18n("Load File Content into a Note"));
+                                       QCoreApplication::tr("Load File Content into a Note"));
     if (! url.isEmpty())
         return copyFileAndLoad(url, parent);
     return 0;

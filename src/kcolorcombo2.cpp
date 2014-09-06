@@ -121,7 +121,7 @@ void KColorPopup::relayout() // FIXME: relayout should NOT redraw the pixmap!
         m_selector->drawColorRect(painter, x, y, m_selector->defaultColor(), /*isDefault=*/true, colorWidth, colorHeight);
         painter.setFont(m_selector->font());
         painter.setPen(textColor);
-        painter.drawText(x + 2 + colorWidth, y, /*width=*/5000, colorHeight, Qt::AlignLeft | Qt::AlignVCenter | Qt::TextDontClip, i18n("(Default)"));
+        painter.drawText(x + 2 + colorWidth, y, /*width=*/5000, colorHeight, Qt::AlignLeft | Qt::AlignVCenter | Qt::TextDontClip, tr("(Default)"));
     }
     x = 1 + MARGIN + m_columnOther * (colorWidth + MARGIN);
     if (m_selectedColumn >= m_columnOther && rowCount == m_selectedRow) {
@@ -133,7 +133,7 @@ void KColorPopup::relayout() // FIXME: relayout should NOT redraw the pixmap!
     m_selector->drawColorRect(painter, x, y, m_otherColor, /*isDefault=*/false, colorWidth, colorHeight);
     painter.setFont(m_selector->font());
     painter.setPen(textColor);
-    painter.drawText(x + 2 + colorWidth, y, /*width=*/5000, colorHeight, Qt::AlignLeft | Qt::AlignVCenter | Qt::TextDontClip, i18n("Other..."));
+    painter.drawText(x + 2 + colorWidth, y, /*width=*/5000, colorHeight, Qt::AlignLeft | Qt::AlignVCenter | Qt::TextDontClip, tr("Other..."));
 
 //  QPoint pos = mapFromGlobal(QCursor::pos());
 //  painter.drawRect(pos.x(), pos.y(), 5000, 5000);
@@ -603,7 +603,7 @@ void KColorCombo2::drawColorRect(QPainter &painter, int x, int y, const QColor &
 
 int KColorCombo2::colorRectHeight() const
 {
-    return (fontMetrics().boundingRect(i18n("(Default)")).height() + 2)*3 / 2;
+    return (fontMetrics().boundingRect(tr("(Default)")).height() + 2)*3 / 2;
 }
 
 int KColorCombo2::colorRectWidthForHeight(int height) const
@@ -623,13 +623,13 @@ void KColorCombo2::deleteColorArray()
 
 void KColorCombo2::updateComboBox()
 {
-    int height = colorRectHeight() * 2 / 3; // fontMetrics().boundingRect(i18n("(Default)")).height() + 2
+    int height = colorRectHeight() * 2 / 3; // fontMetrics().boundingRect(tr("(Default)")).height() + 2
     QPixmap pixmap = colorRectPixmap(effectiveColor(), !m_color.isValid(), height, height); // TODO: isDefaultColorSelected()
     setItemIcon(/*index=*/0, pixmap);
     setItemText(/*index=*/0,
                 (m_color.isValid()
-                 ? QString(i18n( "R:%1, G:%2, B:%3", m_color.red(), m_color.green(), m_color.blue() ))
-                 : i18nc("color", "(Default)")));
+                 ? QString(tr( "R:%1, G:%2, B:%3").arg(QString::number(m_color.red()), QString::number(m_color.green()), QString::number(m_color.blue())))
+                 : QCoreApplication::translate("color", "(Default)")));
 }
 
 void KColorCombo2::showPopup()

@@ -105,12 +105,12 @@ QString Backup::newSafetyFolder()
     QDir dir;
     QString fullPath;
 
-    fullPath = QDir::homePath() + "/" + i18nc("Safety folder name before restoring a basket data archive", "Baskets Before Restoration") + "/";
+    fullPath = QDir::homePath() + "/" + QCoreApplication::translate("Safety folder name before restoring a basket data archive", "Baskets Before Restoration") + "/";
     if (!dir.exists(fullPath))
         return fullPath;
 
     for (int i = 2; ; ++i) {
-        fullPath = QDir::homePath() + "/" + i18nc("Safety folder name before restoring a basket data archive", "Baskets Before Restoration (%1)", i) + "/";
+        fullPath = QDir::homePath() + "/" + QCoreApplication::translate("Safety folder name before restoring a basket data archive", "Baskets Before Restoration (%1)").arg(i) + "/";
         if (!dir.exists(fullPath))
             return fullPath;
     }

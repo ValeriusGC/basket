@@ -13,6 +13,8 @@
 #ifndef CRASH_H
 #define CRASH_H
 
+#include <QCoreApplication>
+
 /**
  * @author Max Howell
  * @short The amaroK crash-handler
@@ -22,6 +24,7 @@
  */
 class Crash
 {
+    Q_DECLARE_TR_FUNCTIONS(Crash)
 public:
     static void crashHandler(int signal);
 };

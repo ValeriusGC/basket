@@ -307,7 +307,7 @@ TagsEditDialog::TagsEditDialog(QWidget *parent, State *stateToEdit, bool addNewT
         ,  m_loading(false)
 {
     // KDialog options
-    setCaption(i18n("Customize Tags"));
+    setCaption(tr("Customize Tags"));
     setButtons(Ok | Cancel);
     setDefaultButton(Ok);
     setObjectName("CustomizeTags");
@@ -322,8 +322,8 @@ TagsEditDialog::TagsEditDialog(QWidget *parent, State *stateToEdit, bool addNewT
 
     /* Left part: */
 
-    QPushButton *newTag     = new QPushButton(i18n("Ne&w Tag"),   mainWidget());
-    QPushButton *newState   = new QPushButton(i18n("New St&ate"), mainWidget());
+    QPushButton *newTag     = new QPushButton(tr("Ne&w Tag"),   mainWidget());
+    QPushButton *newState   = new QPushButton(tr("New St&ate"), mainWidget());
 
     connect(newTag,   SIGNAL(clicked()), this, SLOT(newTag()));
     connect(newState, SIGNAL(clicked()), this, SLOT(newState()));
@@ -341,9 +341,9 @@ TagsEditDialog::TagsEditDialog(QWidget *parent, State *stateToEdit, bool addNewT
     m_moveDown  = new KPushButton(KGuiItem("", "arrow-down"), mainWidget());
     m_deleteTag = new KPushButton(KGuiItem("", "edit-delete"), mainWidget());
 
-    m_moveUp->setToolTip(i18n("Move Up (Ctrl+Shift+Up)"));
-    m_moveDown->setToolTip(i18n("Move Down (Ctrl+Shift+Down)"));
-    m_deleteTag->setToolTip(i18n("Delete"));
+    m_moveUp->setToolTip(tr("Move Up (Ctrl+Shift+Up)"));
+    m_moveDown->setToolTip(tr("Move Down (Ctrl+Shift+Down)"));
+    m_deleteTag->setToolTip(tr("Delete"));
 
     connect(m_moveUp,    SIGNAL(clicked()), this, SLOT(moveUp()));
     connect(m_moveDown,  SIGNAL(clicked()), this, SLOT(moveDown()));
@@ -366,7 +366,7 @@ TagsEditDialog::TagsEditDialog(QWidget *parent, State *stateToEdit, bool addNewT
 
     QWidget *rightWidget = new QWidget(mainWidget());
 
-    m_tagBox             = new QGroupBox(i18n("Tag"), rightWidget);
+    m_tagBox             = new QGroupBox(tr("Tag"), rightWidget);
     m_tagBoxLayout       = new QHBoxLayout;
     m_tagBox->setLayout(m_tagBoxLayout);
 
@@ -374,19 +374,19 @@ TagsEditDialog::TagsEditDialog(QWidget *parent, State *stateToEdit, bool addNewT
     m_tagBoxLayout->addWidget(tagWidget);
 
     m_tagName = new QLineEdit(tagWidget);
-    QLabel *tagNameLabel = new QLabel(i18n("&Name:"), tagWidget);
+    QLabel *tagNameLabel = new QLabel(tr("&Name:"), tagWidget);
     tagNameLabel->setBuddy(m_tagName);
 
-    m_inherit = new QCheckBox(i18n("&Inherited by new sibling notes"), tagWidget);
+    m_inherit = new QCheckBox(tr("&Inherited by new sibling notes"), tagWidget);
 
-    m_allowCrossRefernce = new QCheckBox(i18n("Allow Cross Reference Links"), tagWidget);
+    m_allowCrossRefernce = new QCheckBox(tr("Allow Cross Reference Links"), tagWidget);
 
     HelpLabel *allowCrossReferenceHelp = new HelpLabel(
-        i18n("What does this do?"),
-        "<p>" + i18n("This option will enable you to type a cross reference link directly into a text note. Cross Reference links can have the following sytax:") + "</p>" +
-        "<p>" + i18n("From the top of the tree (Absolute path):") + "<br />" + i18n("[[/top level item/child|optional title]]") + "<p>" +
-        "<p>" + i18n("Relative to the current basket:") + "<br />" + i18n("[[../sibling|optional title]]") + "<br />" +
-        i18n("[[child|optional title]]") + "<br />" + i18n("[[./child|optional title]]") + "<p>",
+        tr("What does this do?"),
+        "<p>" + tr("This option will enable you to type a cross reference link directly into a text note. Cross Reference links can have the following sytax:") + "</p>" +
+        "<p>" + tr("From the top of the tree (Absolute path):") + "<br />" + tr("[[/top level item/child|optional title]]") + "<p>" +
+        "<p>" + tr("Relative to the current basket:") + "<br />" + tr("[[../sibling|optional title]]") + "<br />" +
+        tr("[[child|optional title]]") + "<br />" + tr("[[./child|optional title]]") + "<p>",
         tagWidget);
 
     QGridLayout *tagGrid = new QGridLayout(tagWidget);
@@ -397,7 +397,7 @@ TagsEditDialog::TagsEditDialog(QWidget *parent, State *stateToEdit, bool addNewT
     tagGrid->addWidget(allowCrossReferenceHelp, 3, 1);
     tagGrid->setColumnStretch(/*col=*/3, /*stretch=*/255);
 
-    m_stateBox           = new QGroupBox(i18n("State"), rightWidget);
+    m_stateBox           = new QGroupBox(tr("State"), rightWidget);
     m_stateBoxLayout = new QHBoxLayout;
     m_stateBox->setLayout(m_stateBoxLayout);
 
@@ -405,7 +405,7 @@ TagsEditDialog::TagsEditDialog(QWidget *parent, State *stateToEdit, bool addNewT
     m_stateBoxLayout->addWidget(stateWidget);
 
     m_stateName = new QLineEdit(stateWidget);
-    m_stateNameLabel = new QLabel(i18n("Na&me:"), stateWidget);
+    m_stateNameLabel = new QLabel(tr("Na&me:"), stateWidget);
     m_stateNameLabel->setBuddy(m_stateName);
 
     QWidget *emblemWidget = new QWidget(stateWidget);
@@ -413,8 +413,8 @@ TagsEditDialog::TagsEditDialog(QWidget *parent, State *stateToEdit, bool addNewT
     m_emblem->setIconType(KIconLoader::NoGroup, KIconLoader::Action);
     m_emblem->setIconSize(16);
     m_emblem->setIcon("edit-delete");
-    m_removeEmblem = new QPushButton(i18nc("Remove tag emblem", "Remo&ve"), emblemWidget);
-    QLabel *emblemLabel = new QLabel(i18n("&Emblem:"), stateWidget);
+    m_removeEmblem = new QPushButton(QCoreApplication::translate("Remove tag emblem", "Remo&ve"), emblemWidget);
+    QLabel *emblemLabel = new QLabel(tr("&Emblem:"), stateWidget);
     emblemLabel->setBuddy(m_emblem);
     connect(m_removeEmblem, SIGNAL(clicked()), this, SLOT(removeEmblem()));   // m_emblem.resetIcon() is not a slot!
 
@@ -431,7 +431,7 @@ TagsEditDialog::TagsEditDialog(QWidget *parent, State *stateToEdit, bool addNewT
     emblemLayout->addStretch();
 
     m_backgroundColor = new KColorCombo2(QColor(), palette().color(QPalette::Base), stateWidget);
-    QLabel *backgroundColorLabel = new QLabel(i18n("&Background:"), stateWidget);
+    QLabel *backgroundColorLabel = new QLabel(tr("&Background:"), stateWidget);
     backgroundColorLabel->setBuddy(m_backgroundColor);
 
     QHBoxLayout *backgroundColorLayout = new QHBoxLayout(0);
@@ -444,29 +444,29 @@ TagsEditDialog::TagsEditDialog(QWidget *parent, State *stateToEdit, bool addNewT
     m_bold->setCheckable(true);
     int size = qMax(m_bold->sizeHint().width(), m_bold->sizeHint().height());
     m_bold->setFixedSize(size, size); // Make it square!
-    m_bold->setToolTip(i18n("Bold"));
+    m_bold->setToolTip(tr("Bold"));
 
     //QIcon underlineIconSet = KIconLoader::global()->loadIconSet("format-text-underline", KIconLoader::Small);
     KIcon underlineIconSet("format-text-underline", KIconLoader::global());
     m_underline = new QPushButton(underlineIconSet, "", stateWidget);
     m_underline->setCheckable(true);
     m_underline->setFixedSize(size, size); // Make it square!
-    m_underline->setToolTip(i18n("Underline"));
+    m_underline->setToolTip(tr("Underline"));
 
     //QIcon italicIconSet = KIconLoader::global()->loadIconSet("format-text-italic", KIconLoader::Small);
     KIcon italicIconSet("format-text-italic", KIconLoader::global());
     m_italic = new QPushButton(italicIconSet, "", stateWidget);
     m_italic->setCheckable(true);
     m_italic->setFixedSize(size, size); // Make it square!
-    m_italic->setToolTip(i18n("Italic"));
+    m_italic->setToolTip(tr("Italic"));
 
     KIcon strikeIconSet("format-text-strikethrough", KIconLoader::global());
     m_strike = new QPushButton(strikeIconSet, "", stateWidget);
     m_strike->setCheckable(true);
     m_strike->setFixedSize(size, size); // Make it square!
-    m_strike->setToolTip(i18n("Strike Through"));
+    m_strike->setToolTip(tr("Strike Through"));
 
-    QLabel *textLabel = new QLabel(i18n("&Text:"), stateWidget);
+    QLabel *textLabel = new QLabel(tr("&Text:"), stateWidget);
     textLabel->setBuddy(m_bold);
 
     QHBoxLayout *textLayout = new QHBoxLayout;
@@ -477,30 +477,30 @@ TagsEditDialog::TagsEditDialog(QWidget *parent, State *stateToEdit, bool addNewT
     textLayout->addStretch();
 
     m_textColor = new KColorCombo2(QColor(), palette().color(QPalette::Text), stateWidget);
-    QLabel *textColorLabel = new QLabel(i18n("Co&lor:"), stateWidget);
+    QLabel *textColorLabel = new QLabel(tr("Co&lor:"), stateWidget);
     textColorLabel->setBuddy(m_textColor);
 
     m_font = new QFontComboBox(stateWidget);
-    m_font->addItem(i18n("(Default)"), 0);
-    QLabel *fontLabel = new QLabel(i18n("&Font:"), stateWidget);
+    m_font->addItem(tr("(Default)"), 0);
+    QLabel *fontLabel = new QLabel(tr("&Font:"), stateWidget);
     fontLabel->setBuddy(m_font);
 
     m_fontSize = new FontSizeCombo(/*rw=*/true, /*withDefault=*/true, stateWidget);
-    QLabel *fontSizeLabel = new QLabel(i18n("&Size:"), stateWidget);
+    QLabel *fontSizeLabel = new QLabel(tr("&Size:"), stateWidget);
     fontSizeLabel->setBuddy(m_fontSize);
 
     m_textEquivalent = new QLineEdit(stateWidget);
-    QLabel *textEquivalentLabel = new QLabel(i18n("Te&xt equivalent:"), stateWidget);
+    QLabel *textEquivalentLabel = new QLabel(tr("Te&xt equivalent:"), stateWidget);
     textEquivalentLabel->setBuddy(m_textEquivalent);
     QFont font = m_textEquivalent->font();
     font.setFamily("monospace");
     m_textEquivalent->setFont(font);
 
     HelpLabel *textEquivalentHelp = new HelpLabel(
-        i18n("What is this for?"),
-        "<p>" + i18n("When you copy and paste or drag and drop notes to a text editor, this text will be inserted as a textual equivalent of the tag.") + "</p>" +
-//      "<p>" + i18n("If filled, this property lets you paste this tag or this state as textual equivalent.") + "<br>" +
-        i18n("For instance, a list of notes with the <b>To Do</b> and <b>Done</b> tags are exported as lines preceded by <b>[ ]</b> or <b>[x]</b>, "
+        tr("What is this for?"),
+        "<p>" + tr("When you copy and paste or drag and drop notes to a text editor, this text will be inserted as a textual equivalent of the tag.") + "</p>" +
+//      "<p>" + tr("If filled, this property lets you paste this tag or this state as textual equivalent.") + "<br>" +
+        tr("For instance, a list of notes with the <b>To Do</b> and <b>Done</b> tags are exported as lines preceded by <b>[ ]</b> or <b>[x]</b>, "
              "representing an empty checkbox and a checked box.") + "</p>" +
         "<p align='center'><img src=\":images/tag_export_help.png\"></p>",
         stateWidget);
@@ -508,13 +508,13 @@ TagsEditDialog::TagsEditDialog(QWidget *parent, State *stateToEdit, bool addNewT
     textEquivalentHelpLayout->addWidget(textEquivalentHelp);
     textEquivalentHelpLayout->addStretch(255);
 
-    m_onEveryLines = new QCheckBox(i18n("On ever&y line"), stateWidget);
+    m_onEveryLines = new QCheckBox(tr("On ever&y line"), stateWidget);
 
     HelpLabel *onEveryLinesHelp = new HelpLabel(
-        i18n("What does this mean?"),
-        "<p>" + i18n("When a note has several lines, you can choose to export the tag or the state on the first line or on every line of the note.") + "</p>" +
+        tr("What does this mean?"),
+        "<p>" + tr("When a note has several lines, you can choose to export the tag or the state on the first line or on every line of the note.") + "</p>" +
         "<p align='center'><img src=\":images/tag_export_on_every_lines_help.png\"></p>" +
-        "<p>" + i18n("In the example above, the tag of the top note is only exported on the first line, while the tag of the bottom note is exported on every line of the note."),
+        "<p>" + tr("In the example above, the tag of the top note is only exported on the first line, while the tag of the bottom note is exported on every line of the note."),
         stateWidget);
     QHBoxLayout *onEveryLinesHelpLayout = new QHBoxLayout;
     onEveryLinesHelpLayout->addWidget(onEveryLinesHelp);
@@ -1069,14 +1069,14 @@ void TagsEditDialog::currentItemChanged(QTreeWidgetItem *item, QTreeWidgetItem* 
             loadTagFrom(tagItem->tagCopy()->newTag);
             loadBlankState();
             m_stateBox->setEnabled(false);
-            m_stateBox->setTitle(i18n("State"));
+            m_stateBox->setTitle(tr("State"));
             m_stateNameLabel->setEnabled(true);
             m_stateName->setEnabled(true);
         } else {
             loadTagFrom(tagItem->tagCopy()->newTag); // TODO: No duplicat
             loadStateFrom(tagItem->tagCopy()->stateCopies[0]->newState);
             m_stateBox->setEnabled(true);
-            m_stateBox->setTitle(i18n("Appearance"));
+            m_stateBox->setTitle(tr("Appearance"));
             m_stateName->setText("");
             m_stateNameLabel->setEnabled(false);
             m_stateName->setEnabled(false);
@@ -1085,7 +1085,7 @@ void TagsEditDialog::currentItemChanged(QTreeWidgetItem *item, QTreeWidgetItem* 
         loadTagFrom(((TagListViewItem*)(tagItem->parent()))->tagCopy()->newTag);
         loadStateFrom(tagItem->stateCopy()->newState);
         m_stateBox->setEnabled(true);
-        m_stateBox->setTitle(i18n("State"));
+        m_stateBox->setTitle(tr("State"));
         m_stateNameLabel->setEnabled(true);
         m_stateName->setEnabled(true);
     }

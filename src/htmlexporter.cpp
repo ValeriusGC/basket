@@ -59,11 +59,11 @@ HTMLExporter::HTMLExporter(BasketScene *basket)
     QString url = folder + QString(basket->basketName()).replace("/", "_") + ".html";
 
     // Ask a file name & path to the user:
-    QString filter = "*.html *.htm|" + i18n("HTML Documents") + "\n*|" + i18n("All Files");
+    QString filter = "*.html *.htm|" + tr("HTML Documents") + "\n*|" + tr("All Files");
     QString destination = url;
     for (bool askAgain = true; askAgain;) {
         // Ask:
-        destination = KFileDialog::getSaveFileName(destination, filter, 0, i18n("Export to HTML"));
+        destination = KFileDialog::getSaveFileName(destination, filter, 0, tr("Export to HTML"));
         // User canceled?
         if (destination.isEmpty())
             return;
@@ -82,7 +82,7 @@ HTMLExporter::HTMLExporter(BasketScene *basket)
     }
 
     // Create the progress dialog that will always be shown during the export:
-    KProgressDialog dialog(0, i18n("Export to HTML"), i18n("Exporting to HTML. Please wait..."));
+    KProgressDialog dialog(0, tr("Export to HTML"), tr("Exporting to HTML. Please wait..."));
     dialog.showCancelButton(false);
     dialog.setAutoClose(true);
     dialog.show();
@@ -117,15 +117,15 @@ void HTMLExporter::prepareExport(BasketScene *basket, const QString &fullPath)
     withBasketTree = (item->childCount() >= 0);
 
     // Create and empty the files folder:
-    QString filesFolderPath = i18nc("HTML export folder (files)", "%1_files", filePath) + "/"; // eg.: "/home/seb/foo.html_files/"
+    QString filesFolderPath = QCoreApplication::translate("HTML export folder (files)", "%1_files").arg(filePath) + "/"; // eg.: "/home/seb/foo.html_files/"
     Tools::deleteRecursively(filesFolderPath);
     QDir dir;
     dir.mkdir(filesFolderPath);
 
     // Create sub-folders:
-    iconsFolderPath   = filesFolderPath + i18nc("HTML export folder (icons)",   "icons")   + "/"; // eg.: "/home/seb/foo.html_files/icons/"
-    imagesFolderPath  = filesFolderPath + i18nc("HTML export folder (images)",  "images")  + "/"; // eg.: "/home/seb/foo.html_files/images/"
-    basketsFolderPath = filesFolderPath + i18nc("HTML export folder (baskets)", "baskets") + "/"; // eg.: "/home/seb/foo.html_files/baskets/"
+    iconsFolderPath   = filesFolderPath + QCoreApplication::translate("HTML export folder (icons)",   "icons")   + "/"; // eg.: "/home/seb/foo.html_files/icons/"
+    imagesFolderPath  = filesFolderPath + QCoreApplication::translate("HTML export folder (images)",  "images")  + "/"; // eg.: "/home/seb/foo.html_files/images/"
+    basketsFolderPath = filesFolderPath + QCoreApplication::translate("HTML export folder (baskets)", "baskets") + "/"; // eg.: "/home/seb/foo.html_files/baskets/"
     dir.mkdir(iconsFolderPath);
     dir.mkdir(imagesFolderPath);
     dir.mkdir(basketsFolderPath);
@@ -142,22 +142,22 @@ void HTMLExporter::exportBasket(BasketScene *basket, bool isSubBasket)
     currentBasket = basket;
 
     // Compute the absolute & relative paths for this basket:
-    filesFolderPath   = i18nc("HTML export folder (files)", "%1_files", filePath) + "/";
+    filesFolderPath   = QCoreApplication::translate("HTML export folder (files)", "%1_files").arg(filePath) + "/";
     if (isSubBasket) {
         basketFilePath    = basketsFolderPath + basket->folderName().left(basket->folderName().length() - 1) + ".html";
         filesFolderName   = "../";
-        dataFolderName    = basket->folderName().left(basket->folderName().length() - 1) + "-" + i18nc("HTML export folder (data)", "data") + "/";
+        dataFolderName    = basket->folderName().left(basket->folderName().length() - 1) + "-" + QCoreApplication::translate("HTML export folder (data)", "data") + "/";
         dataFolderPath    = basketsFolderPath + dataFolderName;
         basketsFolderName = "";
     } else {
         basketFilePath    = filePath;
-        filesFolderName   = i18nc("HTML export folder (files)", "%1_files", KUrl(filePath).fileName()) + "/";
-        dataFolderName    = filesFolderName + i18nc("HTML export folder (data)",    "data")  + "/";
-        dataFolderPath    = filesFolderPath + i18nc("HTML export folder (data)",    "data")  + "/";
-        basketsFolderName = filesFolderName + i18nc("HTML export folder (baskets)", "baskets")  + "/";
+        filesFolderName   = QCoreApplication::translate("HTML export folder (files)", "%1_files").arg(KUrl(filePath).fileName()) + "/";
+        dataFolderName    = filesFolderName + QCoreApplication::translate("HTML export folder (data)",    "data")  + "/";
+        dataFolderPath    = filesFolderPath + QCoreApplication::translate("HTML export folder (data)",    "data")  + "/";
+        basketsFolderName = filesFolderName + QCoreApplication::translate("HTML export folder (baskets)", "baskets")  + "/";
     }
-    iconsFolderName   = (isSubBasket ? "../" : filesFolderName) + i18nc("HTML export folder (icons)",   "icons")   + "/"; // eg.: "foo.html_files/icons/"   or "../icons/"
-    imagesFolderName  = (isSubBasket ? "../" : filesFolderName) + i18nc("HTML export folder (images)",  "images")  + "/"; // eg.: "foo.html_files/images/"  or "../images/"
+    iconsFolderName   = (isSubBasket ? "../" : filesFolderName) + QCoreApplication::translate("HTML export folder (icons)",   "icons")   + "/"; // eg.: "foo.html_files/icons/"   or "../icons/"
+    imagesFolderName  = (isSubBasket ? "../" : filesFolderName) + QCoreApplication::translate("HTML export folder (images)",  "images")  + "/"; // eg.: "foo.html_files/images/"  or "../images/"
 
     qDebug() << "Exporting ================================================";
     qDebug() << "  filePath:" << filePath;
@@ -296,7 +296,7 @@ void HTMLExporter::exportBasket(BasketScene *basket, bool isSubBasket)
     // TODO: Make sure only filtered notes are exported!
 //  if (decoration()->filterData().isFiltering)
 //      stream <<
-//          "  <p>" << i18n("Notes matching the filter &quot;%1&quot;:").arg(Tools::textToHTMLWithoutP(decoration()->filterData().string)) << "</p>\n";
+//          "  <p>" << tr("Notes matching the filter &quot;%1&quot;:").arg(Tools::textToHTMLWithoutP(decoration()->filterData().string)) << "</p>\n";
 
     stream <<
     "  <div class=\"basketSurrounder\">\n";
@@ -323,8 +323,8 @@ void HTMLExporter::exportBasket(BasketScene *basket, bool isSubBasket)
     stream << QString(
         "  </div>\n"
         "  <p class=\"credits\">%1</p>\n").arg(
-            i18n("Made with <a href=\"http://basket.kde.org/\">%1</a> %2, a KDE tool to take notes and keep information at hand.",
-                 KGlobal::mainComponent().aboutData()->programName(), VERSION));
+            tr("Made with <a href=\"http://basket.kde.org/\">%1</a> %2, a KDE tool to take notes and keep information at hand.").arg(
+                 qApp->applicationName(), VERSION));
 
     // Copy a transparent GIF image in the folder, needed for the JavaScript hack:
     QString gifFileName = "spacer.gif";

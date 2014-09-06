@@ -226,7 +226,7 @@ Tag::Tag()
     ++tagNumber;
     QString sAction = "tag_shortcut_number_" + QString::number(tagNumber);
 
-    QMenu *ac = Global::bnpView->m_tagsMenu;
+    QMenu *ac = Global::mainWin->m_tagsMenu;
     m_action = ac->addAction(KIcon("FAKE ICON"), "FAKE TEXT", Global::bnpView,
                              SLOT(activatedTagShortcut()));
 
