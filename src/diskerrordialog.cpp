@@ -27,8 +27,7 @@
 #include <QtGui/QPixmap>
 #include <QtGui/QHBoxLayout>
 #include <QLocale>
-
-#include <KDE/KIconLoader>
+#include <QIcon>
 
 DiskErrorDialog::DiskErrorDialog(const QString &titleMessage, const QString &message, QWidget *parent)
         : QDialog(parent)
@@ -42,12 +41,14 @@ DiskErrorDialog::DiskErrorDialog(const QString &titleMessage, const QString &mes
     setModal(true);
     //QHBoxLayout *layout = new QHBoxLayout(mainWidget(), /*margin=*/0, spacingHint());
     QHBoxLayout *layout = new QHBoxLayout(this);
-    QPixmap icon = KIconLoader::global()->loadIcon(
-                       "hdd_unmount", KIconLoader::NoGroup, 64, KIconLoader::DefaultState,
-                       QStringList(), /*path_store=*/0L, /*canReturnNull=*/true
-                   );
+//    QPixmap icon = KIconLoader::global()->loadIcon(
+//                       "hdd_unmount", KIconLoader::NoGroup, 64, KIconLoader::DefaultState,
+//                       QStringList(), /*path_store=*/0L, /*canReturnNull=*/true
+//                   );
+    QIcon icon = QIcon();
+    // TODO qt5 QFileIconProvider
     QLabel *iconLabel  = new QLabel(this);
-    iconLabel->setPixmap(icon);
+    iconLabel->setPixmap(icon.pixmap(16,16));
     iconLabel->setFixedSize(iconLabel->sizeHint());
     QLabel *label = new QLabel("<p><nobr><b><font size='+1'>" + titleMessage + "</font></b></nobr></p><p>" + message + "</p>", this);
     if (!icon.isNull())

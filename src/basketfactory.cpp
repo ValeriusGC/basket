@@ -27,8 +27,6 @@
 #include <QMessageBox>
 #include <QCoreApplication>
 
-#include <KDE/KLocale>
-
 #include "global.h"
 #include "basketscene.h"
 #include "xmlwork.h"

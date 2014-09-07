@@ -1274,7 +1274,7 @@ void ImageContent::exportToHTML(HTMLExporter *exporter, int /*indent*/)
     qreal height = m_pixmapItem.pixmap().height();
     qreal contentWidth = note()->width() - note()->contentX() - 1 - Note::NOTE_MARGIN;
 
-    QString imageName = exporter->copyFile(fullPath(), /*createIt=*/true);
+    QString imageName = exporter->copyFile(fullPath());
 
     if (contentWidth <= m_pixmapItem.pixmap().width()) { // Scalled down
         qreal scale = contentWidth / m_pixmapItem.pixmap().width();
@@ -1409,7 +1409,7 @@ void AnimationContent::movieFrameChanged()
 void AnimationContent::exportToHTML(HTMLExporter *exporter, int /*indent*/)
 {
     exporter->stream << QString("<img src=\"%1\" width=\"%2\" height=\"%3\" alt=\"\">")
-    .arg(exporter->dataFolderName + exporter->copyFile(fullPath(), /*createIt=*/true),
+    .arg(exporter->dataFolderName + exporter->copyFile(fullPath()),
          QString::number(m_movie->currentPixmap().size().width()),
          QString::number(m_movie->currentPixmap().size().height()));
 }
@@ -1582,7 +1582,7 @@ void FileContent::startFetchingUrlPreview()
 void FileContent::exportToHTML(HTMLExporter *exporter, int indent)
 {
     QString spaces;
-    QString fileName = exporter->copyFile(fullPath(), true);
+    QString fileName = exporter->copyFile(fullPath());
     exporter->stream << m_linkDisplayItem.linkDisplay().toHtml(exporter, QUrl(exporter->dataFolderName + fileName), "").replace("\n", "\n" + spaces.fill(' ', indent + 1));
 }
 

@@ -31,5 +31,9 @@
         <file>icons/edit-delete.png</file>
         <file>icons/arrow-down.png</file>
         <file>icons/arrow-up.png</file>
+        <file>icons/mail-message-new.png</file>
+        <file>icons/internet-mail.png</file>
+        <file>icons/dialog-close.png</file>
+        <file>icons/edit-find.png</file>
     </qresource>
 </RCC>

@@ -20,9 +20,7 @@
 
 #include "basketstatusbar.h"
 
-#include <KDE/KLocale>
 #include <QStatusBar>
-
 #include <QtCore/QObject>
 #include <QtGui/QLabel>
 #include <QtGui/QPixmap>

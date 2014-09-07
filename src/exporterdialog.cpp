@@ -20,11 +20,6 @@
 
 #include "exporterdialog.h"
 
-#include <KDE/KUrlRequester>
-#include <KDE/KFileDialog>
-#include <KDE/KLocale>
-#include <KDE/KVBox>
-
 #include <QtCore/QDir>
 #include <QtGui/QCheckBox>
 #include <QtGui/QLabel>

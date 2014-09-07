@@ -291,11 +291,6 @@ public slots:
 private:
     LikeBackPrivate *d;
 
-    /**
-     * Get the user email address from KControl.
-     */
-    void fetchUserEmail();
-
 private slots:
     /**
      * Slot triggered by the "Help -> Send a Comment to Developers" KAction.

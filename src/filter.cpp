@@ -25,11 +25,8 @@
 #include <QtGui/QHBoxLayout>
 #include <QtGui/QPixmap>
 #include <QLineEdit>
-
-#include <KDE/KDialog>
 #include <QComboBox>
-#include <KDE/KIconLoader>
-#include <KDE/KLocale>
+#include <QIcon>
 
 #include "global.h"
 #include "tools.h"
@@ -48,8 +45,8 @@ FilterBar::FilterBar(QWidget *parent)
     // (Aaron Seigo says we don't need to worry about the
     //  "Toolbar group" stuff anymore.)
 
-    QIcon resetIcon = KIcon("dialog-close", KIconLoader::global());
-    QIcon inAllIcon = KIcon("edit-find", KIconLoader::global());
+    QIcon resetIcon = QIcon("://icons/dialog-close.png");
+    QIcon inAllIcon = QIcon("://icons/edit-find.png");
 
     m_resetButton        = new QToolButton(this);
     m_resetButton->setIcon(resetIcon);
@@ -83,13 +80,13 @@ FilterBar::FilterBar(QWidget *parent)
     // Layout all those widgets:
 //  hBox->addStretch();
     hBox->addWidget(m_resetButton);
-    hBox->addSpacing(KDialog::spacingHint());
+    hBox->addSpacing(sizeHint().width());
     hBox->addWidget(label);
     hBox->addWidget(m_lineEdit);
-    hBox->addSpacing(KDialog::spacingHint());
+    hBox->addSpacing(sizeHint().width());
     hBox->addWidget(label2);
     hBox->addWidget(m_tagsBox);
-    hBox->addSpacing(KDialog::spacingHint());
+    hBox->addSpacing(sizeHint().width());
     hBox->addWidget(m_inAllBasketsButton);
 
     m_data = new FilterData(); // TODO: Not a pointer! and return a const &  !!
@@ -166,10 +163,11 @@ void FilterBar::repopulateTagsCombo()
             text = state->name();
             icon = state->emblem();
         }
-        emblem = KIconLoader::global()->loadIcon(
-                     icon, KIconLoader::Desktop, ICON_SIZE, KIconLoader::DefaultState,
-                     QStringList(), 0L, /*canReturnNull=*/true
-                 );
+//        emblem = KIconLoader::global()->loadIcon(
+//                     icon, KIconLoader::Desktop, ICON_SIZE, KIconLoader::DefaultState,
+//                     QStringList(), 0L, /*canReturnNull=*/true
+//                 );
+        emblem = QIcon(icon).pixmap(ICON_SIZE, ICON_SIZE);
         m_tagsBox->insertItem(index, emblem, text);
         // Update the mapping:
         m_tagsMap.insert(index, tag);
@@ -181,11 +179,12 @@ void FilterBar::repopulateTagsCombo()
                 // Insert the state:
                 text = state->name();
                 icon = state->emblem();
-                emblem = KIconLoader::global()->loadIcon(
-                             icon, KIconLoader::Desktop, ICON_SIZE,
-                             KIconLoader::DefaultState, QStringList(), 0L,
-                             /*canReturnNull=*/true
-                         );
+//                emblem = KIconLoader::global()->loadIcon(
+//                             icon, KIconLoader::Desktop, ICON_SIZE,
+//                             KIconLoader::DefaultState, QStringList(), 0L,
+//                             /*canReturnNull=*/true
+//                         );
+                emblem = QIcon(icon).pixmap(ICON_SIZE, ICON_SIZE);
                 // Indent the emblem to show the hierarchy relation:
                 if (!emblem.isNull())
                     emblem = Tools::indentPixmap(emblem, /*depth=*/1, /*deltaX=*/2 * ICON_SIZE / 3);

@@ -20,7 +20,6 @@
 
 #include "backgroundmanager.h"
 
-#include <KDE/KUrl>
 #include <KDE/KGlobal>
 #include <KDE/KStandardDirs>
 
@@ -30,13 +29,14 @@
 #include <QtGui/QPainter>
 #include <QtGui/QImage>
 #include <QtGui/QPixmap>
+#include <QFileInfo>
 
 /** class BackgroundEntry: */
 
 BackgroundEntry::BackgroundEntry(const QString &location)
 {
     this->location = location;
-    name           = KUrl(location).fileName();
+    name           = QFileInfo(location).fileName();
     tiled          = false;
     pixmap         = 0;
     preview        = 0;

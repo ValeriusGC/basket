@@ -23,8 +23,7 @@
 #include <QtCore/QTimer>
 #include <QtGui/QKeyEvent>
 #include <QtGui/QMouseEvent>
-
-#include <KDE/KColorDialog>
+#include <QColorDialog>
 
 /// ///
 
@@ -77,7 +76,7 @@ void DesktopColorPicker::mouseReleaseEvent(QMouseEvent *event)
         m_gettingColorFromScreen = false;
         releaseMouse();
         releaseKeyboard();
-        QColor color = KColorDialog::grabColor(event->globalPos());
+        QColor color = QColorDialog::getColor();//event->globalPos());
         emit pickedColor(color);
     } else
         QDesktopWidget::mouseReleaseEvent(event);

@@ -23,9 +23,7 @@
 #include <QtCore/QString>
 #include <QtGui/QCloseEvent>
 #include <QtGui/QVBoxLayout>
-
-#include <KDE/KLocale>
-#include <KDE/KTextBrowser>
+#include <QTextBrowser>
 
 #include "global.h"
 
@@ -36,7 +34,7 @@ DebugWindow::DebugWindow(QWidget *parent)
     setWindowTitle(tr("Debug Window"));
 
     layout      = new QVBoxLayout(this);
-    textBrowser = new KTextBrowser(this);
+    textBrowser = new QTextBrowser(this);
 
     textBrowser->setWordWrapMode(QTextOption::NoWrap);
 

@@ -26,11 +26,9 @@
 #include <QtCore/QTextStream>
 #include <QtXml/QDomDocument>
 #include <QMessageBox>
-#include "QDebug"
-
-#include <KDE/KLocale>
-#include <KIO/CopyJob>
-#include <KDE/KApplication>
+#include <QDebug>
+#include <QApplication>
+#include <QDir>
 
 #include "notecontent.h"
 #include "notefactory.h"
@@ -60,28 +58,13 @@ bool FormatImporter::shouldImportBaskets()
 
 void FormatImporter::copyFolder(const QString &folder, const QString &newFolder)
 {
-    copyFinished = false;
-    KIO::CopyJob *copyJob = KIO::copyAs(KUrl(folder), KUrl(newFolder), KIO::HideProgressInfo);
-    connect(copyJob,  SIGNAL(copyingDone(KIO::Job *, KUrl, KUrl, time_t, bool, bool)),
-            this, SLOT(slotCopyingDone(KIO::Job*)));
-    while (!copyFinished)
-        kapp->processEvents();
+    Tools::copyRecursively(folder, newFolder);
 }
 
 void FormatImporter::moveFolder(const QString &folder, const QString &newFolder)
 {
-    copyFinished = false;
-    KIO::CopyJob *copyJob = KIO::moveAs(KUrl(folder), KUrl(newFolder), KIO::HideProgressInfo);
-    connect(copyJob,  SIGNAL(copyingDone(KIO::Job *, KUrl, KUrl, time_t, bool, bool)),
-            this, SLOT(slotCopyingDone(KIO::Job*)));
-    while (!copyFinished)
-        kapp->processEvents();
-}
-
-void FormatImporter::slotCopyingDone(KIO::Job *)
-{
-//  kDebug() << "Copy finished of " + from.path() + " to " + to.path();
-    copyFinished = true;
+    QDir d;
+    d.rename(folder, newFolder);
 }
 
 void FormatImporter::importBaskets()
@@ -191,7 +174,7 @@ QDomElement FormatImporter::importBasket(const QString &folderName)
     QDomElement properties = XMLWork::getElement(docElem, "properties");
     QDomElement background = XMLWork::getElement(properties, "background");
     QColor backgroundColor = QColor(background.attribute("color"));
-    if (backgroundColor.isValid() && (backgroundColor != kapp->palette().color(QPalette::Base))) { // Use the default color if it was already that color:
+    if (backgroundColor.isValid() && (backgroundColor != qApp->palette().color(QPalette::Base))) { // Use the default color if it was already that color:
         QDomElement appearance = document->createElement("appearance");
         appearance.setAttribute("backgroundColor", backgroundColor.name());
         properties.appendChild(appearance);
