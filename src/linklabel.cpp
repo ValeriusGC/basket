@@ -35,12 +35,8 @@
 #include <QtGui/QStyle>
 #include <QtGui/QGroupBox>
 #include <QComboBox>
-
-#include <KDE/KApplication>
-#include <KDE/KAboutData>
-#include <KDE/KLocale>
-#include <KDE/KIconLoader>
-#include <KDE/KUrl>
+#include <QApplication>
+#include <QUrl>
 
 #include "variouswidgets.h"
 #include "tools.h"
@@ -119,9 +115,9 @@ QColor LinkLook::effectiveHoverColor() const
 QColor LinkLook::defaultColor() const
 {
     if (m_useLinkColor)
-        return kapp->palette().color(QPalette::Link);
+        return qApp->palette().color(QPalette::Link);
     else
-        return kapp->palette().color(QPalette::Text);
+        return qApp->palette().color(QPalette::Text);
 }
 
 QColor LinkLook::defaultHoverColor() const
@@ -222,7 +218,7 @@ void LinkLabel::setLink(const QString &title, const QString &icon, LinkLook *loo
     if (icon.isEmpty())
         m_icon->clear();
     else {
-        QPixmap pixmap = DesktopIcon(icon, m_look->iconSize(), m_look->iconSize());
+        QPixmap pixmap = QIcon(icon).pixmap(m_look->iconSize(), m_look->iconSize());
         if (!pixmap.isNull())
             m_icon->setPixmap(pixmap);
     }
@@ -243,7 +239,7 @@ void LinkLabel::setLook(LinkLook *look) // FIXME: called externaly (so, without 
     m_title->setFont(font);
     QPalette palette;
     if (m_isSelected)
-        palette.setColor(m_title->foregroundRole(), KApplication::palette().color(QPalette::Text));
+        palette.setColor(m_title->foregroundRole(), qApp->palette().color(QPalette::Text));
     else
         palette.setColor(m_title->foregroundRole(), look->effectiveColor());
 
@@ -351,7 +347,7 @@ void LinkLabel::setSelected(bool selected)
     QPalette palette;
 
     if (selected)
-        palette.setColor(m_title->foregroundRole(), KApplication::palette().color(QPalette::HighlightedText));
+        palette.setColor(m_title->foregroundRole(), qApp->palette().color(QPalette::HighlightedText));
     else if (m_isHovered)
         palette.setColor(m_title->foregroundRole(), m_look->effectiveHoverColor());
     else
@@ -402,7 +398,7 @@ void LinkDisplay::setLink(const QString &title, const QString &icon, const QPixm
     m_font    = font;
 
     // "Constants":
-    int BUTTON_MARGIN = kapp->style()->pixelMetric(QStyle::PM_ButtonMargin);
+    int BUTTON_MARGIN = qApp->style()->pixelMetric(QStyle::PM_ButtonMargin);
     int LINK_MARGIN   = BUTTON_MARGIN + 2;
 
     // Recompute m_minWidth:
@@ -440,7 +436,7 @@ void LinkDisplay::setWidth(qreal width)
 void LinkDisplay::paint(QPainter *painter, qreal x, qreal y, qreal width, qreal height, const QPalette &palette,
                         bool isDefaultColor, bool isSelected, bool isHovered, bool isIconButtonHovered) const
 {
-    qreal BUTTON_MARGIN = kapp->style()->pixelMetric(QStyle::PM_ButtonMargin);
+    qreal BUTTON_MARGIN = qApp->style()->pixelMetric(QStyle::PM_ButtonMargin);
     qreal LINK_MARGIN   = BUTTON_MARGIN + 2;
 
     QPixmap pixmap;
@@ -451,11 +447,7 @@ void LinkDisplay::paint(QPainter *painter, qreal x, qreal y, qreal width, qreal 
     else {
         qreal           iconSize   = m_look->iconSize();
         QString       iconName   = (isHovered ? Global::openNoteIcon() : m_icon);
-        KIconLoader::States iconState  = (isIconButtonHovered ? KIconLoader::ActiveState : KIconLoader::DefaultState);
-        pixmap = KIconLoader::global()->loadIcon(
-                     iconName, KIconLoader::Desktop, iconSize, iconState, QStringList(),
-                     0L, /*canReturnNull=*/false
-                 );
+        pixmap = QIcon(iconName).pixmap(iconSize, iconSize);
     }
     qreal iconPreviewWidth  = qMax(m_look->iconSize(), (m_look->previewEnabled() ? m_preview.width()  : 0));
     qreal pixmapX = (iconPreviewWidth - pixmap.width()) / 2;
@@ -465,13 +457,13 @@ void LinkDisplay::paint(QPainter *painter, qreal x, qreal y, qreal width, qreal 
         QStyleOption opt;
         opt.rect = QRect(-1, -1, iconPreviewWidth + 2 * BUTTON_MARGIN, height + 2);
         opt.state = isIconButtonHovered ? (QStyle::State_MouseOver | QStyle::State_Enabled)  : QStyle::State_Enabled;
-        kapp->style()->drawPrimitive(QStyle::PE_PanelButtonCommand, &opt, painter);
+        qApp->style()->drawPrimitive(QStyle::PE_PanelButtonCommand, &opt, painter);
     }
     painter->drawPixmap(x + BUTTON_MARGIN - 1 + pixmapX, y + pixmapY, pixmap);
 
     // Figure out the text color:
     if (isSelected) {
-        painter->setPen(kapp->palette().color(QPalette::HighlightedText));
+        painter->setPen(qApp->palette().color(QPalette::HighlightedText));
     } else if (isIconButtonHovered)
         painter->setPen(m_look->effectiveHoverColor());
     else if (!isDefaultColor || (!m_look->color().isValid() && !m_look->useLinkColor())) // If the color is FORCED or if the link color default to the text color:
@@ -499,7 +491,7 @@ QPixmap LinkDisplay::feedbackPixmap(qreal width, qreal height, const QPalette &p
 
 bool LinkDisplay::iconButtonAt(const QPointF &pos) const
 {
-    qreal BUTTON_MARGIN    = kapp->style()->pixelMetric(QStyle::PM_ButtonMargin);
+    qreal BUTTON_MARGIN    = qApp->style()->pixelMetric(QStyle::PM_ButtonMargin);
 //  int LINK_MARGIN      = BUTTON_MARGIN + 2;
     qreal iconPreviewWidth = qMax(m_look->iconSize(), (m_look->previewEnabled() ? m_preview.width()  : 0));
 
@@ -508,7 +500,7 @@ bool LinkDisplay::iconButtonAt(const QPointF &pos) const
 
 QRectF LinkDisplay::iconButtonRect() const
 {
-    qreal BUTTON_MARGIN    = kapp->style()->pixelMetric(QStyle::PM_ButtonMargin);
+    qreal BUTTON_MARGIN    = qApp->style()->pixelMetric(QStyle::PM_ButtonMargin);
 //  int LINK_MARGIN      = BUTTON_MARGIN + 2;
     qreal iconPreviewWidth = qMax(m_look->iconSize(), (m_look->previewEnabled() ? m_preview.width()  : 0));
 
@@ -533,7 +525,7 @@ QFont LinkDisplay::labelFont(QFont font, bool isIconButtonHovered) const
 
 qreal LinkDisplay::heightForWidth(qreal width) const
 {
-    qreal BUTTON_MARGIN     = kapp->style()->pixelMetric(QStyle::PM_ButtonMargin);
+    qreal BUTTON_MARGIN     = qApp->style()->pixelMetric(QStyle::PM_ButtonMargin);
     qreal LINK_MARGIN       = BUTTON_MARGIN + 2;
     qreal iconPreviewWidth  = qMax(m_look->iconSize(), (m_look->previewEnabled() ? m_preview.width()  : 0));
     qreal iconPreviewHeight = qMax(m_look->iconSize(), (m_look->previewEnabled() ? m_preview.height() : 0));
