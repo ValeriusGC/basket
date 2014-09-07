@@ -54,7 +54,7 @@ LinkLook *LinkLook::soundLook       = new LinkLook(/*useLinkColor=*/false, /*can
 LinkLook *LinkLook::fileLook        = new LinkLook(/*useLinkColor=*/false, /*canPreview=*/true);
 LinkLook *LinkLook::localLinkLook   = new LinkLook(/*useLinkColor=*/true,  /*canPreview=*/true);
 LinkLook *LinkLook::networkLinkLook = new LinkLook(/*useLinkColor=*/true,  /*canPreview=*/false);
-LinkLook *LinkLook::launcherLook    = new LinkLook(/*useLinkColor=*/true,  /*canPreview=*/false);
+//LinkLook *LinkLook::launcherLook    = new LinkLook(/*useLinkColor=*/true,  /*canPreview=*/false);
 LinkLook *LinkLook::crossReferenceLook=new LinkLook(/*useLinkColor=*/true,  /*canPreview=*/false);
 
 LinkLook::LinkLook(bool useLinkColor, bool canPreview)
@@ -129,7 +129,7 @@ QColor LinkLook::defaultHoverColor() const
     return Qt::red;
 }
 
-LinkLook* LinkLook::lookForURL(const KUrl &url)
+LinkLook* LinkLook::lookForURL(const QUrl &url)
 {
     return url.isLocalFile() ? localLinkLook : networkLinkLook;
 }
@@ -548,11 +548,11 @@ QString LinkDisplay::toHtml(const QString &/*imageName*/) const
     return "";
 }
 
-QString LinkDisplay::toHtml(HTMLExporter *exporter, const KUrl &url, const QString &title)
+QString LinkDisplay::toHtml(HTMLExporter *exporter, const QUrl &url, const QString &title)
 {
     QString linkIcon;
     if (m_look->previewEnabled() && !m_preview.isNull()) {
-        QString fileName = Tools::fileNameForNewFile("preview_" + url.fileName() + ".png", exporter->iconsFolderPath);
+        QString fileName = Tools::fileNameForNewFile("preview_" + url.path() + ".png", exporter->iconsFolderPath);
         QString fullPath = exporter->iconsFolderPath + fileName;
         m_preview.save(fullPath, "PNG");
         linkIcon = QString("<img src=\"%1\" width=\"%2\" height=\"%3\" alt=\"\">")
@@ -565,7 +565,7 @@ QString LinkDisplay::toHtml(HTMLExporter *exporter, const KUrl &url, const QStri
 
     QString linkTitle = Tools::textToHTMLWithoutP(title.isEmpty() ? m_title : title);
 
-    return QString("<a href=\"%1\">%2 %3</a>").arg(url.prettyUrl(), linkIcon, linkTitle);
+    return QString("<a href=\"%1\">%2 %3</a>").arg(url.toString(), linkIcon, linkTitle);
 }
 
 /** LinkLookEditWidget **/

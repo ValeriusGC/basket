@@ -30,11 +30,7 @@
 #include <QtGui/QPixmap>
 #include <QtGui/QDesktopWidget>       //For kapp->desktop()
 #include <QtGui/QDragEnterEvent>
-
-#include <kdeversion.h>
-#include <KDE/KApplication>
-
-#include <KIO/CopyJob>
+#include <QApplication>
 
 #include "basketscene.h"
 #include "notefactory.h"
@@ -117,7 +113,8 @@ void NoteDrag::serializeNotes(NoteSelection *noteList, QDataStream &stream, bool
                 if (cutting) {
                     // Move file in a temporary place:
                     QString fullPath = Global::tempCutFolder() + Tools::fileNameForNewFile(content->fileName(), Global::tempCutFolder());
-                    KIO::move(KUrl(content->fullPath()), KUrl(fullPath), KIO::HideProgressInfo);
+                    QDir dir;
+                    dir.rename(content->fullPath(), fullPath);
                     node->fullPath = fullPath;
                     stream << fullPath;
                 } else
@@ -211,9 +208,9 @@ void NoteDrag::serializeImage(NoteSelection *noteList, QDrag *multipleDrag)
 
 void NoteDrag::serializeLinks(NoteSelection *noteList, QDrag *multipleDrag, bool cutting)
 {
-    KUrl::List  urls;
+    QList<QUrl>  urls;
     QStringList titles;
-    KUrl    url;
+    QUrl    url;
     QString title;
     for (NoteSelection *node = noteList->firstStacked(); node; node = node->nextStacked()) {
         node->note->content()->toLink(&url, &title, node->fullPath);
@@ -225,37 +222,37 @@ void NoteDrag::serializeLinks(NoteSelection *noteList, QDrag *multipleDrag, bool
     if (!urls.isEmpty()) {
         // First, the standard text/uri-list MIME format:
         QMimeData* mimeData = new QMimeData;
-        urls.populateMimeData(mimeData);
+//        urls.populateMimeData(mimeData); TODO qt5
 
-        // Then, also provide it in the Mozilla proprietary format (that also allow to add titles to URLs):
-        // A version for Mozilla applications (convert to "theUrl\ntheTitle", into UTF-16):
-        // FIXME: Does Mozilla support the drag of several URLs at once?
-        // FIXME: If no, only provide that if theire is only ONE URL.
-        QString xMozUrl;
-        for (int i = 0; i < urls.count(); ++i)
-            xMozUrl += (xMozUrl.isEmpty() ? "" : "\n") + urls[i].prettyUrl() + "\n" + titles[i];
-        /*      Code for only one: ===============
-                xMozUrl = note->title() + "\n" + note->url().prettyUrl();*/
-        QByteArray baMozUrl;
-        QTextStream stream(baMozUrl, QIODevice::WriteOnly);
+//        // Then, also provide it in the Mozilla proprietary format (that also allow to add titles to URLs):
+//        // A version for Mozilla applications (convert to "theUrl\ntheTitle", into UTF-16):
+//        // FIXME: Does Mozilla support the drag of several URLs at once?
+//        // FIXME: If no, only provide that if theire is only ONE URL.
+//        QString xMozUrl;
+//        for (int i = 0; i < urls.count(); ++i)
+//            xMozUrl += (xMozUrl.isEmpty() ? "" : "\n") + urls[i].prettyUrl() + "\n" + titles[i];
+//        /*      Code for only one: ===============
+//                xMozUrl = note->title() + "\n" + note->url().prettyUrl();*/
+//        QByteArray baMozUrl;
+//        QTextStream stream(baMozUrl, QIODevice::WriteOnly);
 
-        // It's UTF16 (aka UCS2), but with the first two order bytes
-        //stream.setEncoding(QTextStream::RawUnicode); // It's UTF16 (aka UCS2), but with the first two order bytes
-        //FIXME: find out if this is really equivalent, as http://doc.trolltech.com/4.5/qtextstream-qt3.html pretends
-        stream.setCodec("UTF-16");
+//        // It's UTF16 (aka UCS2), but with the first two order bytes
+//        //stream.setEncoding(QTextStream::RawUnicode); // It's UTF16 (aka UCS2), but with the first two order bytes
+//        //FIXME: find out if this is really equivalent, as http://doc.trolltech.com/4.5/qtextstream-qt3.html pretends
+//        stream.setCodec("UTF-16");
 
-        stream << xMozUrl;
+//        stream << xMozUrl;
 
-        mimeData->setData("text/x-moz-url", baMozUrl);
+//        mimeData->setData("text/x-moz-url", baMozUrl);
 
-        if (cutting) {
-            QByteArray arrayCut;
-            arrayCut.resize(2);
-            arrayCut[0] = '1';
-            arrayCut[1] = 0;
-            mimeData->setData("application/x-kde-cutselection", arrayCut);
-        }
-        multipleDrag->setMimeData(mimeData);
+//        if (cutting) {
+//            QByteArray arrayCut;
+//            arrayCut.resize(2);
+//            arrayCut[0] = '1';
+//            arrayCut[1] = 0;
+//            mimeData->setData("application/x-kde-cutselection", arrayCut);
+//        }
+//        multipleDrag->setMimeData(mimeData);
     }
 }
 
@@ -302,7 +299,7 @@ QPixmap NoteDrag::feedbackPixmap(NoteSelection *noteList)
             bgColor   = node->note->basket()->backgroundColor();
             needSpace = false;
         } else {
-            pixmap    = node->note->content()->feedbackPixmap(/*maxWidth=*/kapp->desktop()->width() / 2, /*maxHeight=*/96);
+            pixmap    = node->note->content()->feedbackPixmap(/*maxWidth=*/qApp->desktop()->width() / 2, /*maxHeight=*/96);
             bgColor   = node->note->backgroundColor();
             needSpace = node->note->content()->needSpaceForFeedbackPixmap();
         }
@@ -315,7 +312,7 @@ QPixmap NoteDrag::feedbackPixmap(NoteSelection *noteList)
             height += (i > 0 && needSpace ? 1 : 0) + pixmap.height() + SPACING + (needSpace ? 1 : 0);
             if (elipsisImage)
                 break;
-            if (height > kapp->desktop()->height() / 2)
+            if (height > qApp->desktop()->height() / 2)
                 elipsisImage = true;
         }
     }
@@ -480,11 +477,10 @@ Note* NoteDrag::decodeHierarchy(QDataStream &stream, BasketScene *parent, bool m
 
                     QString newFileName = Tools::fileNameForNewFile(fileName, parent->fullPath());
                     note->content()->setFileName(newFileName);
-
-                    KIO::CopyJob *copyJob = KIO::move(KUrl(fullPath), KUrl(parent->fullPath() + newFileName),
-				    KIO::Overwrite | KIO::Resume | KIO::HideProgressInfo);
-                    parent->connect(copyJob, SIGNAL(copyingDone(KIO::Job *, KUrl, KUrl, time_t, bool, bool)),
-                                    parent, SLOT(slotCopyingDone2(KIO::Job *, const KUrl&, const KUrl&)));
+                    QDir dir;
+                    dir.remove(parent->fullPath() + newFileName);
+                    Tools::copyRecursively(fullPath, parent->fullPath() + newFileName);
+                    parent->slotCopyingDone2(fullPath, parent->fullPath() + newFileName);
                 }
                 note->setGroupWidth(groupWidth);
                 note->setParentNote(0);
@@ -502,16 +498,14 @@ Note* NoteDrag::decodeHierarchy(QDataStream &stream, BasketScene *parent, bool m
                 // Later on, file_copy/file_move will copy/move the file to the new location.
                 QString newFileName = Tools::fileNameForNewFile(fileName, parent->fullPath());
                         //NoteFactory::createFileForNewNote(parent, "", fileName);
-                KIO::CopyJob *copyJob;
+                QDir dir;
+                dir.remove(parent->fullPath() + newFileName);
                 if (moveFiles) {
-                    copyJob = KIO::move(KUrl(fullPath), KUrl(parent->fullPath() + newFileName),
-                        KIO::Overwrite | KIO::Resume | KIO::HideProgressInfo);
+                    dir.rename(fullPath, parent->fullPath() + newFileName);
                 } else {
-                    copyJob = KIO::copy(KUrl(fullPath), KUrl(parent->fullPath() + newFileName),
-                        KIO::Overwrite | KIO::Resume | KIO::HideProgressInfo);
+                    Tools::copyRecursively(fullPath, parent->fullPath() + newFileName);
                 }
-                parent->connect(copyJob, SIGNAL(copyingDone(KIO::Job *, KUrl, KUrl, time_t, bool, bool)),
-                                parent, SLOT(slotCopyingDone2(KIO::Job *, const KUrl&, const KUrl&)));
+                parent->slotCopyingDone2(fullPath, parent->fullPath() + newFileName);
 		
 		note = NoteFactory::loadFile(newFileName, (NoteType::Id)type, parent);
                 note->setGroupWidth(groupWidth);

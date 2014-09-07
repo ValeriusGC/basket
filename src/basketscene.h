@@ -53,7 +53,6 @@ class QWheelEvent;
 
 class KAction;
 class KDirWatch;
-class KUrl;
 
 namespace KIO { 
     class Job; 
@@ -566,7 +565,7 @@ protected:
     void dragMoveEvent(QGraphicsSceneDragDropEvent *event);
     void dragLeaveEvent(QGraphicsSceneDragDropEvent *);
 public slots:
-    void slotCopyingDone2(KIO::Job *job, const KUrl &from, const KUrl &to);
+    void slotCopyingDone2(const QString &from, const QString &to);
 public:
     Note* noteForFullPath(const QString &path);
 

@@ -29,11 +29,7 @@
 #include <QtGui/QStyleOption>
 #include <QtGui/QImage>
 #include <QDebug>
-
-#include <KDE/KApplication>
-#include <KDE/KIconLoader>
-#include <KDE/KGlobal>
-#include <KDE/KLocale>  //For KGLobal::locale(
+#include <QApplication>
 
 #include <stdlib.h> // rand() function
 #include <math.h> // sqrt() and pow() functions
@@ -154,12 +150,14 @@ void Note::setParentBasket(BasketScene *basket)
     
 QString Note::addedStringDate()
 {
-    return KGlobal::locale()->formatDateTime(m_addedDate);
+    QLocale l;
+    return l.toString(m_addedDate);
 }
 
 QString Note::lastModificationStringDate()
 {
-    return KGlobal::locale()->formatDateTime(m_lastModificationDate);
+    QLocale l;
+    return l.toString(m_lastModificationDate);
 }
 
 QString Note::toText(const QString &cuttedFullPath)
@@ -775,7 +773,7 @@ QString Note::linkAt(const QPointF &pos)
     if (link.isEmpty() || link.startsWith(QLatin1String("basket://")))
         return link;
     else
-        return NoteFactory::filteredURL(KUrl(link)).prettyUrl();//KURIFilter::self()->filteredURI(link);
+        return NoteFactory::filteredURL(QUrl(link)).toString();//KURIFilter::self()->filteredURI(link);
 }
 
 qreal Note::contentX() const
@@ -1570,7 +1568,7 @@ void Note::drawInactiveResizer(QPainter *painter, qreal x, qreal y, qreal height
 
 QPalette Note::palette() const
 {
-    return (m_basket ? m_basket->palette() : kapp->palette());
+    return (m_basket ? m_basket->palette() : qApp->palette());
 }
 
 /* type: 1: topLeft

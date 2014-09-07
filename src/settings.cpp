@@ -114,7 +114,7 @@ void Settings::loadConfig()
     loadLinkLook(LinkLook::fileLook,        "File Look",         defaultFileLook);
     loadLinkLook(LinkLook::localLinkLook,   "Local Link Look",   defaultLocalLinkLook);
     loadLinkLook(LinkLook::networkLinkLook, "Network Link Look", defaultNetworkLinkLook);
-    loadLinkLook(LinkLook::launcherLook,    "Launcher Look",     defaultLauncherLook);
+//    loadLinkLook(LinkLook::launcherLook,    "Launcher Look",     defaultLauncherLook);
     loadLinkLook(LinkLook::crossReferenceLook, "Cross Reference Look", defaultCrossReferenceLook);
 
     QSettings settings;
@@ -199,7 +199,7 @@ void Settings::saveConfig()
     saveLinkLook(LinkLook::fileLook,        "File Look");
     saveLinkLook(LinkLook::localLinkLook,   "Local Link Look");
     saveLinkLook(LinkLook::networkLinkLook, "Network Link Look");
-    saveLinkLook(LinkLook::launcherLook,    "Launcher Look");
+//    saveLinkLook(LinkLook::launcherLook,    "Launcher Look");
     saveLinkLook(LinkLook::crossReferenceLook,"Cross Reference Look");
 
     QSettings settings;
@@ -883,7 +883,7 @@ void NotesAppearancePage::load()
     m_fileLook->set(LinkLook::fileLook);
     m_localLinkLook->set(LinkLook::localLinkLook);
     m_networkLinkLook->set(LinkLook::networkLinkLook);
-    m_launcherLook->set(LinkLook::launcherLook);
+//    m_launcherLook->set(LinkLook::launcherLook);
     m_crossReferenceLook->set(LinkLook::crossReferenceLook);
 }
 

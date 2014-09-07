@@ -198,12 +198,12 @@ public:
     CrossReferenceEditor(CrossReferenceContent *crossReferenceContent, QWidget *parent);
 };
 
-class LauncherEditor : public NoteEditor
-{
-    Q_OBJECT
-public:
-    LauncherEditor(LauncherContent *launcherContent, QWidget *parent);
-};
+//class LauncherEditor : public NoteEditor
+//{
+//    Q_OBJECT
+//public:
+//    LauncherEditor(LauncherContent *launcherContent, QWidget *parent);
+//};
 
 class ColorEditor : public NoteEditor
 {
@@ -285,22 +285,22 @@ private:
 /** The dialog to edit Launcher Note content.
   * @author Sébastien Laoût
   */
-class LauncherEditDialog : public QDialog
-{
-    Q_OBJECT
-public:
-    explicit LauncherEditDialog(LauncherContent *contentNote, QWidget *parent = 0);
-    ~LauncherEditDialog();
-    void ensurePolished();
-protected slots:
-    void slotOk();
-    void guessIcon();
-private:
-    LauncherContent     *m_noteContent;
-    RunCommandRequester *m_command;
-    QLineEdit           *m_name;
-    QToolButton         *m_icon;
-};
+//class LauncherEditDialog : public QDialog
+//{
+//    Q_OBJECT
+//public:
+//    explicit LauncherEditDialog(LauncherContent *contentNote, QWidget *parent = 0);
+//    ~LauncherEditDialog();
+//    void ensurePolished();
+//protected slots:
+//    void slotOk();
+//    void guessIcon();
+//private:
+//    LauncherContent     *m_noteContent;
+//    RunCommandRequester *m_command;
+//    QLineEdit           *m_name;
+//    QToolButton         *m_icon;
+//};
 
 /** This class manage toolbars for the inline editors.
   * The toolbars should be created once at the application startup,

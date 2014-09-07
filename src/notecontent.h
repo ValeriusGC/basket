@@ -24,9 +24,7 @@
 #include <QtCore/QObject>
 #include <QtGui/QGraphicsItem>
 #include <QCoreApplication>
-
-#include <KDE/KUrl>
-#include <KDE/KIO/AccessManager>
+#include <QUrl>
 
 #include <phonon/phononnamespace.h>
 
@@ -47,14 +45,8 @@ class QString;
 class QStringList;
 class QTextDocument;
 class QWidget;
-
-class KFileItem;
-class KUrl;
-
-namespace KIO
-{
-    class PreviewJob;
-}
+class QNetworkAccessManager;
+class QNetworkReply;
 
 namespace Phonon
 {
@@ -111,7 +103,7 @@ public:
     virtual QPixmap toPixmap()                      {
         return QPixmap();
     } /// << @return an image equivalent of the content.
-    virtual void    toLink(KUrl *url, QString *title, const QString &cuttedFullPath); /// << Set the link to the content. By default, it set them to fullPath() if useFile().
+    virtual void    toLink(QUrl *url, QString *title, const QString &cuttedFullPath); /// << Set the link to the content. By default, it set them to fullPath() if useFile().
     virtual bool    useFile() const                                  = 0; /// << @return true if it use a file to store the content.
     virtual bool    canBeSavedAs() const                             = 0; /// << @return true if the content can be saved as a file by the user.
     virtual QString saveAsFilters() const                            = 0; /// << @return the filters for the user to choose a file destination to save the note as.
@@ -165,7 +157,7 @@ public:
         return 0;
     } /// << If the editor should be indented (eg. to not cover an icon), return the number of pixels.
     // Open Content or File:
-    virtual KUrl urlToOpen(bool /*with*/); /// << @return the URL to open the note, or an invalid KUrl if it's not openable. If @p with if false, it's a normal "Open". If it's true, it's for an "Open with..." action. The default implementation return the fullPath() if the note useFile() and nothing if not.
+    virtual QUrl urlToOpen(bool /*with*/); /// << @return the URL to open the note, or an invalid QUrl if it's not openable. If @p with if false, it's a normal "Open". If it's true, it's for an "Open with..." action. The default implementation return the fullPath() if the note useFile() and nothing if not.
     enum OpenMessage {
         OpenOne,              /// << Message to send to the statusbar when opening this note.
         OpenSeveral,          /// << Message to send to the statusbar when opening several notes of this type.
@@ -460,11 +452,11 @@ protected:
     LinkDisplayItem m_linkDisplayItem;
     // File Preview Management:
 protected slots:
-    void newPreview(const KFileItem&, const QPixmap &preview);
-    void removePreview(const KFileItem&);
+    void newPreview(/*const KFileItem&,*/ const QPixmap &preview);
+    void removePreview(/*const KFileItem&*/);
     void startFetchingUrlPreview();
 protected:
-    KIO::PreviewJob *m_previewJob;
+//    KIO::PreviewJob *m_previewJob;
 };
 
 /** Real implementation of sound notes:
@@ -512,7 +504,7 @@ class LinkContent : public QObject, public NoteContent
     Q_OBJECT
 public:
     // Constructor and destructor:
-    LinkContent(Note *parent, const KUrl &url, const QString &title, const QString &icon, bool autoTitle, bool autoIcon);
+    LinkContent(Note *parent, const QUrl &url, const QString &title, const QString &icon, bool autoTitle, bool autoIcon);
     ~LinkContent();
     // Simple Generic Methods:
     NoteType::Id type() const;
@@ -520,7 +512,7 @@ public:
     QString lowerTypeName() const;
     QString toText(const QString &/*cuttedFullPath*/);
     QString toHtml(const QString &imageName, const QString &cuttedFullPath);
-    void    toLink(KUrl *url, QString *title, const QString &cuttedFullPath);
+    void    toLink(QUrl *url, QString *title, const QString &cuttedFullPath);
     bool    useFile() const;
     bool    canBeSavedAs() const;
     QString saveAsFilters() const;
@@ -544,11 +536,11 @@ public:
     Qt::CursorShape cursorFromZone(int zone) const;
     QString statusBarMessage(int zone);
     // Open Content or File:
-    KUrl urlToOpen(bool /*with*/);
+    QUrl urlToOpen(bool /*with*/);
     QString messageWhenOpening(OpenMessage where);
     // Content-Specific Methods:
-    void    setLink(const KUrl &url, const QString &title, const QString &icon, bool autoTitle, bool autoIcon); /// << Change the link and relayout the note.
-    KUrl    url()       {
+    void    setLink(const QUrl &url, const QString &title, const QString &icon, bool autoTitle, bool autoIcon); /// << Change the link and relayout the note.
+    QUrl    url()       {
         return m_url;
     } /// << @return the URL of the link note-content.
     QString title()     {
@@ -566,24 +558,24 @@ public:
     void startFetchingLinkTitle();
     QGraphicsItem *graphicsItem() { return &m_linkDisplayItem; }
 protected:
-    KUrl        m_url;
+    QUrl        m_url;
     QString     m_title;
     QString     m_icon;
     bool        m_autoTitle;
     bool        m_autoIcon;
     LinkDisplayItem m_linkDisplayItem;
-    KIO::Integration::AccessManager*      m_access_manager;
+    QNetworkAccessManager*      m_access_manager;
     QNetworkReply*      m_reply;
     QString*    m_httpBuff;
     // File Preview Management:
 protected slots:
     void httpReadyRead();
     void httpDone(QNetworkReply* reply);
-    void newPreview(const KFileItem&, const QPixmap &preview);
-    void removePreview(const KFileItem&);
+    void newPreview(/*const KFileItem&, */const QPixmap &preview);
+    void removePreview(/*const KFileItem&*/);
     void startFetchingUrlPreview();
 protected:
-    KIO::PreviewJob *m_previewJob;
+//    KIO::PreviewJob *m_previewJob;
 };
 
 /** Real implementation of cross reference notes:
@@ -595,7 +587,7 @@ class CrossReferenceContent : public QObject, public NoteContent
     Q_OBJECT
 public:
     // Constructor and destructor:
-    CrossReferenceContent(Note *parent, const KUrl &url, const QString &title, const QString &icon);
+    CrossReferenceContent(Note *parent, const QUrl &url, const QString &title, const QString &icon);
     ~CrossReferenceContent();
     // Simple Generic Methods:
     NoteType::Id type() const;
@@ -603,7 +595,7 @@ public:
     QString lowerTypeName() const;
     QString toText(const QString &/*cuttedFullPath*/);
     QString toHtml(const QString &imageName, const QString &cuttedFullPath);
-    void    toLink(KUrl *url, QString *title, const QString &cuttedFullPath);
+    void    toLink(QUrl *url, QString *title, const QString &cuttedFullPath);
     bool    useFile() const;
     bool    canBeSavedAs() const;
     QString saveAsFilters() const;
@@ -627,12 +619,12 @@ public:
     Qt::CursorShape cursorFromZone(int zone) const;
     QString statusBarMessage(int zone);
     // Open Content or File:
-    KUrl urlToOpen(bool /*with*/);
+    QUrl urlToOpen(bool /*with*/);
     QString messageWhenOpening(OpenMessage where);
     // Content-Specific Methods:
-    void    setLink(const KUrl &url, const QString &title, const QString &icon); /// << Change the link and relayout the note.
-    void    setCrossReference(const KUrl &url, const QString &title, const QString &icon);
-    KUrl    url()       {
+    void    setLink(const QUrl &url, const QString &title, const QString &icon); /// << Change the link and relayout the note.
+    void    setCrossReference(const QUrl &url, const QString &title, const QString &icon);
+    QUrl    url()       {
         return m_url;
     } /// << @return the URL of the link note-content.
     QString title()     {
@@ -645,7 +637,7 @@ public:
     QGraphicsItem *graphicsItem() { return &m_linkDisplayItem; }
 
 protected:
-    KUrl        m_url;
+    QUrl        m_url;
     QString     m_title;
     QString     m_icon;
     LinkDisplayItem m_linkDisplayItem;
@@ -654,61 +646,61 @@ protected:
 /** Real implementation of launcher notes:
  * @author Sébastien Laoût
  */
-class LauncherContent : public NoteContent
-{
-public:
-    // Constructor and destructor:
-    LauncherContent(Note *parent, const QString &fileName);
-    ~LauncherContent();
-    // Simple Generic Methods:
-    NoteType::Id type() const;
-    QString typeName() const;
-    QString lowerTypeName() const;
-    QString toHtml(const QString &imageName, const QString &cuttedFullPath);
-    void    toLink(KUrl *url, QString *title, const QString &cuttedFullPath);
-    bool    useFile() const;
-    bool    canBeSavedAs() const;
-    QString saveAsFilters() const;
-    bool    match(const FilterData &data);
-    // Complexe Generic Methods:
-    void    exportToHTML(HTMLExporter *exporter, int indent);
-    QString cssClass() const;
-    qreal     setWidthAndGetHeight(qreal width);
-    bool    loadFromFile(bool /*lazyLoad*/);
-    void    fontChanged();
-    QString editToolTipText() const;
-    void    toolTipInfos(QStringList *keys, QStringList *values);
-    // Drag and Drop Content:
-    QPixmap feedbackPixmap(qreal width, qreal height);
-    // Custom Zones:
-    int     zoneAt(const QPointF &pos);
-    QRectF   zoneRect(int zone, const QPointF &/*pos*/);
-    QString zoneTip(int zone);
-    Qt::CursorShape cursorFromZone(int zone) const;
-    // Open Content or File:
-    KUrl urlToOpen(bool with);
-    QString messageWhenOpening(OpenMessage where);
-    // Content-Specific Methods:
-    void    setLauncher(const QString &name, const QString &icon, const QString &exec); /// << Change the launcher note-content and relayout the note. Normally called by loadFromFile (no save done).
-    QString name() {
-        return m_name;
-    }                              /// << @return the URL of the launcher note-content.
-    QString icon() {
-        return m_icon;
-    }                              /// << @return the displayed icon of the launcher note-content.
-    QString exec() {
-        return m_exec;
-    }                              /// << @return the execute command line of the launcher note-content.
-    // TODO: KService *service() ??? And store everything in thta service ?
+//class LauncherContent : public NoteContent
+//{
+//public:
+//    // Constructor and destructor:
+//    LauncherContent(Note *parent, const QString &fileName);
+//    ~LauncherContent();
+//    // Simple Generic Methods:
+//    NoteType::Id type() const;
+//    QString typeName() const;
+//    QString lowerTypeName() const;
+//    QString toHtml(const QString &imageName, const QString &cuttedFullPath);
+//    void    toLink(QUrl *url, QString *title, const QString &cuttedFullPath);
+//    bool    useFile() const;
+//    bool    canBeSavedAs() const;
+//    QString saveAsFilters() const;
+//    bool    match(const FilterData &data);
+//    // Complexe Generic Methods:
+//    void    exportToHTML(HTMLExporter *exporter, int indent);
+//    QString cssClass() const;
+//    qreal     setWidthAndGetHeight(qreal width);
+//    bool    loadFromFile(bool /*lazyLoad*/);
+//    void    fontChanged();
+//    QString editToolTipText() const;
+//    void    toolTipInfos(QStringList *keys, QStringList *values);
+//    // Drag and Drop Content:
+//    QPixmap feedbackPixmap(qreal width, qreal height);
+//    // Custom Zones:
+//    int     zoneAt(const QPointF &pos);
+//    QRectF   zoneRect(int zone, const QPointF &/*pos*/);
+//    QString zoneTip(int zone);
+//    Qt::CursorShape cursorFromZone(int zone) const;
+//    // Open Content or File:
+//    QUrl urlToOpen(bool with);
+//    QString messageWhenOpening(OpenMessage where);
+//    // Content-Specific Methods:
+//    void    setLauncher(const QString &name, const QString &icon, const QString &exec); /// << Change the launcher note-content and relayout the note. Normally called by loadFromFile (no save done).
+//    QString name() {
+//        return m_name;
+//    }                              /// << @return the URL of the launcher note-content.
+//    QString icon() {
+//        return m_icon;
+//    }                              /// << @return the displayed icon of the launcher note-content.
+//    QString exec() {
+//        return m_exec;
+//    }                              /// << @return the execute command line of the launcher note-content.
+//    // TODO: KService *service() ??? And store everything in thta service ?
     
-    QGraphicsItem *graphicsItem() { return &m_linkDisplayItem; }
+//    QGraphicsItem *graphicsItem() { return &m_linkDisplayItem; }
 
-protected:
-    QString     m_name; // TODO: Store them in linkDisplay to gain place (idem for Link notes)
-    QString     m_icon;
-    QString     m_exec;
-    LinkDisplayItem m_linkDisplayItem;
-};
+//protected:
+//    QString     m_name; // TODO: Store them in linkDisplay to gain place (idem for Link notes)
+//    QString     m_icon;
+//    QString     m_exec;
+//    LinkDisplayItem m_linkDisplayItem;
+//};
 
 /** 
  * 
@@ -816,7 +808,7 @@ public:
     QString lowerTypeName() const;
     QString toText(const QString &/*cuttedFullPath*/);
     QString toHtml(const QString &imageName, const QString &cuttedFullPath);
-    void    toLink(KUrl *url, QString *title, const QString &cuttedFullPath);
+    void    toLink(QUrl *url, QString *title, const QString &cuttedFullPath);
     bool    useFile() const;
     bool    canBeSavedAs() const;
     QString saveAsFilters() const;
@@ -838,8 +830,8 @@ public:
         return true;
     }
     // Open Content or File:
-    KUrl urlToOpen(bool /*with*/) {
-        return KUrl();
+    QUrl urlToOpen(bool /*with*/) {
+        return QUrl();
     }
     
     QGraphicsItem *graphicsItem() { return &m_unknownItem; }

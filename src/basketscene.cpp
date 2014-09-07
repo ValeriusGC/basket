@@ -4439,16 +4439,11 @@ void BasketScene::linkLookChanged()
     relayoutNotes(true);
 }
 
-void BasketScene::slotCopyingDone2(KIO::Job *job,
-                              const KUrl &/*from*/,
-                              const KUrl &to)
+void BasketScene::slotCopyingDone2(const QString &/*from*/,
+                              const QString &to)
 {
-    if (job->error()) {
-        DEBUG_WIN << "Copy finished, ERROR";
-        return;
-    }
-    Note *note = noteForFullPath(to.path());
-    DEBUG_WIN << "Copy finished, load note: " + to.path() + (note ? "" : " --- NO CORRESPONDING NOTE");
+    Note *note = noteForFullPath(to);
+    DEBUG_WIN << "Copy finished, load note: " + to + (note ? "" : " --- NO CORRESPONDING NOTE");
     if (note != 0L) {
         note->content()->loadFromFile(/*lazyLoad=*/false);
         if (isEncrypted())

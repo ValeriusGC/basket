@@ -172,9 +172,9 @@ NoteEditor* NoteEditor::editNoteContent(NoteContent *noteContent, QWidget *paren
     if(crossReferenceContent)
         return new CrossReferenceEditor(crossReferenceContent, parent);
 
-    LauncherContent *launcherContent = dynamic_cast<LauncherContent*>(noteContent);
-    if (launcherContent)
-        return new LauncherEditor(launcherContent, parent);
+//    LauncherContent *launcherContent = dynamic_cast<LauncherContent*>(noteContent);
+//    if (launcherContent)
+//        return new LauncherEditor(launcherContent, parent);
 
     ColorContent *colorContent = dynamic_cast<ColorContent*>(noteContent);
     if (colorContent)
@@ -586,15 +586,15 @@ CrossReferenceEditor::CrossReferenceEditor(CrossReferenceContent *crossReference
 
 /** class LauncherEditor: */
 
-LauncherEditor::LauncherEditor(LauncherContent *launcherContent, QWidget *parent)
-        : NoteEditor(launcherContent)
-{
-    QPointer<LauncherEditDialog> dialog = new LauncherEditDialog(launcherContent, parent);
-    if (dialog->exec() == QDialog::Rejected)
-        cancel();
-    if (launcherContent->name().isEmpty() && launcherContent->exec().isEmpty())
-        setEmpty();
-}
+//LauncherEditor::LauncherEditor(LauncherContent *launcherContent, QWidget *parent)
+//        : NoteEditor(launcherContent)
+//{
+//    QPointer<LauncherEditDialog> dialog = new LauncherEditDialog(launcherContent, parent);
+//    if (dialog->exec() == QDialog::Rejected)
+//        cancel();
+//    if (launcherContent->name().isEmpty() && launcherContent->exec().isEmpty())
+//        setEmpty();
+//}
 
 /** class ColorEditor: */
 
@@ -865,10 +865,10 @@ CrossReferenceEditDialog::CrossReferenceEditDialog(CrossReferenceContent *conten
 
     if(m_noteContent->url().isEmpty()){
         BasketListViewItem *item = Global::bnpView->topLevelItem(0);
-        m_noteContent->setCrossReference(KUrl(item->data(0, Qt::UserRole).toString()), m_targetBasket->currentText(), "edit-copy");
+        m_noteContent->setCrossReference(QUrl(item->data(0, Qt::UserRole).toString()), m_targetBasket->currentText(), "edit-copy");
         this->urlChanged(0);
     } else {
-        QString url = m_noteContent->url().url();
+        QString url = m_noteContent->url().toString();
         //cannot use findData because I'm using a StringList and I don't have the second
         // piece of data to make find work.
         for(int i = 0; i < m_targetBasket->count(); ++i) {
@@ -903,7 +903,7 @@ CrossReferenceEditDialog::~CrossReferenceEditDialog()
 void CrossReferenceEditDialog::urlChanged(const int index)
 {
     if(m_targetBasket)
-        m_noteContent->setCrossReference(KUrl(m_targetBasket->itemData(index, Qt::UserRole).toStringList().first()),
+        m_noteContent->setCrossReference(QUrl(m_targetBasket->itemData(index, Qt::UserRole).toStringList().first()),
                                          m_targetBasket->currentText().trimmed(),
                                          m_targetBasket->itemData(index, Qt::UserRole).toStringList().last());
 }
@@ -948,115 +948,115 @@ void CrossReferenceEditDialog::generateBasketList(QComboBox *targetList, BasketL
 
 /** class LauncherEditDialog: */
 
-LauncherEditDialog::LauncherEditDialog(LauncherContent *contentNote, QWidget *parent)
-        : QDialog(parent)
-        , m_noteContent(contentNote)
-{
-    setWindowTitle(tr("Edit Launcher Note"));
-    QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok
-                                     | QDialogButtonBox::Cancel);
-    setObjectName("EditLauncher");
-    setModal(true);
-    connect(buttonBox, SIGNAL(accepted()), SLOT(slotOk()));
+//LauncherEditDialog::LauncherEditDialog(LauncherContent *contentNote, QWidget *parent)
+//        : QDialog(parent)
+//        , m_noteContent(contentNote)
+//{
+//    setWindowTitle(tr("Edit Launcher Note"));
+//    QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok
+//                                     | QDialogButtonBox::Cancel);
+//    setObjectName("EditLauncher");
+//    setModal(true);
+//    connect(buttonBox, SIGNAL(accepted()), SLOT(slotOk()));
 
-    //QGridLayout *layout = new QGridLayout(page, /*nRows=*/4, /*nCols=*/2, /*margin=*/0, spacingHint());
-    QGridLayout *layout = new QGridLayout(this);
+//    //QGridLayout *layout = new QGridLayout(page, /*nRows=*/4, /*nCols=*/2, /*margin=*/0, spacingHint());
+//    QGridLayout *layout = new QGridLayout(this);
 
-//    KService service(contentNote->fullPath());
+////    KService service(contentNote->fullPath());
 
-    m_command = new RunCommandRequester(contentNote->fullPath(), tr("Choose a command to run:"), this);// TODO service.exec
-    m_name    = new QLineEdit(contentNote->fullPath(), this); // TODO service.name
+//    m_command = new RunCommandRequester(contentNote->fullPath(), tr("Choose a command to run:"), this);// TODO service.exec
+//    m_name    = new QLineEdit(contentNote->fullPath(), this); // TODO service.name
 
-    QWidget *wid = new QWidget(this);
-    QHBoxLayout *hLay = new QHBoxLayout(wid);
-    m_icon = new QToolButton(wid);
+//    QWidget *wid = new QWidget(this);
+//    QHBoxLayout *hLay = new QHBoxLayout(wid);
+//    m_icon = new QToolButton(wid);
 
-    QLabel *label = new QLabel(this);
-    label->setText(tr("&Icon:"));
-    label->setBuddy(m_icon);
+//    QLabel *label = new QLabel(this);
+//    label->setText(tr("&Icon:"));
+//    label->setBuddy(m_icon);
 
-    m_icon->setIconSize(QSize(LinkLook::launcherLook->iconSize(), LinkLook::launcherLook->iconSize()));
-    QPushButton *guessButton = new QPushButton(tr("&Guess"), wid);
-    /* Icon button: */
-    m_icon->setIcon(QIcon(contentNote->fullPath())); // TODO service.icon
-    int minSize = guessButton->sizeHint().height();
-    // Make the icon button at least the same heigh than the other buttons for a better alignment (nicer to the eyes):
-    if (m_icon->sizeHint().height() < minSize)
-        m_icon->setFixedSize(minSize, minSize);
-    else
-        m_icon->setFixedSize(m_icon->sizeHint().height(), m_icon->sizeHint().height()); // Make it square
-    /* Guess button: */
-    hLay->addWidget(m_icon);
-    hLay->addWidget(guessButton);
-    hLay->addStretch();
+//    m_icon->setIconSize(QSize(LinkLook::launcherLook->iconSize(), LinkLook::launcherLook->iconSize()));
+//    QPushButton *guessButton = new QPushButton(tr("&Guess"), wid);
+//    /* Icon button: */
+//    m_icon->setIcon(QIcon(contentNote->fullPath())); // TODO service.icon
+//    int minSize = guessButton->sizeHint().height();
+//    // Make the icon button at least the same heigh than the other buttons for a better alignment (nicer to the eyes):
+//    if (m_icon->sizeHint().height() < minSize)
+//        m_icon->setFixedSize(minSize, minSize);
+//    else
+//        m_icon->setFixedSize(m_icon->sizeHint().height(), m_icon->sizeHint().height()); // Make it square
+//    /* Guess button: */
+//    hLay->addWidget(m_icon);
+//    hLay->addWidget(guessButton);
+//    hLay->addStretch();
 
-    m_command->lineEdit()->setMinimumWidth(m_command->lineEdit()->fontMetrics().maxWidth()*20);
+//    m_command->lineEdit()->setMinimumWidth(m_command->lineEdit()->fontMetrics().maxWidth()*20);
 
-    QLabel *label1 = new QLabel(this);
-    label1->setText(tr("Comman&d:"));
-    label1->setBuddy(m_command->lineEdit());
+//    QLabel *label1 = new QLabel(this);
+//    label1->setText(tr("Comman&d:"));
+//    label1->setBuddy(m_command->lineEdit());
 
-    QLabel *label2 = new QLabel(this);
-    label2->setText(tr("&Name:"));
-    label2->setBuddy(m_name);
+//    QLabel *label2 = new QLabel(this);
+//    label2->setText(tr("&Name:"));
+//    label2->setBuddy(m_name);
 
-    layout->addWidget(label1,    0, 0, Qt::AlignVCenter);
-    layout->addWidget(label2,    1, 0, Qt::AlignVCenter);
-    layout->addWidget(label,     2, 0, Qt::AlignVCenter);
-    layout->addWidget(m_command, 0, 1, Qt::AlignVCenter);
-    layout->addWidget(m_name,    1, 1, Qt::AlignVCenter);
-    layout->addWidget(wid,       2, 1, Qt::AlignVCenter);
+//    layout->addWidget(label1,    0, 0, Qt::AlignVCenter);
+//    layout->addWidget(label2,    1, 0, Qt::AlignVCenter);
+//    layout->addWidget(label,     2, 0, Qt::AlignVCenter);
+//    layout->addWidget(m_command, 0, 1, Qt::AlignVCenter);
+//    layout->addWidget(m_name,    1, 1, Qt::AlignVCenter);
+//    layout->addWidget(wid,       2, 1, Qt::AlignVCenter);
 
-    QWidget *stretchWidget = new QWidget(this);
+//    QWidget *stretchWidget = new QWidget(this);
 
-    QSizePolicy policy(QSizePolicy::Fixed, QSizePolicy::Expanding);
-    policy.setHorizontalStretch(1);
-    policy.setVerticalStretch(255);
-    stretchWidget->setSizePolicy(policy); // Make it fill ALL vertical space
+//    QSizePolicy policy(QSizePolicy::Fixed, QSizePolicy::Expanding);
+//    policy.setHorizontalStretch(1);
+//    policy.setVerticalStretch(255);
+//    stretchWidget->setSizePolicy(policy); // Make it fill ALL vertical space
 
-    layout->addWidget(stretchWidget, 3, 1, Qt::AlignVCenter);
+//    layout->addWidget(stretchWidget, 3, 1, Qt::AlignVCenter);
 
-    connect(guessButton, SIGNAL(clicked()), this, SLOT(guessIcon()));
-}
+//    connect(guessButton, SIGNAL(clicked()), this, SLOT(guessIcon()));
+//}
 
-LauncherEditDialog::~LauncherEditDialog()
-{
-}
+//LauncherEditDialog::~LauncherEditDialog()
+//{
+//}
 
-void LauncherEditDialog::ensurePolished()
-{
-    QDialog::ensurePolished();
-    if (m_command->runCommand().isEmpty()) {
-        m_command->lineEdit()->setFocus();
-        m_command->lineEdit()->end(false);
-    } else {
-        m_name->setFocus();
-        m_name->end(false);
-    }
-}
+//void LauncherEditDialog::ensurePolished()
+//{
+//    QDialog::ensurePolished();
+//    if (m_command->runCommand().isEmpty()) {
+//        m_command->lineEdit()->setFocus();
+//        m_command->lineEdit()->end(false);
+//    } else {
+//        m_name->setFocus();
+//        m_name->end(false);
+//    }
+//}
 
-void LauncherEditDialog::slotOk()
-{
-    // TODO: Remember if a string has been modified AND IS DIFFERENT FROM THE
-    // ORIGINAL!
+//void LauncherEditDialog::slotOk()
+//{
+//    // TODO: Remember if a string has been modified AND IS DIFFERENT FROM THE
+//    // ORIGINAL!
 
-//    KDesktopFile dtFile(m_noteContent->fullPath()); TODO recreate
-//    KConfigGroup grp = dtFile.desktopGroup();
-//    grp.writeEntry("Exec", m_command->runCommand());
-//    grp.writeEntry("Name", m_name->text());
-//    grp.writeEntry("Icon", m_icon->icon().name());
+////    KDesktopFile dtFile(m_noteContent->fullPath()); TODO recreate
+////    KConfigGroup grp = dtFile.desktopGroup();
+////    grp.writeEntry("Exec", m_command->runCommand());
+////    grp.writeEntry("Name", m_name->text());
+////    grp.writeEntry("Icon", m_icon->icon().name());
 
-    // Just for faster feedback: conf object will save to disk (and then
-    // m_note->loadContent() called)
-    m_noteContent->setLauncher(m_name->text(), m_icon->icon().name(),
-                               m_command->runCommand());
-    m_noteContent->setEdited();
-}
+//    // Just for faster feedback: conf object will save to disk (and then
+//    // m_note->loadContent() called)
+//    m_noteContent->setLauncher(m_name->text(), m_icon->icon().name(),
+//                               m_command->runCommand());
+//    m_noteContent->setEdited();
+//}
 
-void LauncherEditDialog::guessIcon()
-{
-    m_icon->setIcon(QIcon(NoteFactory::iconForCommand(m_command->runCommand())));
-}
+//void LauncherEditDialog::guessIcon()
+//{
+//    m_icon->setIcon(QIcon(NoteFactory::iconForCommand(m_command->runCommand())));
+//}
 
 /** class InlineEditors: */
 

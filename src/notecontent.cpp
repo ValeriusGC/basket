@@ -35,15 +35,10 @@
 #include <QtGui/QPixmap>
 #include <QtGui/QWidget>
 #include <QtXml/QDomDocument>
-#include <QtNetwork/QNetworkReply>
-#include <KDE/KIO/AccessManager>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
 #include <QDebug>
-
-#include <KDE/KService>
-#include <KDE/KLocale>
-#include <KDE/KFileMetaInfo>
-#include <KDE/KFileItem>
-#include <KDE/KIO/PreviewJob>                   //For KIO::file_preview(...)
+#include <QProcess>
 
 #include <phonon/AudioOutput>
 #include <phonon/MediaObject>
@@ -111,9 +106,9 @@ QRectF NoteContent::zoneRect(int zone, const QPointF &/*pos*/)
         return QRectF();
 }
 
-KUrl NoteContent::urlToOpen(bool /*with*/)
+QUrl NoteContent::urlToOpen(bool /*with*/)
 {
-    return (useFile() ? KUrl(fullPath()) : KUrl());
+    return (useFile() ? QUrl(fullPath()) : QUrl());
 }
 
 void NoteContent::setFileName(const QString &fileName)
@@ -199,10 +194,10 @@ NoteType::Id CrossReferenceContent::type() const
 {
     return NoteType::CrossReference;
 }
-NoteType::Id LauncherContent::type() const
-{
-    return NoteType::Launcher;
-}
+//NoteType::Id LauncherContent::type() const
+//{
+//    return NoteType::Launcher;
+//}
 NoteType::Id ColorContent::type() const
 {
     return NoteType::Color;
@@ -244,10 +239,10 @@ QString CrossReferenceContent::typeName() const
 {
     return tr("Cross Reference");
 }
-QString LauncherContent::typeName() const
-{
-    return tr("Launcher");
-}
+//QString LauncherContent::typeName() const
+//{
+//    return tr("Launcher");
+//}
 QString ColorContent::typeName() const
 {
     return tr("Color");
@@ -289,10 +284,10 @@ QString CrossReferenceContent::lowerTypeName() const
 {
     return "cross_reference";
 }
-QString LauncherContent::lowerTypeName() const
-{
-    return "launcher";
-}
+//QString LauncherContent::lowerTypeName() const
+//{
+//    return "launcher";
+//}
 QString ColorContent::lowerTypeName() const
 {
     return "color";
@@ -318,15 +313,15 @@ QString HtmlContent::toText(const QString &/*cuttedFullPath*/)
 QString LinkContent::toText(const QString &/*cuttedFullPath*/)
 {
     if (autoTitle())
-        return url().prettyUrl();
+        return url().toString();
     else if (title().isEmpty() && url().isEmpty())
         return "";
     else if (url().isEmpty())
         return title();
     else if (title().isEmpty())
-        return url().prettyUrl();
+        return url().toString();
     else
-        return QString("%1 <%2>").arg(title(), url().prettyUrl());
+        return QString("%1 <%2>").arg(title(), url().toString());
 }
 QString CrossReferenceContent::toText(const QString &/*cuttedFullPath*/)
 {
@@ -335,9 +330,9 @@ QString CrossReferenceContent::toText(const QString &/*cuttedFullPath*/)
     else if (url().isEmpty())
         return title();
     else if (title().isEmpty())
-        return url().prettyUrl();
+        return url().toString();
     else
-        return QString("%1 <%2>").arg(title(), url().prettyUrl());
+        return QString("%1 <%2>").arg(title(), url().toString());
 }
 QString ColorContent::toText(const QString &/*cuttedFullPath*/)
 {
@@ -381,18 +376,18 @@ QString FileContent::toHtml(const QString &/*imageName*/, const QString &cuttedF
 
 QString LinkContent::toHtml(const QString &/*imageName*/, const QString &/*cuttedFullPath*/)
 {
-    return QString("<a href=\"%1\">%2</a>").arg(url().prettyUrl(), title());
+    return QString("<a href=\"%1\">%2</a>").arg(url().toString(), title());
 } // With the icon?
 
 QString CrossReferenceContent::toHtml(const QString &/*imageName*/, const QString &/*cuttedFullPath*/)
 {
-    return QString("<a href=\"%1\">%2</a>").arg(url().prettyUrl(), title());
+    return QString("<a href=\"%1\">%2</a>").arg(url().toString(), title());
 } // With the icon?
 
-QString LauncherContent::toHtml(const QString &/*imageName*/, const QString &cuttedFullPath)
-{
-    return QString("<a href=\"%1\">%2</a>").arg((cuttedFullPath.isEmpty() ? fullPath() : cuttedFullPath), name());
-} // With the icon?
+//QString LauncherContent::toHtml(const QString &/*imageName*/, const QString &cuttedFullPath)
+//{
+//    return QString("<a href=\"%1\">%2</a>").arg((cuttedFullPath.isEmpty() ? fullPath() : cuttedFullPath), name());
+//} // With the icon?
 
 QString ColorContent::toHtml(const QString &/*imageName*/, const QString &/*cuttedFullPath*/)
 {
@@ -413,35 +408,35 @@ QPixmap AnimationContent::toPixmap()
     return m_movie->currentPixmap();
 }
 
-void NoteContent::toLink(KUrl *url, QString *title, const QString &cuttedFullPath)
+void NoteContent::toLink(QUrl *url, QString *title, const QString &cuttedFullPath)
 {
     if (useFile()) {
-        *url   = KUrl(cuttedFullPath.isEmpty() ? fullPath() : cuttedFullPath);
+        *url   = QUrl(cuttedFullPath.isEmpty() ? fullPath() : cuttedFullPath);
         *title = (cuttedFullPath.isEmpty() ? fullPath() : cuttedFullPath);
     } else {
-        *url   = KUrl();
+        *url   = QUrl();
         title->clear();
     }
 }
-void LinkContent::toLink(KUrl *url, QString *title, const QString &/*cuttedFullPath*/)
+void LinkContent::toLink(QUrl *url, QString *title, const QString &/*cuttedFullPath*/)
 {
     *url   = this->url();
     *title = this->title();
 }
-void CrossReferenceContent::toLink(KUrl *url, QString *title, const QString &/*cuttedFullPath*/)
+void CrossReferenceContent::toLink(QUrl *url, QString *title, const QString &/*cuttedFullPath*/)
 {
     *url   = this->url();
     *title = this->title();
 }
 
-void LauncherContent::toLink(KUrl *url, QString *title, const QString &cuttedFullPath)
+//void LauncherContent::toLink(QUrl *url, QString *title, const QString &cuttedFullPath)
+//{
+//    *url   = QUrl(cuttedFullPath.isEmpty() ? fullPath() : cuttedFullPath);
+//    *title = name();
+//}
+void UnknownContent::toLink(QUrl *url, QString *title, const QString &/*cuttedFullPath*/)
 {
-    *url   = KUrl(cuttedFullPath.isEmpty() ? fullPath() : cuttedFullPath);
-    *title = name();
-}
-void UnknownContent::toLink(KUrl *url, QString *title, const QString &/*cuttedFullPath*/)
-{
-    *url   = KUrl();
+    *url   = QUrl();
     *title = QString();
 }
 
@@ -477,10 +472,10 @@ bool CrossReferenceContent::useFile() const
 {
     return false;
 }
-bool LauncherContent::useFile() const
-{
-    return true;
-}
+//bool LauncherContent::useFile() const
+//{
+//    return true;
+//}
 bool ColorContent::useFile() const
 {
     return false;
@@ -522,10 +517,10 @@ bool CrossReferenceContent::canBeSavedAs() const
 {
     return true;
 }
-bool LauncherContent::canBeSavedAs() const
-{
-    return true;
-}
+//bool LauncherContent::canBeSavedAs() const
+//{
+//    return true;
+//}
 bool ColorContent::canBeSavedAs() const
 {
     return false;
@@ -567,10 +562,10 @@ QString CrossReferenceContent::saveAsFilters() const
 {
     return "*";
 } // TODO: idem File + If isDir() const: return
-QString LauncherContent::saveAsFilters() const
-{
-    return "application/x-desktop";
-}
+//QString LauncherContent::saveAsFilters() const
+//{
+//    return "application/x-desktop";
+//}
 QString ColorContent::saveAsFilters() const
 {
     return "";
@@ -606,16 +601,16 @@ bool FileContent::match(const FilterData &data)
 }
 bool LinkContent::match(const FilterData &data)
 {
-    return title().contains(data.string) || url().prettyUrl().contains(data.string);
+    return title().contains(data.string) || url().toString().contains(data.string);
 }
 bool CrossReferenceContent::match(const FilterData &data)
 {
-    return title().contains(data.string) || url().prettyUrl().contains(data.string);
+    return title().contains(data.string) || url().toString().contains(data.string);
 }
-bool LauncherContent::match(const FilterData &data)
-{
-    return exec().contains(data.string) || name().contains(data.string);
-}
+//bool LauncherContent::match(const FilterData &data)
+//{
+//    return exec().contains(data.string) || name().contains(data.string);
+//}
 bool ColorContent::match(const FilterData &data)
 {
     return color().name().contains(data.string);
@@ -657,10 +652,10 @@ QString CrossReferenceContent::editToolTipText() const
 {
     return tr("Edit this cross reference");
 }
-QString LauncherContent::editToolTipText() const
-{
-    return tr("Edit this launcher");
-}
+//QString LauncherContent::editToolTipText() const
+//{
+//    return tr("Edit this launcher");
+//}
 QString ColorContent::editToolTipText() const
 {
     return tr("Edit this color");
@@ -702,10 +697,10 @@ QString CrossReferenceContent::cssClass() const
 {
     return "cross_reference";
 }
-QString LauncherContent::cssClass() const
-{
-    return "launcher";
-}
+//QString LauncherContent::cssClass() const
+//{
+//    return "launcher";
+//}
 QString ColorContent::cssClass() const
 {
     return ""     ;
@@ -743,10 +738,10 @@ void CrossReferenceContent::fontChanged()
 {
     setCrossReference(url(), title(), icon());
 }
-void LauncherContent::fontChanged()
-{
-    setLauncher(name(), icon(), exec());
-}
+//void LauncherContent::fontChanged()
+//{
+//    setLauncher(name(), icon(), exec());
+//}
 void ColorContent::fontChanged()
 {
     setColor(color());
@@ -913,14 +908,14 @@ QPixmap FileContent::feedbackPixmap(qreal width, qreal height)
     return m_linkDisplayItem.linkDisplay().feedbackPixmap(width, height, palette, /*isDefaultColor=*/note()->textColor() == basket()->textColor());
 }
 
-QPixmap LauncherContent::feedbackPixmap(qreal width, qreal height)
-{
-    QPalette palette;
-    palette = basket()->palette();
-    palette.setColor(QPalette::WindowText,       note()->textColor());
-    palette.setColor(QPalette::Background, note()->backgroundColor().dark(FEEDBACK_DARKING));
-    return m_linkDisplayItem.linkDisplay().feedbackPixmap(width, height, palette, /*isDefaultColor=*/note()->textColor() == basket()->textColor());
-}
+//QPixmap LauncherContent::feedbackPixmap(qreal width, qreal height)
+//{
+//    QPalette palette;
+//    palette = basket()->palette();
+//    palette.setColor(QPalette::WindowText,       note()->textColor());
+//    palette.setColor(QPalette::Background, note()->backgroundColor().dark(FEEDBACK_DARKING));
+//    return m_linkDisplayItem.linkDisplay().feedbackPixmap(width, height, palette, /*isDefaultColor=*/note()->textColor() == basket()->textColor());
+//}
 
 QPixmap UnknownContent::feedbackPixmap(qreal width, qreal height)
 {
@@ -1423,7 +1418,7 @@ void AnimationContent::exportToHTML(HTMLExporter *exporter, int /*indent*/)
  */
 
 FileContent::FileContent(Note *parent, const QString &fileName)
-        : NoteContent(parent, fileName), m_linkDisplayItem(parent), m_previewJob(0)
+        : NoteContent(parent, fileName), m_linkDisplayItem(parent)//, m_previewJob(0)
 {
     basket()->addWatchedFile(fullPath());
     setFileName(fileName); // FIXME: TO THAT HERE BECAUSE NoteContent() constructor seems to don't be able to call virtual methods???
@@ -1454,36 +1449,36 @@ bool FileContent::loadFromFile(bool /*lazyLoad*/)
 void FileContent::toolTipInfos(QStringList *keys, QStringList *values)
 {
     // Get the size of the file:
-    uint size = QFileInfo(fullPath()).size();
-    QString humanFileSize = KIO::convertSize((KIO::filesize_t)size);
+//    uint size = QFileInfo(fullPath()).size();
+//    QString humanFileSize = KIO::convertSize((KIO::filesize_t)size);
 
-    keys->append(tr("Size"));
-    values->append(humanFileSize);
+//    keys->append(tr("Size"));
+//    values->append(humanFileSize);
 
-    KMimeType::Ptr mime = KMimeType::findByUrl(KUrl(fullPath()));
-    if (mime) {
-        keys->append(tr("Type"));
-        values->append(mime->comment());
-    }
+//    KMimeType::Ptr mime = KMimeType::findByUrl(QUrl(fullPath()));
+//    if (mime) {
+//        keys->append(tr("Type"));
+//        values->append(mime->comment());
+//    }
 
-    KFileMetaInfo info = KFileMetaInfo(KUrl(fullPath()));
-    if (info.isValid()) {
-        QStringList groups = info.preferredKeys();
-        int i = 0;
-        for (QStringList::Iterator it = groups.begin();
-                i < 6 && it != groups.end();
-                ++it) {
-            KFileMetaInfoItem item = info.item(*it);
-            QString value = item.value().toString();
-            if (!value.isEmpty()) {
-                keys->append(item.name());
-                value = QString("%1%2%3").arg(item.prefix(), value,
-                                              item.suffix());
-                values->append(value);
-                ++i;
-            }
-        }
-    }
+//    KFileMetaInfo info = KFileMetaInfo(QUrl(fullPath())); TODO qt5
+//    if (info.isValid()) {
+//        QStringList groups = info.preferredKeys();
+//        int i = 0;
+//        for (QStringList::Iterator it = groups.begin();
+//                i < 6 && it != groups.end();
+//                ++it) {
+//            KFileMetaInfoItem item = info.item(*it);
+//            QString value = item.value().toString();
+//            if (!value.isEmpty()) {
+//                keys->append(item.name());
+//                value = QString("%1%2%3").arg(item.prefix(), value,
+//                                              item.suffix());
+//                values->append(value);
+//                ++i;
+//            }
+//        }
+//    }
 }
 
 int FileContent::zoneAt(const QPointF &pos)
@@ -1538,7 +1533,7 @@ QString FileContent::messageWhenOpening(OpenMessage where)
 void FileContent::setFileName(const QString &fileName)
 {
     NoteContent::setFileName(fileName);
-    KUrl url = KUrl(fullPath());
+    QUrl url = QUrl(fullPath());
     if (linkLook()->previewEnabled())
         m_linkDisplayItem.linkDisplay().setLink(fileName, NoteFactory::iconForURL(url),            linkLook(), note()->font()); // FIXME: move iconForURL outside of NoteFactory !!!!!
     else
@@ -1554,41 +1549,41 @@ void FileContent::linkLookChanged()
     //startFetchingUrlPreview();
 }
 
-void FileContent::newPreview(const KFileItem&, const QPixmap &preview)
+void FileContent::newPreview(/*const KFileItem&, */const QPixmap &preview)
 {
     LinkLook *linkLook = this->linkLook();
-    m_linkDisplayItem.linkDisplay().setLink(fileName(), NoteFactory::iconForURL(KUrl(fullPath())), (linkLook->previewEnabled() ? preview : QPixmap()), linkLook, note()->font());
+    m_linkDisplayItem.linkDisplay().setLink(fileName(), NoteFactory::iconForURL(QUrl(fullPath())), (linkLook->previewEnabled() ? preview : QPixmap()), linkLook, note()->font());
     contentChanged(m_linkDisplayItem.linkDisplay().minWidth());
 }
 
-void FileContent::removePreview(const KFileItem& ki)
+void FileContent::removePreview(/*const KFileItem& ki*/)
 {
-    newPreview(ki, QPixmap());
+    newPreview(/*ki,*/ QPixmap());
 }
 
 void FileContent::startFetchingUrlPreview()
 {
-    /*
-    KUrl url(fullPath());
+    QUrl url(fullPath());
     LinkLook *linkLook = this->linkLook();
 
 //  delete m_previewJob;
     if (!url.isEmpty() && linkLook->previewSize() > 0) {
-        KUrl filteredUrl = NoteFactory::filteredURL(url);//KURIFilter::self()->filteredURI(url);
-        KUrl::List urlList;
-        urlList.append(filteredUrl);
-        m_previewJob = KIO::filePreview(urlList, linkLook->previewSize(), linkLook->previewSize(), linkLook->iconSize());
-        connect(m_previewJob, SIGNAL(gotPreview(const KFileItem&, const QPixmap&)), this, SLOT(newPreview(const KFileItem&, const QPixmap&)));
-        connect(m_previewJob, SIGNAL(failed(const KFileItem&)),                     this, SLOT(removePreview(const KFileItem&)));
+//        QUrl filteredUrl = NoteFactory::filteredURL(url);//KURIFilter::self()->filteredURI(url);
+//        QUrl::List urlList;
+//        urlList.append(filteredUrl);
+//        m_previewJob = KIO::filePreview(urlList, linkLook->previewSize(), linkLook->previewSize(), linkLook->iconSize());
+//        connect(m_previewJob, SIGNAL(gotPreview(const KFileItem&, const QPixmap&)), this, SLOT(newPreview(const KFileItem&, const QPixmap&)));
+//        connect(m_previewJob, SIGNAL(failed(const KFileItem&)),                     this, SLOT(removePreview(const KFileItem&)));
+        removePreview();
     }
-    */
+
 }
 
 void FileContent::exportToHTML(HTMLExporter *exporter, int indent)
 {
     QString spaces;
     QString fileName = exporter->copyFile(fullPath(), true);
-    exporter->stream << m_linkDisplayItem.linkDisplay().toHtml(exporter, KUrl(exporter->dataFolderName + fileName), "").replace("\n", "\n" + spaces.fill(' ', indent + 1));
+    exporter->stream << m_linkDisplayItem.linkDisplay().toHtml(exporter, QUrl(exporter->dataFolderName + fileName), "").replace("\n", "\n" + spaces.fill(' ', indent + 1));
 }
 
 /** class SoundContent:
@@ -1652,8 +1647,8 @@ QString SoundContent::messageWhenOpening(OpenMessage where)
 /** class LinkContent:
  */
 
-LinkContent::LinkContent(Note *parent, const KUrl &url, const QString &title, const QString &icon, bool autoTitle, bool autoIcon)
-        : NoteContent(parent), m_linkDisplayItem(parent), m_access_manager(0), m_httpBuff(0), m_previewJob(0)
+LinkContent::LinkContent(Note *parent, const QUrl &url, const QString &title, const QString &icon, bool autoTitle, bool autoIcon)
+        : NoteContent(parent), m_linkDisplayItem(parent), m_access_manager(0), m_httpBuff(0)//, m_previewJob(0)
 {
     setLink(url, title, icon, autoTitle, autoIcon);
     if(parent)
@@ -1681,7 +1676,7 @@ void LinkContent::saveToNode(QDomDocument &doc, QDomElement &content)
     content.setAttribute("icon",       icon());
     content.setAttribute("autoTitle", (autoTitle() ? "true" : "false"));
     content.setAttribute("autoIcon", (autoIcon()  ? "true" : "false"));
-    QDomText textNode = doc.createTextNode(url().prettyUrl());
+    QDomText textNode = doc.createTextNode(url().toString());
     content.appendChild(textNode);
 }
 
@@ -1689,7 +1684,7 @@ void LinkContent::saveToNode(QDomDocument &doc, QDomElement &content)
 void LinkContent::toolTipInfos(QStringList *keys, QStringList *values)
 {
     keys->append(tr("Target"));
-    values->append(m_url.prettyUrl());
+    values->append(m_url.toString());
 }
 
 int LinkContent::zoneAt(const QPointF &pos)
@@ -1724,13 +1719,13 @@ Qt::CursorShape LinkContent::cursorFromZone(int zone) const
 QString LinkContent::statusBarMessage(int zone)
 {
     if (zone == Note::Custom0 || zone == Note::Content)
-        return m_url.prettyUrl();
+        return m_url.toString();
     else
         return "";
 }
 
 
-KUrl LinkContent::urlToOpen(bool /*with*/)
+QUrl LinkContent::urlToOpen(bool /*with*/)
 {
     return NoteFactory::filteredURL(url());//KURIFilter::self()->filteredURI(url());
 }
@@ -1751,11 +1746,11 @@ QString LinkContent::messageWhenOpening(OpenMessage where)
     }
 }
 
-void LinkContent::setLink(const KUrl &url, const QString &title, const QString &icon, bool autoTitle, bool autoIcon)
+void LinkContent::setLink(const QUrl &url, const QString &title, const QString &icon, bool autoTitle, bool autoIcon)
 {
     m_autoTitle = autoTitle;
     m_autoIcon  = autoIcon;
-    m_url       = NoteFactory::filteredURL(KUrl(url));//KURIFilter::self()->filteredURI(url);
+    m_url       = NoteFactory::filteredURL(QUrl(url));//KURIFilter::self()->filteredURI(url);
     m_title     = (autoTitle ? NoteFactory::titleForURL(m_url) : title);
     m_icon      = (autoIcon  ? NoteFactory::iconForURL(m_url)  : icon);
 
@@ -1775,16 +1770,16 @@ void LinkContent::linkLookChanged()
     fontChanged();
 }
 
-void LinkContent::newPreview(const KFileItem&, const QPixmap &preview)
+void LinkContent::newPreview(/*const KFileItem&, */const QPixmap &preview)
 {
     LinkLook *linkLook = LinkLook::lookForURL(url());
     m_linkDisplayItem.linkDisplay().setLink(title(), icon(), (linkLook->previewEnabled() ? preview : QPixmap()), linkLook, note()->font());
     contentChanged(m_linkDisplayItem.linkDisplay().minWidth());
 }
 
-void LinkContent::removePreview(const KFileItem& ki)
+void LinkContent::removePreview(/*const KFileItem& ki*/)
 {
-    newPreview(ki, QPixmap());
+    newPreview(/*ki, */QPixmap());
 }
 
 // QHttp slots for getting link title
@@ -1845,14 +1840,14 @@ void LinkContent::httpDone(QNetworkReply* reply) {
 
 void LinkContent::startFetchingLinkTitle()
 {
-    KUrl newUrl = this->url();
+    QUrl newUrl = this->url();
 
     //If this is not an HTTP request, just ignore it.
-    if (newUrl.protocol() == "http") {
+    if (newUrl.scheme() == "http") {
 
         //If we have no access_manager, create one.
         if (m_access_manager == 0) {
-            m_access_manager = new KIO::Integration::AccessManager(this);
+            m_access_manager = new QNetworkAccessManager(this);
             connect(m_access_manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(httpDone(QNetworkReply*)));
         }
 
@@ -1861,7 +1856,7 @@ void LinkContent::startFetchingLinkTitle()
             newUrl.setPort(80);
 
         //If no path or query part, default to /
-        if (newUrl.encodedPathAndQuery(KUrl::AddTrailingSlash).isEmpty())
+        if (newUrl.encodedPath().isEmpty())
             newUrl.setPath("/");
 
         //Issue request
@@ -1873,17 +1868,18 @@ void LinkContent::startFetchingLinkTitle()
 // Code dupicated from FileContent::startFetchingUrlPreview()
 void LinkContent::startFetchingUrlPreview()
 {
-    KUrl url = this->url();
+    QUrl url = this->url();
     LinkLook *linkLook = LinkLook::lookForURL(this->url());
 
 //  delete m_previewJob;
     if (!url.isEmpty() && linkLook->previewSize() > 0) {
-        KUrl filteredUrl = NoteFactory::filteredURL(url);//KURIFilter::self()->filteredURI(url);
-        KUrl::List urlList;
-        urlList.append(filteredUrl);
-        m_previewJob = KIO::filePreview(urlList, linkLook->previewSize(), linkLook->previewSize(), linkLook->iconSize());
-        connect(m_previewJob, SIGNAL(gotPreview(const KFileItem&, const QPixmap&)), this, SLOT(newPreview(const KFileItem&, const QPixmap&)));
-        connect(m_previewJob, SIGNAL(failed(const KFileItem&)),                     this, SLOT(removePreview(const KFileItem&)));
+//        QUrl filteredUrl = NoteFactory::filteredURL(url);//KURIFilter::self()->filteredURI(url); TODO create preview frame
+//        QUrl::List urlList;
+//        urlList.append(filteredUrl);
+//        m_previewJob = KIO::filePreview(urlList, linkLook->previewSize(), linkLook->previewSize(), linkLook->iconSize());
+//        connect(m_previewJob, SIGNAL(gotPreview(const KFileItem&, const QPixmap&)), this, SLOT(newPreview(const KFileItem&, const QPixmap&)));
+//        connect(m_previewJob, SIGNAL(failed(const KFileItem&)),                     this, SLOT(removePreview(const KFileItem&)));
+        removePreview();
     }
 }
 
@@ -1893,16 +1889,16 @@ void LinkContent::exportToHTML(HTMLExporter *exporter, int indent)
 
 // TODO:
 //  // Append address (useful for print version of the page/basket):
-//  if (exportData.formatForImpression && (!autoTitle() && title() != NoteFactory::titleForURL(url().prettyUrl()))) {
+//  if (exportData.formatForImpression && (!autoTitle() && title() != NoteFactory::titleForURL(url().toString()))) {
 //      // The address is on a new line, unless title is empty (empty lines was replaced by &nbsp;):
 //      if (linkTitle == " "/*"&nbsp;"*/)
-//          linkTitle = url().prettyUrl()/*""*/;
+//          linkTitle = url().toString()/*""*/;
 //      else
-//          linkTitle = linkTitle + " <" + url().prettyUrl() + ">"/*+ "<br>"*/;
-//      //linkTitle += "<i>" + url().prettyUrl() + "</i>";
+//          linkTitle = linkTitle + " <" + url().toString() + ">"/*+ "<br>"*/;
+//      //linkTitle += "<i>" + url().toString() + "</i>";
 //  }
 
-    KUrl linkURL;
+    QUrl linkURL;
     /*
         QFileInfo fInfo(url().path());
     //  DEBUG_WIN << url().path()
@@ -1929,7 +1925,7 @@ void LinkContent::exportToHTML(HTMLExporter *exporter, int indent)
 /** class CrossReferenceContent:
  */
 
-CrossReferenceContent::CrossReferenceContent(Note *parent, const KUrl &url, const QString &title, const QString &icon)
+CrossReferenceContent::CrossReferenceContent(Note *parent, const QUrl &url, const QString &title, const QString &icon)
         : NoteContent(parent), m_linkDisplayItem(parent)
 {
     this->setCrossReference(url, title, icon);
@@ -1951,14 +1947,14 @@ void CrossReferenceContent::saveToNode(QDomDocument &doc, QDomElement &content)
 {
     content.setAttribute("title",      title());
     content.setAttribute("icon",       icon());
-    QDomText textNode = doc.createTextNode(url().prettyUrl());
+    QDomText textNode = doc.createTextNode(url().toString());
     content.appendChild(textNode);
 }
 
 void CrossReferenceContent::toolTipInfos(QStringList *keys, QStringList *values)
 {
     keys->append(tr("Target"));
-    values->append(m_url.prettyUrl());
+    values->append(m_url.toString());
 }
 
 int CrossReferenceContent::zoneAt(const QPointF &pos)
@@ -1998,7 +1994,7 @@ QString CrossReferenceContent::statusBarMessage(int zone)
         return "";
 }
 
-KUrl CrossReferenceContent::urlToOpen(bool /*with*/)
+QUrl CrossReferenceContent::urlToOpen(bool /*with*/)
 {
     return m_url;
 }
@@ -2014,15 +2010,15 @@ QString CrossReferenceContent::messageWhenOpening(OpenMessage where)
     }
 }
 
-void CrossReferenceContent::setLink(const KUrl &url, const QString &title, const QString &icon)
+void CrossReferenceContent::setLink(const QUrl &url, const QString &title, const QString &icon)
 {
     this->setCrossReference(url, title, icon);
 }
 
-void CrossReferenceContent::setCrossReference(const KUrl &url, const QString &title, const QString &icon)
+void CrossReferenceContent::setCrossReference(const QUrl &url, const QString &title, const QString &icon)
 {
     m_url = url;
-    m_title = (title.isEmpty() ? url.url() : title);
+    m_title = (title.isEmpty() ? url.toString() : title);
     m_icon = icon;
 
     LinkLook *look = LinkLook::crossReferenceLook;
@@ -2039,7 +2035,7 @@ void CrossReferenceContent::linkLookChanged()
 
 void CrossReferenceContent::exportToHTML(HTMLExporter *exporter, int /*indent*/)
 {
-    QString url = m_url.url();
+    QString url = m_url.toString();
     QString title;
 
     if(url.startsWith(QLatin1String("basket://")))
@@ -2077,124 +2073,131 @@ void CrossReferenceContent::exportToHTML(HTMLExporter *exporter, int /*indent*/)
 /** class LauncherContent:
  */
 
-LauncherContent::LauncherContent(Note *parent, const QString &fileName)
-        : NoteContent(parent, fileName), m_linkDisplayItem(parent)
-{
-    basket()->addWatchedFile(fullPath());
-    loadFromFile(/*lazyLoad=*/false);
-    if(parent)
-    {
-      parent->addToGroup(&m_linkDisplayItem);
-      m_linkDisplayItem.setPos(parent->contentX(),Note::NOTE_MARGIN);
-    }
-}
+//LauncherContent::LauncherContent(Note *parent, const QString &fileName)
+//        : NoteContent(parent, fileName), m_linkDisplayItem(parent)
+//{
+//    basket()->addWatchedFile(fullPath());
+//    loadFromFile(/*lazyLoad=*/false);
+//    if(parent)
+//    {
+//      parent->addToGroup(&m_linkDisplayItem);
+//      m_linkDisplayItem.setPos(parent->contentX(),Note::NOTE_MARGIN);
+//    }
+//}
 
-LauncherContent::~LauncherContent()
-{
-    if(note()) note()->removeFromGroup(&m_linkDisplayItem);
-}
+//LauncherContent::~LauncherContent()
+//{
+//    if(note()) note()->removeFromGroup(&m_linkDisplayItem);
+//}
 
-qreal LauncherContent::setWidthAndGetHeight(qreal width)
-{
-    m_linkDisplayItem.linkDisplay().setWidth(width);
-    return m_linkDisplayItem.linkDisplay().height();
-}
+//qreal LauncherContent::setWidthAndGetHeight(qreal width)
+//{
+////    m_linkDisplayItem.linkDisplay().setWidth(width);
+////    return m_linkDisplayItem.linkDisplay().height();
+//    return 64; // TODO fix crash
+//}
 
-bool LauncherContent::loadFromFile(bool /*lazyLoad*/) // TODO: saveToFile() ?? Is it possible?
-{
-    DEBUG_WIN << "Loading LauncherContent From " + basket()->folderName() + fileName();
-    KService service(fullPath());
-    setLauncher(service.name(), service.icon(), service.exec());
-    return true;
-}
+//bool LauncherContent::loadFromFile(bool /*lazyLoad*/) // TODO: saveToFile() ?? Is it possible?
+//{
+//    DEBUG_WIN << "Loading LauncherContent From " + basket()->folderName() + fileName();
+//    QProcess *process = new QProcess();
+//    process->start(fullPath());
+//    return true;
+//}
 
 
-void LauncherContent::toolTipInfos(QStringList *keys, QStringList *values)
-{
-    KService service(fullPath());
+//void LauncherContent::toolTipInfos(QStringList *keys, QStringList *values)
+//{
+////    KService service(fullPath()); // TODO no idea what this does
 
-    QString exec = service.exec();
-    if (service.terminal())
-        exec = tr("%1 <i>(run in terminal)</i>").arg(exec);
+////    QString exec = service.exec();
+////    if (service.terminal())
+////        exec = tr("%1 <i>(run in terminal)</i>").arg(exec);
 
-    if (!service.comment().isEmpty() && service.comment() != service.name()) {
-        keys->append(tr("Comment"));
-        values->append(service.comment());
-    }
+////    if (!service.comment().isEmpty() && service.comment() != service.name()) {
+////        keys->append(tr("Comment"));
+////        values->append(service.comment());
+////    }
 
-    keys->append(tr("Command"));
-    values->append(exec);
-}
+////    keys->append(tr("Command"));
+////    values->append(exec);
+//}
 
-int LauncherContent::zoneAt(const QPointF &pos)
-{
-    return (m_linkDisplayItem.linkDisplay().iconButtonAt(pos) ? 0 : Note::Custom0);
-}
+//int LauncherContent::zoneAt(const QPointF &pos)
+//{
+//    return (m_linkDisplayItem.linkDisplay().iconButtonAt(pos) ? 0 : Note::Custom0);
+//}
 
-QRectF LauncherContent::zoneRect(int zone, const QPointF &/*pos*/)
-{
-    QRectF linkRect = m_linkDisplayItem.linkDisplay().iconButtonRect();
+//QRectF LauncherContent::zoneRect(int zone, const QPointF &/*pos*/)
+//{
+//    QRectF linkRect = m_linkDisplayItem.linkDisplay().iconButtonRect();
 
-    if (zone == Note::Custom0)
-        return QRectF(linkRect.width(), 0, note()->width(), note()->height()); // Too wide and height, but it will be clipped by Note::zoneRect()
-    else if (zone == Note::Content)
-        return linkRect;
-    else
-        return QRectF();
-}
+//    if (zone == Note::Custom0)
+//        return QRectF(linkRect.width(), 0, note()->width(), note()->height()); // Too wide and height, but it will be clipped by Note::zoneRect()
+//    else if (zone == Note::Content)
+//        return linkRect;
+//    else
+//        return QRectF();
+//}
 
-QString LauncherContent::zoneTip(int zone)
-{
-    return (zone == Note::Custom0 ? tr("Launch this application") : QString());
-}
+//QString LauncherContent::zoneTip(int zone)
+//{
+//    return (zone == Note::Custom0 ? tr("Launch this application") : QString());
+//}
 
-Qt::CursorShape LauncherContent::cursorFromZone(int zone) const
-{
-    if (zone == Note::Custom0)
-        return Qt::PointingHandCursor;
-    return Qt::ArrowCursor;
-}
+//Qt::CursorShape LauncherContent::cursorFromZone(int zone) const
+//{
+//    if (zone == Note::Custom0)
+//        return Qt::PointingHandCursor;
+//    return Qt::ArrowCursor;
+//}
 
-KUrl LauncherContent::urlToOpen(bool with)
-{
-    if (KService(fullPath()).exec().isEmpty())
-        return KUrl();
+//QUrl LauncherContent::urlToOpen(bool with)
+//{
+//    QProcess *newProcess = new QProcess();
+//    newProcess->start(fullPath());
+//    newProcess->waitForFinished();
+//    if (newProcess->exitStatus() == QProcess::NormalExit)
+//        return fullPath();
+//    else
+//        return QUrl();
+//}
 
-    return (with ? KUrl() : KUrl(fullPath())); // Can open the appliation, but not with another application :-)
-}
+//QString LauncherContent::messageWhenOpening(OpenMessage where)
+//{
+//    QProcess *newProcess = new QProcess();
+//    newProcess->start(fullPath());
+//    newProcess->waitForFinished();
+//    if (newProcess->exitStatus() == QProcess::CrashExit)
+//        return tr("The launcher have no command to run.");
 
-QString LauncherContent::messageWhenOpening(OpenMessage where)
-{
-    if (KService(fullPath()).exec().isEmpty())
-        return tr("The launcher have no command to run.");
+//    switch (where) {
+//    case OpenOne:               return tr("Launching application...");
+//    case OpenSeveral:           return tr("Launching applications...");
+//    case OpenOneWith:
+//    case OpenSeveralWith:
+//    case OpenOneWithDialog:
+//    case OpenSeveralWithDialog:            // TODO: "Open this application with this file as parameter"?
+//    default:                    return "";
+//    }
+//}
 
-    switch (where) {
-    case OpenOne:               return tr("Launching application...");
-    case OpenSeveral:           return tr("Launching applications...");
-    case OpenOneWith:
-    case OpenSeveralWith:
-    case OpenOneWithDialog:
-    case OpenSeveralWithDialog:            // TODO: "Open this application with this file as parameter"?
-    default:                    return "";
-    }
-}
+//void LauncherContent::setLauncher(const QString &name, const QString &icon, const QString &exec)
+//{
+//    m_name = name;
+//    m_icon = icon;
+//    m_exec = exec;
 
-void LauncherContent::setLauncher(const QString &name, const QString &icon, const QString &exec)
-{
-    m_name = name;
-    m_icon = icon;
-    m_exec = exec;
+//    m_linkDisplayItem.linkDisplay().setLink(name, icon, LinkLook::launcherLook, note()->font());
+//    contentChanged(m_linkDisplayItem.linkDisplay().minWidth());
+//}
 
-    m_linkDisplayItem.linkDisplay().setLink(name, icon, LinkLook::launcherLook, note()->font());
-    contentChanged(m_linkDisplayItem.linkDisplay().minWidth());
-}
-
-void LauncherContent::exportToHTML(HTMLExporter *exporter, int indent)
-{
-    QString spaces;
-    QString fileName = exporter->copyFile(fullPath(), /*createIt=*/true);
-    exporter->stream << m_linkDisplayItem.linkDisplay().toHtml(exporter, KUrl(exporter->dataFolderName + fileName), "").replace("\n", "\n" + spaces.fill(' ', indent + 1));
-}
+//void LauncherContent::exportToHTML(HTMLExporter *exporter, int indent)
+//{
+//    QString spaces;
+//    QString fileName = exporter->copyFile(fullPath(), /*createIt=*/true);
+//    exporter->stream << m_linkDisplayItem.linkDisplay().toHtml(exporter, QUrl(exporter->dataFolderName + fileName), "").replace("\n", "\n" + spaces.fill(' ', indent + 1));
+//}
 
 /** class ColorItem:
  */
@@ -2662,13 +2665,13 @@ void NoteFactory__loadNode(const QDomElement &content, const QString &lowerTypeN
     else if (lowerTypeName == "file")      new FileContent(parent, content.text());
     else if (lowerTypeName == "link") {
         bool autoTitle = content.attribute("title") == content.text();
-        bool autoIcon  = content.attribute("icon")  == NoteFactory::iconForURL(KUrl(content.text()));
+        bool autoIcon  = content.attribute("icon")  == NoteFactory::iconForURL(QUrl(content.text()));
         autoTitle = XMLWork::trueOrFalse(content.attribute("autoTitle"), autoTitle);
         autoIcon  = XMLWork::trueOrFalse(content.attribute("autoIcon"),  autoIcon);
-        new LinkContent(parent, KUrl(content.text()), content.attribute("title"), content.attribute("icon"), autoTitle, autoIcon);
+        new LinkContent(parent, QUrl(content.text()), content.attribute("title"), content.attribute("icon"), autoTitle, autoIcon);
     } else if (lowerTypeName == "cross_reference") {
-        new CrossReferenceContent(parent, KUrl(content.text()), content.attribute("title"), content.attribute("icon"));
-    } else if (lowerTypeName == "launcher")  new LauncherContent(parent, content.text());
+        new CrossReferenceContent(parent, QUrl(content.text()), content.attribute("title"), content.attribute("icon"));
+    } //else if (lowerTypeName == "launcher")  new LauncherContent(parent, content.text());
     else if (lowerTypeName == "color")     new ColorContent(parent, QColor(content.text()));
     else if (lowerTypeName == "unknown")   new UnknownContent(parent, content.text());
 }

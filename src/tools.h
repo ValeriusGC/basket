@@ -98,6 +98,10 @@ void deleteMetadataRecursively(const QString &folderOrFile);
   * If @p wantedName alread exist in @p destFolder, a dash and a number will be added before the extenssion.
   * Id there were already such a number in @p wantedName, it is incremented until a free filename is found.
   */
+/** Copy the folder @p folderOrFile recursively.
+  */
+bool copyRecursively(const QString &srcFilePath, const QString &tgtFilePath);
+
 QString fileNameForNewFile(const QString &wantedName, const QString &destFolder);
 
 // Other:

@@ -2294,10 +2294,7 @@ bool BNPView::createNoteFromFile(const QString url, const QString basket)
     BasketScene* b = basketForFolderName(basket);
     if (!b)
         return false;
-    KUrl kurl(url);
-    if (url.isEmpty())
-        return false;
-    Note* n = NoteFactory::copyFileAndLoad(kurl, b);
+    Note* n = NoteFactory::copyFileAndLoad(url, b);
     if (!n)
         return false;
     b->insertCreatedNote(n);

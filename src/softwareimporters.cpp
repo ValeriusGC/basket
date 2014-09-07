@@ -289,7 +289,7 @@ void SoftwareImporters::importKJots()
             if (!buf.isNull() && buf.left(9) == "\\NewEntry") {
 
                 // First create a basket for it:
-                BasketFactory::newBasket(/*icon=*/"kjots", /*name=*/KUrl(file.fileName()).fileName(), /*backgroundImage=*/"", /*backgroundColor=*/QColor(), /*textColor=*/QColor(), /*templateName=*/"1column", /*createIn=*/kjotsBasket);
+                BasketFactory::newBasket(/*icon=*/"kjots", /*name=*/file.fileName(), /*backgroundImage=*/"", /*backgroundColor=*/QColor(), /*textColor=*/QColor(), /*templateName=*/"1column", /*createIn=*/kjotsBasket);
                 BasketScene *basket = Global::bnpView->currentBasket();
                 basket->load();
 
@@ -587,7 +587,7 @@ void SoftwareImporters::importTextFile()
                            );
 
         // First create a basket for it:
-        QString title = QCoreApplication::translate("From TextFile.txt", "From %1").arg(KUrl(fileName).fileName());
+        QString title = QCoreApplication::translate("From TextFile.txt", "From %1").arg(fileName);
         BasketFactory::newBasket(/*icon=*/"txt", title, /*backgroundImage=*/"", /*backgroundColor=*/QColor(), /*textColor=*/QColor(), /*templateName=*/"1column", /*createIn=*/0);
         BasketScene *basket = Global::bnpView->currentBasket();
         basket->load();
