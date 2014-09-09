@@ -34,11 +34,9 @@
 #include <QtGui/QDragEnterEvent>
 #include <QtGui/QClipboard>
 #include <QDebug>
-
-#include <KDE/KLocale>
-#include <KDE/KColorDialog>
-#include <KDE/KStandardShortcut>
-#include <KDE/KGlobalSettings>
+#include <QColorDialog>
+#include <QKeySequence>
+#include <QDesktopWidget>
 
 //#define DEBUG_COLOR_ARRAY
 //#define OUTPUT_GIMP_PALETTE
@@ -198,7 +196,7 @@ void KColorPopup::validate()
         m_selector->setColor(QColor());
     else { // The user want to choose one:
         QColor color = m_selector->effectiveColor();
-        if (KColorDialog::getColor(color, this) == QDialog::Accepted)
+        if (QColorDialog::getColor(color, this) == QDialog::Accepted)
             m_selector->setColor(color);
     }
 }
@@ -638,7 +636,7 @@ void KColorCombo2::showPopup()
         setRainbowPreset();
 
     // Compute where to show the popup:
-    QRect desk = KGlobalSettings::desktopGeometry(this);
+    QRect desk = qApp->desktop()->screenGeometry();
 
     QPoint popupPoint = mapToGlobal(QPoint(0, 0));
 
@@ -688,7 +686,7 @@ void KColorCombo2::showPopup()
 void KColorCombo2::mouseMoveEvent(QMouseEvent *event)
 {
     if ((event->buttons() & Qt::LeftButton) &&
-            (event->pos() - m_dragStartPos).manhattanLength() > KGlobalSettings::dndEventDelay()) {
+            (event->pos() - m_dragStartPos).manhattanLength() > QApplication::startDragDistance()) {
         // Drag color object:
         QMimeData* mimeData = new QMimeData;
         QDrag* colorDrag = new QDrag(this);
@@ -721,11 +719,11 @@ void KColorCombo2::keyPressEvent(QKeyEvent *event)
 {
     QKeySequence key(event->key());
 
-    if (KStandardShortcut::copy().contains(key)) {
+    if (key.toString().contains(QKeySequence(QKeySequence::Copy).toString())) {
         QMimeData *mime = new QMimeData;
         mime->setColorData(effectiveColor());
         QApplication::clipboard()->setMimeData(mime, QClipboard::Clipboard);
-    } else if (KStandardShortcut::paste().contains(key)) {
+    } else if (key.toString().contains(QKeySequence(QKeySequence::Paste).toString())) {
         QColor color;
         color = qvariant_cast<QColor>(QApplication::clipboard()->mimeData(QClipboard::Clipboard)->colorData());
         setColor(color);

@@ -42,6 +42,11 @@
 MainWindow::MainWindow(QWidget *parent)
         : QMainWindow(parent), m_quit(false)
 {
+    if (QIcon::themeName().isEmpty() || QIcon::themeName() == "hicolor")
+        QIcon::setThemeName("oxygen");
+    qDebug() << QIcon::themeSearchPaths();
+    qDebug() << QIcon::themeName();
+
     Global::mainWin = this;
     setupActions();
     setupMenus();
@@ -52,7 +57,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_editToolBar = addToolBar("Edit");
 
     m_baskets = new BNPView(this, "BNPViewApp", this, bar, m_mainToolBar, m_editToolBar);
-    connect(m_baskets,      SIGNAL(setWindowCaption(const QString &)), this, SLOT(setCaption(const QString &)));
+    connect(m_baskets,      SIGNAL(setWindowCaption(const QString &)), this, SLOT(setWindowTitle(const QString &)));
 
     bar->setupStatusBar();
 
@@ -67,8 +72,8 @@ MainWindow::MainWindow(QWidget *parent)
     // Temp, settings
     menuBar()->addAction("Settings", this, SLOT(showSettingsDialog()));
     menuBar()->addAction("About", this, SLOT(showAboutDialog()));
-    connect(m_tagsMenu, SIGNAL(aboutToShow()), Global::bnpView, SLOT(populateTagsMenu(Note*)));
-    connect(m_tagsMenu, SIGNAL(aboutToHide()), Global::bnpView, SLOT(disconnectTagsMenu()));
+//    connect(m_tagsMenu, SIGNAL(aboutToShow()), Global::bnpView, SLOT(populateTagsMenu(Note*)));
+//    connect(m_tagsMenu, SIGNAL(aboutToHide()), Global::bnpView, SLOT(disconnectTagsMenu()));
     ensurePolished();
 }
 

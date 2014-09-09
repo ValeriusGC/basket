@@ -53,27 +53,16 @@
 #include <QtGui/QInputDialog>
 #include <QtGui/QGraphicsProxyWidget>
 #include <QtXml/QDomDocument>
+#include <QFileSystemWatcher>
 #include <QMessageBox>
 #include <QDebug>
 #include <QTextEdit>
-#include <QCoreApplication>
+#include <QApplication>
 #include <QMenu>
-
-#include <KDE/KStyle>
-#include <KDE/KApplication>
-#include <KDE/KColorScheme> // for KStatefulBrush
-#include <KDE/KOpenWithDialog>
-#include <KDE/KService>
-#include <KDE/KLocale>
-#include <KDE/KFileDialog>
-#include <KDE/KAboutData>
-#include <KDE/KSaveFile>
-#include <KDE/KAuthorized>
-#include <KDE/KIconLoader>
-#include <KDE/KRun>
-#include <KDE/KDirWatch>
-
-#include <KIO/CopyJob>
+#include <QFileDialog>
+#include <QDesktopServices>
+#include <QProcess>
+#include <QFileInfo>
 
 #include <stdlib.h>     // rand() function
 
@@ -625,7 +614,7 @@ void BasketScene::loadProperties(const QDomElement &properties)
     QString defaultTextColor       = (textColorSetting().isValid()       ? textColorSetting().name()       : "");
 
     // Load the Properties:
-    QString icon = XMLWork::getElementText(properties, "icon", this->icon());
+    QString icon = XMLWork::getElementText(properties, "icon", "basket");
     QString name = XMLWork::getElementText(properties, "name", basketName());
 
     QDomElement appearance = XMLWork::getElement(properties, "appearance");
@@ -653,7 +642,7 @@ void BasketScene::loadProperties(const QDomElement &properties)
 void BasketScene::saveProperties(QDomDocument &document, QDomElement &properties)
 {
     XMLWork::addElement(document, properties, "name", basketName());
-    XMLWork::addElement(document, properties, "icon", icon());
+    XMLWork::addElement(document, properties, "icon", iconName());
 
     QDomElement appearance = document.createElement("appearance");
     properties.appendChild(appearance);
@@ -702,19 +691,20 @@ void BasketScene::setAppearance(const QString &icon, const QString &name, const 
 {
     unsubscribeBackgroundImages();
 
-    m_icon                   = icon;
+    m_icon                   = QIcon::fromTheme(icon);
+    m_iconName               = icon;
     m_basketName             = name;
     m_backgroundImageName    = backgroundImage;
     m_backgroundColorSetting = backgroundColor;
     m_textColorSetting       = textColor;
 
     // Basket should ALWAYS have an icon (the "basket" icon by default):
-    QPixmap iconTest = KIconLoader::global()->loadIcon(
-                           m_icon, KIconLoader::NoGroup, 16, KIconLoader::DefaultState,
-                           QStringList(), 0L, /*canReturnNull=*/true
-                       );
-    if (iconTest.isNull())
-        m_icon = "basket";
+    if (m_icon.pixmap(16,16).isNull()) // Try local theme first
+    {
+        m_icon = QIcon(Global::savesFolder() + "basket-icons/" + icon); // Try basket icon folder
+        if (QIcon(m_icon).pixmap(16,16).isNull())
+            m_icon = QIcon::fromTheme("basket"); // Fallback to basket icon
+    }
 
     // We don't request the background images if it's not loaded yet (to make the application startup fast).
     // When the basket is loading (because requested by the user: he/she want to access it)
@@ -904,7 +894,7 @@ bool BasketScene::save()
     root.appendChild(notes);
 
     // Write to Disk:
-    if (!saveToFile(fullPath() + ".basket", "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n" + document.toString())) {
+    if (!saveToFile(fullPath() + "basket.xml", "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n" + document.toString())) {
         DEBUG_WIN << "Basket[" + folderName() + "]: <font color=red>FAILED to save</font>!";
         return false;
     }
@@ -954,7 +944,7 @@ void BasketScene::load()
     QString content;
 
     // Load properties
-    if (loadFromFile(fullPath() + ".basket", &content)) {
+    if (loadFromFile(fullPath() + "basket.xml", &content)) {
         doc = new QDomDocument("basket");
         if (! doc->setContent(content)) {
             DEBUG_WIN << "Basket[" + folderName() + "]: <font color=red>FAILED to parse XML</font>!";
@@ -985,7 +975,7 @@ void BasketScene::load()
     QDomElement notes = XMLWork::getElement(docElem, "notes");
     if (notes.isNull())
         notes = XMLWork::getElement(docElem, "items");
-    m_watcher->stopScan();
+    m_watcher->blockSignals(true);
     m_shouldConvertPlainTextNotes = false; // Convert Pre-0.6.0 baskets: plain text notes should be converted to rich text ones once all is loaded!
 
     // Load notes
@@ -993,7 +983,7 @@ void BasketScene::load()
     loadNotes(notes, 0L);
     if (m_shouldConvertPlainTextNotes)
         convertTexts();
-    m_watcher->startScan();
+    m_watcher->blockSignals(false);
 
     signalCountsChanged();
     if (isColumnsLayout()) {
@@ -1172,9 +1162,9 @@ BasketScene::BasketScene(QWidget *parent, const QString &folderName)
     m_view->viewport()->setAutoFillBackground(false); // Do not clear the widget before paintEvent() because we always draw every pixels (faster and flicker-free)
 
     // File Watcher:
-    m_watcher = new KDirWatch(this);
+    m_watcher = new QFileSystemWatcher(this);
 
-    connect(m_watcher,       SIGNAL(dirty(const QString&)),   this, SLOT(watchedFileModified(const QString&)));
+    connect(m_watcher,       SIGNAL(directoryChanged(QString)),   this, SLOT(watchedFileModified(const QString&)));
     //connect(m_watcher,       SIGNAL(deleted(const QString&)), this, SLOT(watchedFileDeleted(const QString&)));
     connect(&m_watcherTimer, SIGNAL(timeout()),               this, SLOT(updateModifiedNotes()));
 
@@ -1215,7 +1205,7 @@ void BasketScene::leaveEvent(QEvent *)
 
 void BasketScene::setFocusIfNotInPopupMenu()
 {
-    if (!kapp->activePopupWidget()) {
+    if (!qApp->activePopupWidget()) {
         if (isDuringEdit())
             m_editor->graphicsWidget()->setFocus();
         else
@@ -1238,7 +1228,7 @@ void BasketScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 
     // Do nothing if we disabled the click some milliseconds sooner.
     // For instance when a popup menu has been closed with click, we should not do action:
-    if (event->button() == Qt::LeftButton && (kapp->activePopupWidget() || m_lastDisableClick.msecsTo(QTime::currentTime()) <= 80)) {
+    if (event->button() == Qt::LeftButton && (qApp->activePopupWidget() || m_lastDisableClick.msecsTo(QTime::currentTime()) <= 80)) {
         doHoverEffects();
         m_noActionOnMouseRelease = true;
         // But we allow to select:
@@ -1663,7 +1653,7 @@ void BasketScene::clickedToInsert(QGraphicsSceneMouseEvent *event, Note *clicked
 {
     Note *note;
     if (event->button() == Qt::MidButton)
-        note = NoteFactory::dropNote(KApplication::clipboard()->mimeData(QClipboard::Selection), this);
+        note = NoteFactory::dropNote(QApplication::clipboard()->mimeData(QClipboard::Selection), this);
     else
         note = NoteFactory::createNoteText("", this);
 
@@ -1910,7 +1900,7 @@ void BasketScene::pasteNote(QClipboard::Mode mode)
         }
         closeEditor();
         unselectAll();
-        Note *note = NoteFactory::dropNote(KApplication::clipboard()->mimeData(mode), this);
+        Note *note = NoteFactory::dropNote(QApplication::clipboard()->mimeData(mode), this);
         if (note) {
             insertCreatedNote(note);
             //unselectAllBut(note);
@@ -2209,8 +2199,7 @@ void BasketScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
             } else if (link.startsWith("basket://")) {
                 emit crossReference(link);
             } else {
-                KRun *run = new KRun(KUrl(link), m_view->window()); //  open the URL.
-                run->setAutoDelete(true);
+                QProcess::execute(link);
             }
             break;
         } // If there is no link, edit note content
@@ -2262,13 +2251,13 @@ void BasketScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 void BasketScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
     // redirect this event to the editor if track mouse event is active
-    if (m_editorTrackMouseEvent && (m_pressPos - event->scenePos()).manhattanLength() > KApplication::startDragDistance()) {
+    if (m_editorTrackMouseEvent && (m_pressPos - event->scenePos()).manhattanLength() > QApplication::startDragDistance()) {
 	m_editor->updateSelection(event->scenePos());	
 	return;
     }
     
     // Drag the notes:
-    if (m_canDrag && (m_pressPos - event->scenePos()).manhattanLength() > KApplication::startDragDistance()) {
+    if (m_canDrag && (m_pressPos - event->scenePos()).manhattanLength() > QApplication::startDragDistance()) {
         m_canDrag          = false;
         m_isSelecting      = false; // Don't draw selection rectangle ater drag!
         m_selectionStarted = false;
@@ -2404,7 +2393,7 @@ void BasketScene::doAutoScrollSelection()
 //        dx = pos.x() - visibleWidth() + AUTO_SCROLL_MARGIN;
 
     if (dx || dy) {
-        kapp->sendPostedEvents(); // Do the repaints, because the scrolling will make the area to repaint to be wrong
+        qApp->sendPostedEvents(); // Do the repaints, because the scrolling will make the area to repaint to be wrong
 //        scrollBy(dx, dy);
         if (!m_autoScrollSelectionTimer.isActive())
             m_autoScrollSelectionTimer.start(AUTO_SCROLL_DELAY);
@@ -2570,7 +2559,7 @@ void BasketScene::doHoverEffects(const QPointF &pos)
     // Don't do hover effects when a popup menu is opened.
     // Primarily because the basket area will only receive mouseEnterEvent and mouveLeaveEvent.
     // It willn't be noticed of mouseMoveEvent, which would result in a apparently broken application state:
-    bool underMouse = !kapp->activePopupWidget();
+    bool underMouse = !qApp->activePopupWidget();
     //if (kapp->activePopupWidget())
     //    underMouse = false;
 
@@ -2584,7 +2573,7 @@ void BasketScene::doHoverEffects(const QPointF &pos)
 
 void BasketScene::mouseEnteredEditorWidget()
 {
-    if (!m_lockedHovering && !kapp->activePopupWidget())
+    if (!m_lockedHovering && !qApp->activePopupWidget())
         doHoverEffects(editedNote(), Note::Content, QPoint());
 }
 
@@ -2648,8 +2637,7 @@ void BasketScene::drawInserter(QPainter &painter, qreal xPainter, qreal yPainter
     int lineY  = (m_inserterGroup && m_inserterTop ? 0 : 2);
     int roundY = (m_inserterGroup && m_inserterTop ? 0 : 1);
 
-    KStatefulBrush statefulBrush(KColorScheme::View, KColorScheme::HoverColor);
-    QColor dark = statefulBrush.brush(palette()).color();
+    QColor dark(Qt::blue);
     QColor light = dark.lighter().lighter();
     if (m_inserterGroup && Settings::groupOnInsertionLine())
         light = Tools::mixColor(light, palette().color(QPalette::Highlight));
@@ -3025,7 +3013,7 @@ void BasketScene::drawForeground ( QPainter * painter, const QRectF & rect )
             label->setAlignment(Qt::AlignTop);
             layout->addWidget(label, 0, 1, 1, 2);
             QLabel* pixmap = new QLabel(m_decryptBox);
-            pixmap->setPixmap(KIconLoader::global()->loadIcon("encrypted", KIconLoader::NoGroup, KIconLoader::SizeHuge));
+            pixmap->setPixmap(QIcon::fromTheme("encrypted").pixmap(64,64));
             layout->addWidget(pixmap, 0, 0, 2, 1);
 
             QSpacerItem* spacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
@@ -3215,16 +3203,16 @@ void BasketScene::popupEmblemMenu(Note *note, int emblemNumber)
     if (tag->countStates() == 1) {
         menu.setTitle(/*SmallIcon(state->icon()), */tag->name());
         QAction* act;
-        act = new QAction(KIcon("edit-delete"), tr("&Remove"), &menu);
+        act = new QAction(QIcon::fromTheme("edit-delete"), tr("&Remove"), &menu);
         act->setData(1);
         menu.addAction(act);
-        act = new QAction(KIcon("configure"),  tr("&Customize..."), &menu);
+        act = new QAction(QIcon::fromTheme("configure"),  tr("&Customize..."), &menu);
         act->setData(2);
         menu.addAction(act);
 
         menu.addSeparator();
 
-        act = new QAction(KIcon("search-filter"),     tr("&Filter by this Tag"), &menu);
+        act = new QAction(QIcon::fromTheme("search-filter"),     tr("&Filter by this Tag"), &menu);
         act->setData(3);
         menu.addAction(act);
     } else {
@@ -3256,13 +3244,13 @@ void BasketScene::popupEmblemMenu(Note *note, int emblemNumber)
         menu.addSeparator();
 
         QAction *act = new QAction(&menu);
-        act->setIcon(KIcon("edit-delete"));
+        act->setIcon(QIcon::fromTheme("edit-delete"));
         act->setText(tr("&Remove"));
         act->setShortcut(sequenceOnDelete ? sequence : QKeySequence());
         act->setData(1);
         menu.addAction(act);
         act = new QAction(
-            KIcon("configure"),
+            QIcon::fromTheme("configure"),
             tr("&Customize..."),
             &menu
         );
@@ -3271,13 +3259,13 @@ void BasketScene::popupEmblemMenu(Note *note, int emblemNumber)
 
         menu.addSeparator();
 
-        act = new QAction(KIcon("search-filter"),
+        act = new QAction(QIcon::fromTheme("search-filter"),
                           tr("&Filter by this Tag"),
                           &menu);
         act->setData(3);
         menu.addAction(act);
         act = new QAction(
-            KIcon("search-filter"),
+            QIcon::fromTheme("search-filter"),
             tr("Filter by this &State"),
             &menu);
         act->setData(4);
@@ -4012,7 +4000,7 @@ void BasketScene::noteDeleteWithoutConfirmation(bool deleteFilesToo)
 
 void BasketScene::doCopy(CopyMode copyMode)
 {
-    QClipboard *cb = KApplication::clipboard();
+    QClipboard *cb = QApplication::clipboard();
     QClipboard::Mode mode = ((copyMode == CopyToSelection) ? QClipboard::Selection : QClipboard::Clipboard);
 
     NoteSelection *selection = selectedNotes();
@@ -4077,7 +4065,7 @@ void BasketScene::noteOpen(Note *note)
     if (!note)
         return;
 
-    KUrl    url     = note->content()->urlToOpen(/*with=*/false);
+    QUrl    url     = note->content()->urlToOpen(/*with=*/false);
     QString message = note->content()->messageWhenOpening(NoteContent::OpenOne /*NoteContent::OpenSeveral*/);
     if (url.isEmpty()) {
         if (message.isEmpty())
@@ -4092,34 +4080,13 @@ void BasketScene::noteOpen(Note *note)
         // Finally do the opening job:
         QString customCommand = note->content()->customOpenCommand();
 
-        if (url.url().startsWith("basket://")) {
-            emit crossReference(url.url());
+        if (url.toString().startsWith("basket://")) {
+            emit crossReference(url.toString());
         } else if (customCommand.isEmpty()) {
-            KRun *run = new KRun(url, m_view->window());
-            run->setAutoDelete(true);
+            QProcess::execute(url.toString());
         } else
-            KRun::run(customCommand, url, m_view->window());
+            QProcess::execute(customCommand);
     }
-}
-
-/** Code from bool KRun::displayOpenWithDialog(const KUrl::List& lst, bool tempFiles)
-  * It does not allow to set a text, so I ripped it to do that:
-  */
-bool KRun__displayOpenWithDialog(const KUrl::List& lst, QWidget *window, bool tempFiles, const QString &text)
-{
-    if (kapp && !KAuthorized::authorizeKAction("openwith")) {
-        QMessageBox::information(window, QString(), QCoreApplication::tr("You are not authorized to open this file.")); // TODO: Better message, tr freeze :-(
-        return false;
-    }
-    KOpenWithDialog l(lst, text, QString::null, 0L);
-    if (l.exec()) {
-        KService::Ptr service = l.service();
-        if (!!service)
-            return KRun::run(*service, lst, window, tempFiles);
-        //kDebug(250) << "No service set, running " << l.text() << endl;
-        return KRun::run(l.text(), lst, window); // TODO handle tempFiles
-    }
-    return false;
 }
 
 void BasketScene::noteOpenWith(Note *note)
@@ -4129,13 +4096,15 @@ void BasketScene::noteOpenWith(Note *note)
     if (!note)
         return;
 
-    KUrl    url     = note->content()->urlToOpen(/*with=*/true);
+    QUrl    url     = note->content()->urlToOpen(/*with=*/true);
     QString message = note->content()->messageWhenOpening(NoteContent::OpenOneWith /*NoteContent::OpenSeveralWith*/);
-    QString text    = note->content()->messageWhenOpening(NoteContent::OpenOneWithDialog /*NoteContent::OpenSeveralWithDialog*/);
     if (url.isEmpty())
         emit postMessage(tr("Unable to open this note.") /*"Unable to open those notes."*/);
-    else if (KRun__displayOpenWithDialog(url, m_view->window(), false, text))
+    else
+    {
+        QDesktopServices::openUrl(url);
         emit postMessage(message); // "Opening link target with..." / "Opening note file with..."
+    }
 }
 
 void BasketScene::noteSaveAs()
@@ -4146,17 +4115,22 @@ void BasketScene::noteSaveAs()
     if (!note)
         return;
 
-    KUrl url = note->content()->urlToOpen(/*with=*/false);
+    QUrl url = note->content()->urlToOpen(/*with=*/false);
+    QFileInfo info = QFileInfo(url.toString());
     if (url.isEmpty())
         return;
 
-    QString fileName = KFileDialog::getSaveFileName(url.fileName(), note->content()->saveAsFilters(), m_view, tr("Save to File"));
+    QString fileName = QFileDialog::getSaveFileName(m_view, tr("Save to File"), info.fileName(), note->content()->saveAsFilters());
     // TODO: Ask to overwrite !
     if (fileName.isEmpty())
         return;
 
     // TODO: Convert format, etc. (use NoteContent::saveAs(fileName))
-    KIO::copy(url, KUrl(fileName));
+    QFile f(fileName);
+    if (f.exists())
+        f.remove();
+    QDir d;
+    d.rename(url.toString(), fileName);
 }
 
 Note* BasketScene::selectedGroup()
@@ -4204,7 +4178,7 @@ Note* BasketScene::lastSelected()
 
 bool BasketScene::convertTexts()
 {
-    m_watcher->stopScan();
+    m_watcher->blockSignals(true);
     bool convertedNotes = false;
 
     if (!isLoaded())
@@ -4216,7 +4190,7 @@ bool BasketScene::convertTexts()
 
     if (convertedNotes)
         save();
-    m_watcher->startScan();
+    m_watcher->blockSignals(false);
     return convertedNotes;
 }
 
@@ -4468,7 +4442,7 @@ Note* BasketScene::noteForFullPath(const QString &path)
 
 void BasketScene::deleteFiles()
 {
-    m_watcher->stopScan();
+    m_watcher->blockSignals(true);
     Tools::deleteRecursively(fullPath());
 }
 
@@ -4968,13 +4942,13 @@ void BasketScene::ensureNoteVisible(Note *note)
 void BasketScene::addWatchedFile(const QString &fullPath)
 {
 //  DEBUG_WIN << "Watcher>Add Monitoring Of : <font color=blue>" + fullPath + "</font>";
-    m_watcher->addFile(fullPath);
+    m_watcher->addPath(fullPath);
 }
 
 void BasketScene::removeWatchedFile(const QString &fullPath)
 {
 //  DEBUG_WIN << "Watcher>Remove Monitoring Of : <font color=blue>" + fullPath + "</font>";
-    m_watcher->removeFile(fullPath);
+    m_watcher->removePath(fullPath);
 }
 
 void BasketScene::watchedFileModified(const QString &fullPath)
@@ -5048,7 +5022,7 @@ bool BasketScene::saveAgain()
 {
     bool result = false;
 
-    m_watcher->stopScan();
+    m_watcher->blockSignals(true);
     // Re-encrypt basket file:
     result = save();
     // Re-encrypt every note files recursively:
@@ -5059,7 +5033,7 @@ bool BasketScene::saveAgain()
                 break;
         }
     }
-    m_watcher->startScan();
+    m_watcher->blockSignals(false);
     return result;
 }
 
@@ -5084,7 +5058,7 @@ bool BasketScene::isEncrypted()
 
 bool BasketScene::isFileEncrypted()
 {
-    QFile file(fullPath() + ".basket");
+    QFile file(fullPath() + "basket.xml");
 
     if (file.open(QIODevice::ReadOnly)) {
         // Should be ASCII anyways
@@ -5195,50 +5169,12 @@ bool BasketScene::saveToFile(const QString& fullPath, const QByteArray& array, u
  * instead.
  */
 /*static*/ bool BasketScene::safelySaveToFile(const QString& fullPath,
-        const QByteArray& array,
-        unsigned long length)
+        const QByteArray& array)
 {
-    // Modulus operandi:
-    // 1. Use KSaveFile to try and save the file
-    // 2. Show a modal dialog (with the error) when bad things happen
-    // 3. We keep trying (at increasing intervals, up until every minute)
-    //    until we finally save the file.
-
-    // The error dialog is static to make sure we never show the dialog twice,
-    static DiskErrorDialog *dialog = 0;
-    static const uint maxDelay = 60 * 1000; // ms
-    uint retryDelay = 1000; // ms
-    bool success = false;
-    do {
-        KSaveFile saveFile(fullPath);
-        if (saveFile.open()) {
-            saveFile.write(array, length);
-            if (saveFile.finalize())
-                success = true;
-        }
-
-        if (!success) {
-            if (!dialog) {
-                dialog = new DiskErrorDialog(tr("Error while saving"),
-                                             saveFile.errorString(),
-                                             kapp->activeWindow());
-            }
-
-            if (!dialog->isVisible())
-                dialog->show();
-
-            static const uint sleepDelay = 50; // ms
-            for (uint i = 0; i < retryDelay / sleepDelay; ++i) {
-                kapp->processEvents();
-            }
-            // Double the retry delay, but don't go over the max.
-            retryDelay = qMin(maxDelay, retryDelay * 2); // ms
-        }
-    } while (!success);
-
-    if (dialog)
-	dialog->deleteLater();
-    dialog = NULL;
+    QFile f(fullPath);
+    f.open(QIODevice::WriteOnly);
+    f.write(array);
+    f.close();
 
     return true; // Guess we can't really return a fail
 }
@@ -5246,12 +5182,7 @@ bool BasketScene::saveToFile(const QString& fullPath, const QByteArray& array, u
 /*static*/ bool BasketScene::safelySaveToFile(const QString& fullPath, const QString& string, bool isLocalEncoding)
 {
     QByteArray bytes = (isLocalEncoding ? string.toLocal8Bit() : string.toUtf8());
-    return safelySaveToFile(fullPath, bytes, bytes.length() - 1);
-}
-
-/*static*/ bool BasketScene::safelySaveToFile(const QString& fullPath, const QByteArray& array)
-{
-    return safelySaveToFile(fullPath, array, array.size());
+    return safelySaveToFile(fullPath, bytes);
 }
 
 void BasketScene::lock()

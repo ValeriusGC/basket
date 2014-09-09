@@ -28,6 +28,7 @@
 
 #include <QtCore/QList>
 #include <QtCore/QString>
+#include <QCoreApplication>
 
 /**
     @author Petri Damsten <damu@iki.fi>
@@ -45,6 +46,7 @@ typedef QList< KGpgKey > KGpgKeyList;
 
 class KGpgMe
 {
+    Q_DECLARE_TR_FUNCTIONS(KGpgMe)
 public:
     KGpgMe();
     ~KGpgMe();

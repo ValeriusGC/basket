@@ -932,7 +932,7 @@ void CrossReferenceEditDialog::generateBasketList(QComboBox *targetList, BasketL
         link.append(bv->folderName().toLower()); //unique ref.
         QStringList data;
         data.append(link);
-        data.append(bv->icon());
+        data.append(bv->iconName());
 
         targetList->addItem(item->icon(0), text, QVariant(data));
 
@@ -1083,10 +1083,10 @@ void InlineEditors::initToolBars(QToolBar *editbar)
                         Global::bnpView->currentBasket()->textColor() :
                         palette().color(QPalette::Text));
 
-    richTextUndo = editbar->addAction(KIcon("edit-undo"), tr("Undo"));
+    richTextUndo = editbar->addAction(QIcon::fromTheme("edit-undo"), tr("Undo"));
     richTextUndo->setCheckable(true);
 
-    richTextRedo = editbar->addAction(KIcon("edit-redo"), tr("Redo"));
+    richTextRedo = editbar->addAction(QIcon::fromTheme("edit-redo"), tr("Redo"));
     richTextRedo->setCheckable(true);
 
     editbar->addSeparator();
@@ -1116,15 +1116,15 @@ void InlineEditors::initToolBars(QToolBar *editbar)
 
     editbar->addSeparator();
 
-    richTextBold = editbar->addAction(KIcon("format-text-bold"), tr("Bold"));
+    richTextBold = editbar->addAction(QIcon::fromTheme("format-text-bold"), tr("Bold"));
     richTextBold->setCheckable(true);
     richTextBold->setShortcut(QKeySequence("Ctrl+B"));
 
-    richTextItalic = editbar->addAction(KIcon("format-text-italic"), tr("Italic"));
+    richTextItalic = editbar->addAction(QIcon::fromTheme("format-text-italic"), tr("Italic"));
     richTextItalic->setCheckable(true);
     richTextItalic->setShortcut(QKeySequence("Ctrl+I"));
 
-    richTextUnderline = editbar->addAction(KIcon("format-text-underline"), tr("Underline"));
+    richTextUnderline = editbar->addAction(QIcon::fromTheme("format-text-underline"), tr("Underline"));
     richTextUnderline->setCheckable(true);
     richTextUnderline->setShortcut(QKeySequence("Ctrl+U"));
 
@@ -1132,28 +1132,28 @@ void InlineEditors::initToolBars(QToolBar *editbar)
     ta = new KToggleAction(ac);
     ac->addAction("richtext_super", ta);
     ta->setText(tr("Superscript"));
-    ta->setIcon(KIcon("text_super"));
+    ta->setIcon(QIcon::fromTheme("text_super"));
     richTextSuper = ta;
 
     ta = new KToggleAction(ac);
     ac->addAction("richtext_sub", ta);
     ta->setText(tr("Subscript"));
-    ta->setIcon(KIcon("text_sub"));
+    ta->setIcon(QIcon::fromTheme("text_sub"));
     richTextSub = ta;
 #endif
 
     editbar->addSeparator();
 
-    richTextLeft = editbar->addAction(KIcon("format-justify-left"), tr("Align Left"));
+    richTextLeft = editbar->addAction(QIcon::fromTheme("format-justify-left"), tr("Align Left"));
     richTextLeft->setCheckable(true);
 
-    richTextCenter = editbar->addAction(KIcon("format-justify-center"), tr("Centered"));
+    richTextCenter = editbar->addAction(QIcon::fromTheme("format-justify-center"), tr("Centered"));
     richTextCenter->setCheckable(true);
 
-    richTextRight = editbar->addAction(KIcon("format-justify-right"), tr("Align Right"));
+    richTextRight = editbar->addAction(QIcon::fromTheme("format-justify-right"), tr("Align Right"));
     richTextRight->setCheckable(true);
 
-    richTextJustified = editbar->addAction(KIcon("format-justify-fill"), tr("Justified"));
+    richTextJustified = editbar->addAction(QIcon::fromTheme("format-justify-fill"), tr("Justified"));
     richTextJustified->setCheckable(true);
 
     disableRichTextToolBar();

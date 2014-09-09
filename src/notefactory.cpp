@@ -524,13 +524,13 @@ Note* NoteFactory::dropURLs(QList<QUrl> urls, BasketScene *parent, Qt::DropActio
         if (shouldAsk) {
             QMenu menu(parent->graphicsView());
             QList<QAction *> actList;
-            actList << new QAction(KIcon("go-jump"),
+            actList << new QAction(QIcon::fromTheme("go-jump"),
                                    QCoreApplication::tr("&Move Here\tShift"),
                                    &menu)
-            << new QAction(KIcon("edit-copy"),
+            << new QAction(QIcon::fromTheme("edit-copy"),
                            QCoreApplication::tr("&Copy Here\tCtrl"),
                            &menu)
-            << new QAction(KIcon("insert-link"),
+            << new QAction(QIcon::fromTheme("insert-link"),
                            QCoreApplication::tr("&Link Here\tCtrl+Shift"),
                            &menu);
 
@@ -538,7 +538,7 @@ Note* NoteFactory::dropURLs(QList<QUrl> urls, BasketScene *parent, Qt::DropActio
             menu.addAction(a);
 
             menu.addSeparator();
-            menu.addAction(KIcon("dialog-cancel"), QCoreApplication::tr("C&ancel\tEscape"));
+            menu.addAction(QIcon::fromTheme("dialog-cancel"), QCoreApplication::tr("C&ancel\tEscape"));
             int id = actList.indexOf(menu.exec(QCursor::pos()));
             switch (id) {
             case 0: action = Qt::MoveAction; break;
@@ -984,10 +984,7 @@ QString NoteFactory::iconForCommand(const QString &command)
 
 bool NoteFactory::isIconExist(const QString &icon)
 {
-    return ! KIconLoader::global()->loadIcon(
-               icon, KIconLoader::NoGroup, 16, KIconLoader::DefaultState,
-               QStringList(), 0L, true
-           ).isNull();
+    return ! QIcon::fromTheme(icon).isNull();
 }
 
 Note* NoteFactory::createEmptyNote(NoteType::Id type, BasketScene *parent)

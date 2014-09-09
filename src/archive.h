@@ -34,9 +34,6 @@ class QDomNode;
 class QProgressDialog;
 class QDomElement;
 
-class KTar;
-class KProgress;
-
 /**
  * @author Sébastien Laoût <slaout@linux62.org>
  */
@@ -48,7 +45,7 @@ public:
     static void open(const QString &path);
 private:
     // Convenient Methods for Saving:
-    static void saveBasketToArchive(BasketScene *basket, bool recursive, KTar *tar, QStringList &backgrounds, const QString &tempFolder, QProgressDialog *dialog);
+    static void saveBasketToArchive(BasketScene *basket, bool recursive, QStringList &backgrounds, const QString &tempFolder, QProgressDialog *dialog);
     static void listUsedTags(BasketScene *basket, bool recursive, QList<Tag*> &list);
     // Convenient Methods for Loading:
     static void renameBasketFolders(const QString &extractionFolder, QMap<QString, QString> &mergedStates);

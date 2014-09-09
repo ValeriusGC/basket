@@ -67,7 +67,7 @@ QString BasketFactory::unpackTemplate(const QString &templateName)
 
     // Unpack the template file to that folder:
     // TODO: REALLY unpack (this hand-creation is temporary, or it could be used in case the template can't be found)
-    QFile file(fullPath + "/.basket");
+    QFile file(fullPath + "/basket.xml");
     if (file.open(QIODevice::WriteOnly)) {
         QTextStream stream(&file);
         stream.setCodec("UTF-8");
@@ -110,7 +110,7 @@ void BasketFactory::newBasket(const QString &icon,
         return;
 
     // Read the properties, change those that should be customized and save the result:
-    QDomDocument *document  = XMLWork::openFile("basket", Global::basketsFolder() + folderName + "/.basket");
+    QDomDocument *document  = XMLWork::openFile("basket", Global::basketsFolder() + folderName + "/basket.xml");
     if (!document) {
         QMessageBox::critical(/*parent=*/0, QCoreApplication::tr("Basket Creation Failed"), QCoreApplication::tr("Sorry, but the template customization for this new basket has failed."));
         return;

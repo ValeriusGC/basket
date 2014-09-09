@@ -37,9 +37,6 @@
 #include <QDebug>
 #include <QLocale>
 
-#include <KDE/KIconLoader>
-#include <KDE/KStringHandler>
-
 #include "global.h"
 #include "bnpview.h"
 #include "basketscene.h"
@@ -94,12 +91,7 @@ void BasketListViewItem::setup()
 {
     setText(/*column=*/0, escapedName(m_basket->basketName()));
 
-    QPixmap icon = KIconLoader::global()->loadIcon(
-                       m_basket->icon(), KIconLoader::NoGroup, 16, KIconLoader::DefaultState,
-                       QStringList(), 0L, /*canReturnNull=*/false
-                   );
-
-    setIcon(/*column=*/0, icon);
+    setIcon(/*column=*/0, QIcon(m_basket->icon()));
     /*
         QBrush brush;
 

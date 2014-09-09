@@ -27,6 +27,7 @@
 #include <QtGui/QTextCursor>
 #include <QtGui/QClipboard>
 #include <QtGui/QGraphicsScene>
+#include <QIcon>
 
 #include "note.h" // For Note::Zone
 #include "config.h"
@@ -50,13 +51,7 @@ class QKeyEvent;
 class QMouseEvent;
 class QResizeEvent;
 class QWheelEvent;
-
-class KAction;
-class KDirWatch;
-
-namespace KIO { 
-    class Job; 
-}
+class QFileSystemWatcher;
 
 class DecoratedBasket;
 class Note;
@@ -267,7 +262,6 @@ public:
     bool saveToFile(const QString& fullPath, const QByteArray& array, unsigned long length);
     bool saveToFile(const QString& fullPath, const QString& string, bool isLocalEncoding = false);
     static bool safelySaveToFile(const QString& fullPath, const QByteArray& array);
-    static bool safelySaveToFile(const QString& fullPath, const QByteArray& array, unsigned long length);
     static bool safelySaveToFile(const QString& fullPath, const QString& string, bool isLocalEncoding = false);
     bool setProtection(int type, QString key);
     int  encryptionType()  {
@@ -455,8 +449,11 @@ public:
     QString basketName() {
         return m_basketName;
     }
-    QString icon()       {
+    QIcon icon()       {
         return m_icon;
+    }
+    QString iconName()  {
+        return m_iconName;
     }
     QString folderName() {
         return m_folderName;
@@ -466,7 +463,8 @@ public:
     static QString fullPathForFolderName(const QString &folderName);
 private:
     QString m_basketName;
-    QString m_icon;
+    QIcon m_icon;
+    QString m_iconName;
     QString m_folderName;
 
 /// ACTIONS ON SELECTED NOTES FROM THE INTERFACE:
@@ -624,7 +622,7 @@ public:
 
 /// THE NEW FILE WATCHER:
 private:
-    KDirWatch           *m_watcher;
+    QFileSystemWatcher           *m_watcher;
     QTimer               m_watcherTimer;
     QList<QString>  m_modifiedFiles;
 public:

@@ -30,10 +30,10 @@
 #include <QtGui/QPixmap>
 #include <QtGui/QVBoxLayout>
 #include <QMessageBox>
-
-#include <KDE/KApplication>
-#include <KDE/KLocale>
-#include <KDE/KPasswordDialog>
+#include <QApplication>
+#include <QInputDialog>
+#include <QDialog>
+#include <QDialogButtonBox>
 
 #include <locale.h>         //For LC_ALL, etc.
 #include <errno.h>          //For errno
@@ -41,7 +41,7 @@
 
 // KGpgSelKey class based on class in KGpg with the same name
 
-class KGpgSelKey : public KDialog
+class KGpgSelKey : public QDialog
 {
 private:
     QTreeWidget* keysListpr;
@@ -50,31 +50,32 @@ public:
 
     KGpgSelKey(QWidget *parent, const char *name, QString preselected,
                const KGpgMe& gpg):
-            KDialog(parent) {
+            QDialog(parent) {
 
         // Dialog options
         setObjectName(name);
         setModal(true);
-        setCaption(i18n("Private Key List"));
-        setButtons(Ok | Cancel);
+        setWindowTitle(tr("Private Key List"));
+        QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok
+                                         | QDialogButtonBox::Cancel);
+        connect(buttonBox, SIGNAL(accepted()), SLOT(accept()));
+        connect(buttonBox, SIGNAL(rejected()), SLOT(close()));
 
-        QString keyname;
         QVBoxLayout* vbox;
-        QWidget* page = new QWidget(this);
         QLabel* labeltxt;
-        QPixmap keyPair = KIcon("kgpg_key2").pixmap(20, 20);
+        QPixmap keyPair = QIcon::fromTheme("kgpg").pixmap(20, 20);
 
         setMinimumSize(350, 100);
-        keysListpr = new QTreeWidget(page);
+        keysListpr = new QTreeWidget(this);
         keysListpr->setRootIsDecorated(true);
         keysListpr->setColumnCount(3);
         QStringList headers;
-        headers << i18n("Name") << i18n("Email") << i18n("ID");
+        headers << tr("Name") << tr("Email") << tr("ID");
         keysListpr->setHeaderLabels(headers);
         keysListpr->setAllColumnsShowFocus(true);
 
-        labeltxt = new QLabel(i18n("Choose a secret key:"), page);
-        vbox = new QVBoxLayout(page);
+        labeltxt = new QLabel(tr("Choose a secret key:"), this);
+        vbox = new QVBoxLayout(this);
 
         KGpgKeyList list = gpg.keys(true);
 
@@ -96,8 +97,8 @@ public:
         }
         vbox->addWidget(labeltxt);
         vbox->addWidget(keysListpr);
-        setMainWidget(page);
-    };
+        setLayout(vbox);
+    }
 
     QString key() {
         QTreeWidgetItem* item = keysListpr->currentItem();
@@ -146,8 +147,8 @@ void KGpgMe::init(gpgme_protocol_t proto)
 #endif
     err = gpgme_engine_check_version(proto);
     if (err) {
-        QMessageBox::critical(kapp->activeWindow(), QString("%1: %2")
-                           .arg(gpgme_strsource(err)).arg(gpgme_strerror(err)));
+        QMessageBox::critical(qApp->activeWindow(), QString("%1: %2")
+                           .arg(gpgme_strsource(err), gpgme_strerror(err)), QString());
     }
 }
 
@@ -186,7 +187,7 @@ QString KGpgMe::checkForUtf8(QString txt)
 
 QString KGpgMe::selectKey(QString previous)
 {
-    QPointer<KGpgSelKey> dlg = new KGpgSelKey(kapp->activeWindow(), "", previous, *this);
+    QPointer<KGpgSelKey> dlg = new KGpgSelKey(qApp->activeWindow(), "", previous, *this);
 
     if (dlg->exec())
         return dlg->key();
@@ -228,13 +229,13 @@ KGpgKeyList KGpgMe::keys(bool privateKeys /* = false */) const
     }
 
     if (err) {
-        QMessageBox::critical(kapp->activeWindow(), QString("%1: %2")
-                           .arg(gpgme_strsource(err)).arg(gpgme_strerror(err)));
+        QMessageBox::critical(qApp->activeWindow(), QString("%1: %2")
+                           .arg(gpgme_strsource(err), gpgme_strerror(err)), QString());
     } else {
         result = gpgme_op_keylist_result(m_ctx);
         if (result->truncated) {
-            QMessageBox::critical(kapp->activeWindow(),
-                               i18n("Key listing unexpectedly truncated."));
+            QMessageBox::critical(qApp->activeWindow(),
+                               tr("Key listing unexpectedly truncated."), QString());
         }
     }
     return keys;
@@ -268,9 +269,8 @@ bool KGpgMe::encrypt(const QByteArray& inBuffer, unsigned long length,
                     if (!err) {
                         result = gpgme_op_encrypt_result(m_ctx);
                         if (result->invalid_recipients) {
-                            QMessageBox::critical(kapp->activeWindow(), QString("%1: %2")
-                                               .arg(i18n("That public key is not meant for encryption"))
-                                               .arg(result->invalid_recipients->fpr));
+                            QMessageBox::critical(qApp->activeWindow(), QString("%1: %2")
+                                               .arg(tr("That public key is not meant for encryption"), result->invalid_recipients->fpr), QString());
                         } else {
                             err = readToBuffer(out, outBuffer);
                         }
@@ -280,8 +280,7 @@ bool KGpgMe::encrypt(const QByteArray& inBuffer, unsigned long length,
         }
     }
     if (err != GPG_ERR_NO_ERROR && err != GPG_ERR_CANCELED) {
-        QMessageBox::critical(kapp->activeWindow(), QString("%1: %2")
-                           .arg(gpgme_strsource(err)).arg(gpgme_strerror(err)));
+        QMessageBox::critical(qApp->activeWindow(), QString("%1: %2").arg(gpgme_strsource(err), gpgme_strerror(err)), QString());
     }
     if (err != GPG_ERR_NO_ERROR)
         clearCache();
@@ -310,9 +309,7 @@ bool KGpgMe::decrypt(const QByteArray& inBuffer, QByteArray* outBuffer)
                 if (!err) {
                     result = gpgme_op_decrypt_result(m_ctx);
                     if (result->unsupported_algorithm) {
-                        QMessageBox::critical(kapp->activeWindow(), QString("%1: %2")
-                                           .arg(i18n("Unsupported algorithm"))
-                                           .arg(result->unsupported_algorithm));
+                        QMessageBox::critical(qApp->activeWindow(), QString("%1: %2").arg(tr("Unsupported algorithm"), result->unsupported_algorithm), QString());
                     } else {
                         err = readToBuffer(out, outBuffer);
                     }
@@ -321,8 +318,7 @@ bool KGpgMe::decrypt(const QByteArray& inBuffer, QByteArray* outBuffer)
         }
     }
     if (err != GPG_ERR_NO_ERROR && err != GPG_ERR_CANCELED) {
-        QMessageBox::critical(kapp->activeWindow(), QString("%1: %2")
-                           .arg(gpgme_strsource(err)).arg(gpgme_strerror(err)));
+        QMessageBox::critical(qApp->activeWindow(), QString("%1: %2").arg(gpgme_strsource(err), gpgme_strerror(err)), QString());
     }
     if (err != GPG_ERR_NO_ERROR)
         clearCache();
@@ -406,10 +402,9 @@ gpgme_error_t KGpgMe::passphrase(const char* uid_hint,
     gpgme_error_t res = GPG_ERR_CANCELED;
     QString s;
     QString gpg_hint = checkForUtf8(uid_hint);
-    int result;
 
     if (last_was_bad) {
-        s += "<b>" + i18n("Wrong password.") + "</b><br><br>\n\n";
+        s += "<b>" + tr("Wrong password.") + "</b><br><br>\n\n";
         clearCache();
     }
 
@@ -420,18 +415,13 @@ gpgme_error_t KGpgMe::passphrase(const char* uid_hint,
         s += gpg_hint;
 
     if (m_cache.isEmpty()) {
-        KPasswordDialog dlg;
-        dlg.setPrompt(s);
-
         if (m_saving)
-            dlg.setWindowTitle(i18n("Please enter a new password:"));
+            m_cache = QInputDialog::getText(0, tr("Password"), tr("Please enter a new password:"), QLineEdit::Password);
+        else
+            m_cache = QInputDialog::getText(0, tr("Password"), tr("Please enter a password:"), QLineEdit::Password);
+    }
 
-        if (dlg.exec())
-            m_cache = dlg.password();
-    } else
-        result = KPasswordDialog::Accepted;
-
-    if (result == KPasswordDialog::Accepted) {
+    if (!m_cache.isEmpty()) {
         write(fd, m_cache.data(), m_cache.length());
         res = 0;
     }

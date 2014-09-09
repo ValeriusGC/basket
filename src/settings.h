@@ -21,10 +21,9 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
-#include <KDE/KAction>          //For UseSysTray
-
 #include <QtCore/QDate>
 #include <QDialog>
+#include <QAction>
 
 #include "basket_export.h"
 #include "bnpview.h"

@@ -225,7 +225,7 @@ Tag::Tag()
     QString sAction = "tag_shortcut_number_" + QString::number(tagNumber);
 
     QMenu *ac = Global::mainWin->m_tagsMenu;
-    m_action = ac->addAction(KIcon("FAKE ICON"), "FAKE TEXT", Global::bnpView,
+    m_action = ac->addAction(QIcon(), QString(), Global::bnpView,
                              SLOT(activatedTagShortcut()));
 
     m_inheritedBySiblings = false;
@@ -738,16 +738,7 @@ StateAction::StateAction(State *state, const QKeySequence &shortcut, QWidget* pa
     if (withTagName && m_state->parentTag())
         setText(m_state->parentTag()->name());
 
-    setIcon(KIconLoader::global()->loadIcon(m_state->emblem(),
-                                            KIconLoader::Small,
-                                            16,
-                                            KIconLoader::DefaultState,
-                                            QStringList(),
-                                            /*path_store=*/0L,
-                                            /*canReturnNull=*/true
-                                           )
-           );
-
+    setIcon(QIcon("://tags/hi16-action-" + m_state->emblem() + ".png"));
 }
 
 StateAction::~StateAction()

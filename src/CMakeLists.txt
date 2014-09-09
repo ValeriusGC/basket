@@ -1,4 +1,4 @@
-include_directories(${KDE4_INCLUDES} ${KDE4_INCLUDE_DIR} ${QT_INCLUDES} ${GPGME_INCLUDES})
+include_directories(${KDE4_INCLUDES} ${KDE4_INCLUDE_DIR} ${QT_INCLUDES} ${GPGME_INCLUDES} ${QUAZIP_INCLUDE_DIRS})
 add_subdirectory(tests)
 
 ########### next target ###############
@@ -66,7 +66,8 @@ target_link_libraries(basketcommon
   ${KDE4_KFILE_LIBS}
   ${KDE4_PHONON_LIBRARY}
   ${X11_LIBRARIES}
-  ${GPGME_VANILLA_LIBRARIES})
+  ${GPGME_VANILLA_LIBRARIES}
+  ${QUAZIP_LIBRARIES})
 
 if(Q_WS_X11)
     target_link_libraries(basketcommon ${X11_X11_LIB})

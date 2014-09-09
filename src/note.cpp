@@ -1940,11 +1940,7 @@ void Note::draw(QPainter *painter, const QRectF &/*clipRect*/)
     qreal xIcon = HANDLE_WIDTH + NOTE_MARGIN;
     for (State::List::Iterator it = m_states.begin(); it != m_states.end(); ++it) {
         if (!(*it)->emblem().isEmpty()) {
-            QPixmap stateEmblem = KIconLoader::global()->loadIcon(
-                                      (*it)->emblem(), KIconLoader::NoGroup, 16,
-                                      KIconLoader::DefaultState, QStringList(), 0L, false
-                                  );
-
+            QPixmap stateEmblem = QIcon("://tags/hi16-action-" + (*it)->emblem() + ".png").pixmap(16,16);
             painter2.drawPixmap(xIcon, yIcon, stateEmblem);
             xIcon += NOTE_MARGIN + EMBLEM_SIZE;
         }

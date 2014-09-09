@@ -7,8 +7,10 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # Instruct CMake to run moc automatically when needed.
 set(CMAKE_AUTOMOC ON)
 
+find_package(Qt4 REQUIRED)
 find_package(X11 REQUIRED)
 find_package(KDE4 REQUIRED)
+find_package(QuaZip REQUIRED)
 find_package(Gpgme)
 find_package(Gpgmepp)
 find_package(SharedDesktopOntologies)

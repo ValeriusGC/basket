@@ -33,20 +33,12 @@
 #include <QtGui/QPushButton>
 #include <QtGui/QHBoxLayout>
 #include <QtGui/QGroupBox>
-#include <QtGui/QProgressBar>
 #include <QMessageBox>
 #include <QSettings>
 #include <QDialogButtonBox>
+#include <QApplication>
 
-#include <KDE/KLocale>
-#include <KDE/KApplication>
-#include <KDE/KAboutData>
-#include <KDE/KDirSelectDialog>
-#include <KDE/KRun>
-#include <KDE/KTar>
-#include <KDE/KFileDialog>
-#include <KDE/KProgressDialog>
-#include <KDE/KVBox>
+#include <quazip/JlCompress.h>
 
 #include <unistd.h> // usleep()
 
@@ -60,8 +52,6 @@ const QString backupMagicFolder = "BasKet-Note-Pads_Backup";
 /** class Backup: */
 
 QString Backup::binaryPath = "";
-
-#include <kiconloader.h>
 
 void Backup::figureOutBinaryPath(const char *argv0, QApplication &app)
 {
@@ -96,7 +86,8 @@ void Backup::setFolderAndRestart(const QString &folder, const QString &message)
             qApp->applicationName()));
 
     // Restart the application:
-    KRun::runCommand(binaryPath, KGlobal::mainComponent().aboutData()->programName(), KGlobal::mainComponent().aboutData()->programName(), 0);
+    // TODO
+//    KRun::runCommand(binaryPath, KGlobal::mainComponent().aboutData()->programName(), KGlobal::mainComponent().aboutData()->programName(), 0);
     exit(0);
 }
 
@@ -127,20 +118,21 @@ BackupThread::BackupThread(const QString &tarFile, const QString &folderToBackup
 
 void BackupThread::run()
 {
-    KTar tar(m_tarFile, "application/x-gzip");
-    tar.open(QIODevice::WriteOnly);
-    tar.addLocalDirectory(m_folderToBackup, backupMagicFolder);
-    // KArchive does not add hidden files. Basket description files (".basket") are hidden, we add them manually:
-    QDir dir(m_folderToBackup + "baskets/");
-    QStringList baskets = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
-    for (QStringList::Iterator it = baskets.begin(); it != baskets.end(); ++it) {
-        tar.addLocalFile(
-            m_folderToBackup + "baskets/" + *it + "/.basket",
-            backupMagicFolder + "/baskets/" + *it + "/.basket"
-        );
-    }
-    // We finished:
-    tar.close();
+    JlCompress::compressDir(m_tarFile, m_folderToBackup);
+//    KTar tar(m_tarFile, "application/x-gzip");
+//    tar.open(QIODevice::WriteOnly);
+//    tar.addLocalDirectory(m_folderToBackup, backupMagicFolder);
+//    // KArchive does not add hidden files. Basket description files (".basket") are hidden, we add them manually:
+//    QDir dir(m_folderToBackup + "baskets/");
+//    QStringList baskets = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+//    for (QStringList::Iterator it = baskets.begin(); it != baskets.end(); ++it) {
+//        tar.addLocalFile(
+//            m_folderToBackup + "baskets/" + *it + "/.basket",
+//            backupMagicFolder + "/baskets/" + *it + "/.basket"
+//        );
+//    }
+//    // We finished:
+//    tar.close();
 }
 
 /** class RestoreThread: */
@@ -152,19 +144,20 @@ RestoreThread::RestoreThread(const QString &tarFile, const QString &destFolder)
 
 void RestoreThread::run()
 {
-    m_success = false;
-    KTar tar(m_tarFile, "application/x-gzip");
-    tar.open(QIODevice::ReadOnly);
-    if (tar.isOpen()) {
-        const KArchiveDirectory *directory = tar.directory();
-        if (directory->entries().contains(backupMagicFolder)) {
-            const KArchiveEntry *entry = directory->entry(backupMagicFolder);
-            if (entry->isDirectory()) {
-                ((const KArchiveDirectory*) entry)->copyTo(m_destFolder);
-                m_success = true;
-            }
-        }
-        tar.close();
-    }
+    JlCompress::extractDir(m_tarFile, m_destFolder);
+//    m_success = false;
+//    KTar tar(m_tarFile, "application/x-gzip");
+//    tar.open(QIODevice::ReadOnly);
+//    if (tar.isOpen()) {
+//        const KArchiveDirectory *directory = tar.directory();
+//        if (directory->entries().contains(backupMagicFolder)) {
+//            const KArchiveEntry *entry = directory->entry(backupMagicFolder);
+//            if (entry->isDirectory()) {
+//                ((const KArchiveDirectory*) entry)->copyTo(m_destFolder);
+//                m_success = true;
+//            }
+//        }
+//        tar.close();
+//    }
 }
 

@@ -35,8 +35,6 @@
 #include <QPushButton>
 #include <QDialogButtonBox>
 
-#include <KDE/KIcon>
-
 #include "basketscene.h"
 #include "kcolorcombo2.h"
 #include "variouswidgets.h"
@@ -82,7 +80,7 @@ BasketPropertiesDialog::BasketPropertiesDialog(BasketScene *basket, QWidget *par
     setObjectName("BasketProperties");
     setModal(true);
 
-    icon->setIcon(KIcon(m_basket->icon()));
+    icon->setIcon(QIcon(m_basket->icon()));
 
     int size = qMax(icon->sizeHint().width(), icon->sizeHint().height());
     icon->setFixedSize(size, size); // Make it square!

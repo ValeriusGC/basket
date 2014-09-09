@@ -173,8 +173,8 @@ void HTMLExporter::exportBasket(BasketScene *basket, bool isSubBasket)
     backgroundColorName = basket->backgroundColor().name().toLower().mid(1);
 
     // Generate basket icons:
-    QString basketIcon16 = iconsFolderName + copyIcon(basket->icon(), 16);
-    QString basketIcon32 = iconsFolderName + copyIcon(basket->icon(), 32);
+    QString basketIcon16 = iconsFolderName + copyIcon(basket->iconName(), 16);
+    QString basketIcon32 = iconsFolderName + copyIcon(basket->iconName(), 32);
 
     // Generate the [+] image for groups:
     QPixmap expandGroup(Note::EXPANDER_WIDTH, Note::EXPANDER_HEIGHT);
@@ -495,7 +495,7 @@ void HTMLExporter::writeBasketTree(BasketScene *currentBasket, BasketScene *bask
     stream <<
     spaces.fill(' ', indent) << "<li><a" << cssClass << " href=\"" << link << "\">"
     "<span" << spanStyle << " title=\"" << Tools::textToHTMLWithoutP(basket->basketName()) << "\">"
-    "<img src=\"" << iconsFolderName <<  copyIcon(basket->icon(), 16) << "\" width=\"16\" height=\"16\" alt=\"\">" << Tools::textToHTMLWithoutP(basket->basketName()) << "</span></a>";
+    "<img src=\"" << iconsFolderName <<  copyIcon(basket->iconName(), 16) << "\" width=\"16\" height=\"16\" alt=\"\">" << Tools::textToHTMLWithoutP(basket->basketName()) << "</span></a>";
 
     // Write the sub-baskets lines & end the current one:
     BasketListViewItem *item = Global::bnpView->listViewItemForBasket(basket);

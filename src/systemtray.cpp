@@ -39,7 +39,7 @@ SystemTray::SystemTray(QWidget *parent)
 {
     // Create pixmaps for the icon:
     m_iconSize = QSize(geometry().width(), geometry().height());
-    m_icon = KIcon("basket");
+    m_icon = QIcon::fromTheme("basket");
     QPixmap lockedIconImage = m_icon.pixmap(m_iconSize);
     QPixmap lockOverlay = QIcon("://images/hi32-status-object-locked.png").pixmap(m_iconSize);
     lockedIconImage.fill(QColor(0, 0, 0, 0)); // force alpha channel
@@ -72,8 +72,8 @@ void SystemTray::updateDisplay()
         return;
 
     // Update the icon
-    if (basket->icon().isEmpty()
-            || basket->icon() == "basket"
+    if (basket->icon().isNull()
+            || basket->iconName() == "basket"
             || !Settings::showIconInSystray())
         setIcon(basket->isLocked() ? m_lockedIcon : m_icon);
     else {

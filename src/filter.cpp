@@ -45,8 +45,8 @@ FilterBar::FilterBar(QWidget *parent)
     // (Aaron Seigo says we don't need to worry about the
     //  "Toolbar group" stuff anymore.)
 
-    QIcon resetIcon = QIcon("://icons/dialog-close.png");
-    QIcon inAllIcon = QIcon("://icons/edit-find.png");
+    QIcon resetIcon = QIcon::fromTheme("dialog-close");
+    QIcon inAllIcon = QIcon::fromTheme("edit-find");
 
     m_resetButton        = new QToolButton(this);
     m_resetButton->setIcon(resetIcon);

@@ -341,7 +341,7 @@ LikeBack::Button LikeBack::buttons()
 QAction* LikeBack::sendACommentAction(QMenu *parent)
 {
     if (d->action == 0) {
-        d->action = parent->addAction(QIcon("://icons/mail-message-new.png"), tr("&Send a Comment to Developers"), this, SLOT(execCommentDialog()));
+        d->action = parent->addAction(QIcon::fromTheme("mail-message-new"), tr("&Send a Comment to Developers"), this, SLOT(execCommentDialog()));
     }
 
     return d->action;
@@ -532,7 +532,7 @@ LikeBackDialog::LikeBackDialog(LikeBack::Button reason, const QString &initialCo
     m_okButton->setDefault(true);
     m_cancelButton = new QPushButton(tr("&Cancel"));
     m_defaultButton = new QPushButton(tr("&Email Address..."));
-    m_defaultButton->setIcon(QIcon("://icons/internet-mail.png"));
+    m_defaultButton->setIcon(QIcon::fromTheme("internet-mail"));
 
     QDialogButtonBox *buttonBox = new QDialogButtonBox(Qt::Horizontal);
     buttonBox->addButton(m_defaultButton, QDialogButtonBox::ActionRole);

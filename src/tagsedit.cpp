@@ -331,9 +331,9 @@ TagsEditDialog::TagsEditDialog(QWidget *parent, State *stateToEdit, bool addNewT
 
     m_tags->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    m_moveUp    = new QPushButton(QIcon("://icons/arrow-up.png"), tr("Up"),  this);
-    m_moveDown  = new QPushButton(QIcon("://icons/arrow-down.png"), tr("Down"), this);
-    m_deleteTag = new QPushButton(QIcon("://icons/edit-delete.png"), tr("Delete"), this);
+    m_moveUp    = new QPushButton(QIcon::fromTheme("arrow-up"), tr("Up"),  this);
+    m_moveDown  = new QPushButton(QIcon::fromTheme("arrow-down"), tr("Down"), this);
+    m_deleteTag = new QPushButton(QIcon::fromTheme("edit-delete"), tr("Delete"), this);
 
     m_moveUp->setToolTip(tr("Move Up (Ctrl+Shift+Up)"));
     m_moveDown->setToolTip(tr("Move Down (Ctrl+Shift+Down)"));
@@ -405,7 +405,7 @@ TagsEditDialog::TagsEditDialog(QWidget *parent, State *stateToEdit, bool addNewT
     QWidget *emblemWidget = new QWidget(stateWidget);
     m_emblem = new QToolButton(emblemWidget);
     m_emblem->setIconSize(QSize(16,16));
-    m_emblem->setIcon(QIcon("://icons/edit-delete.png"));
+    m_emblem->setIcon(QIcon::fromTheme("edit-delete"));
     m_removeEmblem = new QPushButton(QCoreApplication::translate("Remove tag emblem", "Remo&ve"), emblemWidget);
     QLabel *emblemLabel = new QLabel(tr("&Emblem:"), stateWidget);
     emblemLabel->setBuddy(m_emblem);
@@ -431,29 +431,26 @@ TagsEditDialog::TagsEditDialog(QWidget *parent, State *stateToEdit, bool addNewT
     backgroundColorLayout->addWidget(m_backgroundColor);
     backgroundColorLayout->addStretch();
 
-    //QIcon boldIconSet = KIconLoader::global()->loadIconSet("format-text-bold", KIconLoader::Small);
-    KIcon boldIconSet("format-text-bold", KIconLoader::global());
+    QIcon boldIconSet = QIcon::fromTheme("format-text-bold");
     m_bold = new QPushButton(boldIconSet, "", stateWidget);
     m_bold->setCheckable(true);
     int size = qMax(m_bold->sizeHint().width(), m_bold->sizeHint().height());
     m_bold->setFixedSize(size, size); // Make it square!
     m_bold->setToolTip(tr("Bold"));
 
-    //QIcon underlineIconSet = KIconLoader::global()->loadIconSet("format-text-underline", KIconLoader::Small);
-    KIcon underlineIconSet("format-text-underline", KIconLoader::global());
+    QIcon underlineIconSet = QIcon::fromTheme("format-text-underline");
     m_underline = new QPushButton(underlineIconSet, "", stateWidget);
     m_underline->setCheckable(true);
     m_underline->setFixedSize(size, size); // Make it square!
     m_underline->setToolTip(tr("Underline"));
 
-    //QIcon italicIconSet = KIconLoader::global()->loadIconSet("format-text-italic", KIconLoader::Small);
-    KIcon italicIconSet("format-text-italic", KIconLoader::global());
+    QIcon italicIconSet = QIcon::fromTheme("format-text-italic");
     m_italic = new QPushButton(italicIconSet, "", stateWidget);
     m_italic->setCheckable(true);
     m_italic->setFixedSize(size, size); // Make it square!
     m_italic->setToolTip(tr("Italic"));
 
-    KIcon strikeIconSet("format-text-strikethrough", KIconLoader::global());
+    QIcon strikeIconSet = QIcon::fromTheme("format-text-strikethrough");
     m_strike = new QPushButton(strikeIconSet, "", stateWidget);
     m_strike->setCheckable(true);
     m_strike->setFixedSize(size, size); // Make it square!

@@ -24,27 +24,28 @@
 
 #include <QtGui/QHBoxLayout>
 #include <QMessageBox>
-
-#include <KDE/KLocale>
+#include <QDialogButtonBox>
 
 #include "basketscene.h"
 #include "kgpgme.h"
 
 PasswordDlg::PasswordDlg(QWidget *parent)
-        : KDialog(parent)
+        : QDialog(parent)
         , w(0)
 {
     // KDialog options
-    setWindowTitle(i18n("Password Protection"));
-    setButtons(Ok | Cancel);
-    setDefaultButton(Ok);
+    setWindowTitle(tr("Password Protection"));
+    QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok
+                                     | QDialogButtonBox::Cancel);
+    connect(buttonBox, SIGNAL(accepted()), SLOT(accept()));
+    connect(buttonBox, SIGNAL(rejected()), SLOT(close()));
     setModal(true);
-    showButtonSeparator(true);
 
-    setMainWidget(new QWidget(this));
-    QHBoxLayout* toplayout = new QHBoxLayout(mainWidget());
+    QHBoxLayout* toplayout = new QHBoxLayout(this);
     w = new Password;
     toplayout->addWidget(w, 1);
+
+    setLayout(toplayout);
 }
 
 PasswordDlg::~PasswordDlg()
@@ -58,7 +59,7 @@ void PasswordDlg::accept()
     if (n == BasketScene::PrivateKeyEncryption && key().isEmpty())
         QMessageBox::critical(w, QString(), tr("No private key selected."));
     else
-        KDialog::accept();
+        QDialog::accept();
 }
 
 QString PasswordDlg::key() const

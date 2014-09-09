@@ -102,7 +102,7 @@ NewBasketDialog::NewBasketDialog(BasketScene *parentBasket, const NewBasketDefau
     m_icon = new QPushButton(this); // TODO icon chooser dialog
 //    m_icon->setIconType(KIconLoader::NoGroup, KIconLoader::Action);
 //    m_icon->setIconSize(16);
-    m_icon->setIcon(KIcon(m_defaultProperties.icon.isEmpty() ? "basket" : m_defaultProperties.icon));
+    m_icon->setIcon(QIcon::fromTheme(m_defaultProperties.icon.isEmpty() ? "basket" : m_defaultProperties.icon));
 
     int size = qMax(m_icon->sizeHint().width(), m_icon->sizeHint().height());
     m_icon->setFixedSize(size, size); // Make it square!
@@ -268,11 +268,7 @@ int NewBasketDialog::populateBasketsList(QTreeWidgetItem *item, int indent, int 
     static const int ICON_SIZE = 16;
     // Get the basket data:
     BasketScene* basket = ((BasketListViewItem *)item)->basket();
-    QPixmap icon = KIconLoader::global()->loadIcon(
-                       basket->icon(), KIconLoader::NoGroup, ICON_SIZE,
-                       KIconLoader::DefaultState, QStringList(), 0L,
-                       /*canReturnNull=*/false
-                   );
+    QPixmap icon = QIcon(basket->icon()).pixmap(ICON_SIZE, ICON_SIZE);
     icon = Tools::indentPixmap(icon, indent, 2 * ICON_SIZE / 3);
     m_createIn->addItem(icon, basket->basketName());
     m_basketsMap.insert(index, basket);

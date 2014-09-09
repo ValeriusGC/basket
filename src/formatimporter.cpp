@@ -46,11 +46,11 @@ bool FormatImporter::shouldImportBaskets()
     if (Global::bnpView->topLevelItemCount() >= 0)
         return false;
 
-    // ... And there is at least one folder in the save folder, with a ".basket" file inside that folder.
+    // ... And there is at least one folder in the save folder, with a "basket.xml" file inside that folder.
     QDir dir(Global::savesFolder(), QString::null, QDir::Name | QDir::IgnoreCase, QDir::Dirs | QDir::NoSymLinks);
     QStringList list = dir.entryList();
     for (QStringList::Iterator it = list.begin(); it != list.end(); ++it)
-        if (*it != "." && *it != ".." && dir.exists(Global::savesFolder() + *it + "/.basket"))
+        if (*it != "." && *it != ".." && dir.exists(Global::savesFolder() + *it + "/basket.xml"))
             return true;
 
     return false;
@@ -101,7 +101,7 @@ void FormatImporter::importBaskets()
     QStringList list = dir.entryList();
     if (list.count() > 2) // Pass "." and ".."
         for (QStringList::Iterator it = list.begin(); it != list.end(); ++it) // For each folder
-            if (*it != "." && *it != ".." && dir.exists(Global::savesFolder() + *it + "/.basket")) // If it can be a basket folder
+            if (*it != "." && *it != ".." && dir.exists(Global::savesFolder() + *it + "/basket.xml")) // If it can be a basket folder
                 if (!(baskets.contains((*it) + "/")) && baskets.contains(*it))   // And if it is not already in the imported baskets list
                     baskets.append(*it);
 
@@ -163,7 +163,7 @@ void FormatImporter::importBaskets()
 QDomElement FormatImporter::importBasket(const QString &folderName)
 {
     // Load the XML file:
-    QDomDocument *document = XMLWork::openFile("basket", Global::basketsFolder() + folderName + "/.basket");
+    QDomDocument *document = XMLWork::openFile("basket", Global::basketsFolder() + folderName + "/basket.xml");
     if (!document) {
         qDebug() << "Import Baskets: Failed to read the basket file!";
         return QDomElement();
@@ -274,7 +274,7 @@ QDomElement FormatImporter::importBasket(const QString &folderName)
     }
 
     // Save the resulting XML file:
-    QFile file(Global::basketsFolder() + folderName + "/.basket");
+    QFile file(Global::basketsFolder() + folderName + "/basket.xml");
     if (file.open(QIODevice::WriteOnly)) {
         QTextStream stream(&file);
         stream.setCodec("UTF-8");

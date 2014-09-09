@@ -25,7 +25,6 @@
 #include <QtGui/QClipboard>
 #include <QtGui/QSplitter>
 
-#include <KDE/KXMLGUIClient>
 #include <QMainWindow>
 
 #include "global.h"
