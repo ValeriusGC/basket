@@ -1,8 +1,8 @@
 set(basketthumbcreator_PART_SRCS basketthumbcreator.cpp)
 
-kde4_add_plugin(basketthumbcreator ${basketthumbcreator_PART_SRCS})
+add_plugin(basketthumbcreator ${basketthumbcreator_PART_SRCS})
 
-target_link_libraries(basketthumbcreator ${KDE4_KIO_LIBS})
+target_link_libraries(basketthumbcreator)
 
 install(TARGETS basketthumbcreator DESTINATION ${PLUGIN_INSTALL_DIR})
 
@@ -22,4 +22,4 @@ execute_process(COMMAND ${XDG-MIME_EXECUTABLE} default
   ${CMAKE_SOURCE_DIR}/src/basket.desktop application/x-basket-item)
 ")
 
-kde4_install_icons(${ICON_INSTALL_DIR})
+install_icons(${ICON_INSTALL_DIR})

@@ -20,38 +20,38 @@
 
 #include "basketscene.h"
 
-#include <QtCore/QFile>
-#include <QtCore/QFileInfo>
-#include <QtCore/QDir>
-#include <QtCore/QPoint>
-#include <QtCore/QList>
-#include <QtCore/QStringList>
-#include <QtCore/QDateTime>  // seed for rand()
-#include <QtCore/QTimeLine>
-#include <QtGui/QApplication>
-#include <QtGui/QDrag>
-#include <QtGui/QDragMoveEvent>
-#include <QtGui/QDragEnterEvent>
-#include <QtGui/QDragLeaveEvent>
-#include <QtGui/QDropEvent>
-#include <QtGui/QMouseEvent>
-#include <QtGui/QWheelEvent>
-#include <QtGui/QKeyEvent>
-#include <QtGui/QContextMenuEvent>
-#include <QtGui/QFocusEvent>
-#include <QtGui/QResizeEvent>
-#include <QtGui/QPainter>
-#include <QtGui/QFrame>
-#include <QtGui/QLabel>
-#include <QtGui/QPushButton>
-#include <QtGui/QTextDocument>
-#include <QtGui/QAbstractTextDocumentLayout>
-#include <QtGui/QGridLayout>
-#include <QtGui/QToolTip>
-#include <QtGui/QCursor>
-#include <QtGui/QClipboard>
-#include <QtGui/QInputDialog>
-#include <QtGui/QGraphicsProxyWidget>
+#include <QFile>
+#include <QFileInfo>
+#include <QDir>
+#include <QPoint>
+#include <QList>
+#include <QStringList>
+#include <QDateTime>  // seed for rand()
+#include <QTimeLine>
+#include <QApplication>
+#include <QDrag>
+#include <QDragMoveEvent>
+#include <QDragEnterEvent>
+#include <QDragLeaveEvent>
+#include <QDropEvent>
+#include <QMouseEvent>
+#include <QWheelEvent>
+#include <QKeyEvent>
+#include <QContextMenuEvent>
+#include <QFocusEvent>
+#include <QResizeEvent>
+#include <QPainter>
+#include <QFrame>
+#include <QLabel>
+#include <QPushButton>
+#include <QTextDocument>
+#include <QAbstractTextDocumentLayout>
+#include <QGridLayout>
+#include <QToolTip>
+#include <QCursor>
+#include <QClipboard>
+#include <QInputDialog>
+#include <QGraphicsProxyWidget>
 #include <QtXml/QDomDocument>
 #include <QFileSystemWatcher>
 #include <QMessageBox>
@@ -2691,7 +2691,7 @@ void BasketScene::tooltipEvent(QHelpEvent *event)
         message = tr("Insert note here\nRight click for more options");
         QRectF itRect;
         for (QList<QRectF>::iterator it = m_blankAreas.begin(); it != m_blankAreas.end(); ++it) {
-            itRect = QRectF(0, 0, m_view->viewport()->width(), m_view->viewport()->height()).intersect(*it);
+            itRect = QRectF(0, 0, m_view->viewport()->width(), m_view->viewport()->height()).intersected(*it);
             if (itRect.contains(contentPos)) {
                 rect = itRect;
                 rect.moveLeft(rect.left() - sceneRect().x());
@@ -4866,7 +4866,7 @@ void BasketScene::selectRange(Note *start, Note *end, bool unselectOthers /*= tr
     if (isFreeLayout()) {
         QRectF startRect(start->x(), start->y(), start->width(), start->height());
         QRectF endRect(end->x(),   end->y(),   end->width(),   end->height());
-        QRectF toSelect = startRect.unite(endRect);
+        QRectF toSelect = startRect.united(endRect);
         selectNotesIn(toSelect, /*invertSelection=*/false, unselectOthers);
         return;
     }

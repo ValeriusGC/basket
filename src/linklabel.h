@@ -21,7 +21,7 @@
 #ifndef LINKLABEL_H
 #define LINKLABEL_H
 
-#include <QtGui/QFrame>
+#include <QFrame>
 
 class QPixmap;
 class QString;
@@ -127,9 +127,9 @@ class LinkLabel : public QFrame
 {
     Q_OBJECT
 public:
-    LinkLabel(int hAlign, int vAlign, QWidget *parent = 0, Qt::WFlags f = 0);
+    LinkLabel(int hAlign, int vAlign, QWidget *parent = 0, Qt::WindowFlags f = 0);
     LinkLabel(const QString &title, const QString &icon, LinkLook *look, int hAlign, int vAlign,
-              QWidget *parent = 0, Qt::WFlags f = 0);
+              QWidget *parent = 0, Qt::WindowFlags f = 0);
     ~LinkLabel();
 public:
     void setLink(const QString &title, const QString &icon, LinkLook *look = 0);
@@ -214,7 +214,7 @@ class LinkLookEditWidget : public QWidget
     Q_OBJECT
 public:
     LinkLookEditWidget(QWidget* module, const QString exTitle, const QString exIcon,
-                       QWidget *parent = 0, Qt::WFlags fl = 0);
+                       QWidget *parent = 0, Qt::WindowFlags fl = 0);
     ~LinkLookEditWidget();
     void saveChanges();
     void saveToLook(LinkLook *look);

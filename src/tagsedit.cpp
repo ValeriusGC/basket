@@ -20,21 +20,21 @@
 
 #include "tagsedit.h"
 
-#include <QtCore/QEvent>
-#include <QtCore/QList>
-#include <QtCore/QTimer>
-#include <QtGui/QAction>
-#include <QtGui/QCheckBox>
-#include <QtGui/QFontComboBox>
-#include <QtGui/QGridLayout>
-#include <QtGui/QGroupBox>
-#include <QtGui/QHeaderView>    //For m_tags->header()
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QKeyEvent>
-#include <QtGui/QLabel>
-#include <QtGui/QMouseEvent>
-#include <QtGui/QPainter>
-#include <QtGui/QVBoxLayout>
+#include <QEvent>
+#include <QList>
+#include <QTimer>
+#include <QAction>
+#include <QCheckBox>
+#include <QFontComboBox>
+#include <QGridLayout>
+#include <QGroupBox>
+#include <QHeaderView>    //For m_tags->header()
+#include <QHBoxLayout>
+#include <QKeyEvent>
+#include <QLabel>
+#include <QMouseEvent>
+#include <QPainter>
+#include <QVBoxLayout>
 #include <QMessageBox>
 #include <QLineEdit>
 #include <QApplication>

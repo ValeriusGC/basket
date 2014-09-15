@@ -22,7 +22,7 @@
 #define BACKUP_H
 
 #include <QCoreApplication>
-#include <QtCore/QThread>
+#include <QThread>
 
 class QApplication;
 class QLabel;

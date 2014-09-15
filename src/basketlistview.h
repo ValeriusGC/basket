@@ -21,8 +21,8 @@
 #ifndef BASKETLISTVIEW_H
 #define BASKETLISTVIEW_H
 
-#include <QtCore/QTimer>
-#include <QtGui/QTreeWidget>
+#include <QTimer>
+#include <QTreeWidget>
 
 class QPixmap;
 class QResizeEvent;

@@ -21,14 +21,14 @@
 #include "settings.h"
 
 #include <QApplication>
-#include <QtGui/QCheckBox>
-#include <QtGui/QGroupBox>
-#include <QtGui/QLabel>
-#include <QtGui/QPushButton>
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QGridLayout>
-#include <QtGui/QVBoxLayout>
-#include <QtCore/QDate>
+#include <QCheckBox>
+#include <QGroupBox>
+#include <QLabel>
+#include <QPushButton>
+#include <QHBoxLayout>
+#include <QGridLayout>
+#include <QVBoxLayout>
+#include <QDate>
 #include <QDialogButtonBox>
 #include <QComboBox>
 #include <QLineEdit>

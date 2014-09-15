@@ -21,12 +21,12 @@
 #ifndef NOTECONTENT_H
 #define NOTECONTENT_H
 
-#include <QtCore/QObject>
-#include <QtGui/QGraphicsItem>
+#include <QObject>
+#include <QGraphicsItem>
 #include <QCoreApplication>
 #include <QUrl>
 
-#include <phonon/phononnamespace.h>
+//#include <phonon/phononnamespace.h>
 
 #include "linklabel.h"
 
@@ -48,10 +48,10 @@ class QWidget;
 class QNetworkAccessManager;
 class QNetworkReply;
 
-namespace Phonon
-{
-    class MediaObject;
-}
+//namespace Phonon
+//{
+//    class MediaObject;
+//}
 
 class BasketScene;
 class FilterData;
@@ -490,9 +490,9 @@ public:
     LinkLook* linkLook() {
         return LinkLook::soundLook;
     }
-    Phonon::MediaObject *music;
-private slots:
-    void stateChanged(Phonon::State, Phonon::State);
+//    Phonon::MediaObject *music;
+//private slots:
+//    void stateChanged(Phonon::State, Phonon::State);
 
 };
 

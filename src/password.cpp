@@ -22,7 +22,7 @@
 
 #ifdef HAVE_LIBGPGME
 
-#include <QtGui/QHBoxLayout>
+#include <QHBoxLayout>
 #include <QMessageBox>
 #include <QDialogButtonBox>
 

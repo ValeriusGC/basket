@@ -24,11 +24,11 @@
 
 #include "kgpgme.h"
 
-#include <QtCore/QPointer>
-#include <QtGui/QTreeWidget>
-#include <QtGui/QLabel>
-#include <QtGui/QPixmap>
-#include <QtGui/QVBoxLayout>
+#include <QPointer>
+#include <QTreeWidget>
+#include <QLabel>
+#include <QPixmap>
+#include <QVBoxLayout>
 #include <QMessageBox>
 #include <QApplication>
 #include <QInputDialog>

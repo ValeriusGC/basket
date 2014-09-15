@@ -29,12 +29,12 @@
 #include "linklabel.h"
 #include "notecontent.h"
 
-#include <QtCore/QDir>
-#include <QtCore/QFile>
-#include <QtCore/QTextStream>
-#include <QtCore/QList>
-#include <QtGui/QPainter>
-#include <QtGui/QPixmap>
+#include <QDir>
+#include <QFile>
+#include <QTextStream>
+#include <QList>
+#include <QPainter>
+#include <QPixmap>
 #include <QMessageBox>
 #include <QDebug>
 #include <QSettings>
@@ -529,7 +529,7 @@ QString HTMLExporter::copyIcon(const QString &iconName, int size)
     fileName = "ico" + QString::number(size) + "_" + fileName.replace("/", "_") + ".png";
     QString fullPath = iconsFolderPath + fileName;
     if (!QFile::exists(fullPath))
-        DesktopIcon(iconName, size).save(fullPath, "PNG");
+        QIcon(iconName).pixmap(size, size).save(fullPath, "PNG");
     return fileName;
 }
 

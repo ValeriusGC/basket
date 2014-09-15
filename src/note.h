@@ -21,10 +21,10 @@
 #ifndef NOTE_H
 #define NOTE_H
 
-#include <QtCore/QList>
-#include <QtCore/QSet>
-#include <QtCore/QDateTime>
-#include <QtGui/QGraphicsItemGroup>
+#include <QList>
+#include <QSet>
+#include <QDateTime>
+#include <QGraphicsItemGroup>
 
 #include "basket_export.h"
 #include "tag.h"

@@ -20,23 +20,23 @@
 
 #include "notefactory.h"
 
-#include <QtCore/QString>
-#include <QtCore/QTextStream>
-#include <QtCore/QVector>
-#include <QtCore/QRegExp>
-#include <QtCore/QDir>
-#include <QtCore/QFile>
-#include <QtCore/QFileInfo>
-#include <QtCore/QMimeData>
-#include <QtGui/QImage>
-#include <QtGui/QPixmap>
-#include <QtGui/QColor>
-#include <QtGui/QGraphicsView>
-#include <QtGui/QImageReader>
-#include <QtGui/QMovie>
-#include <QtGui/QTextDocument> //For Qt::mightBeRichText(...)
-#include <QtGui/QBitmap> //For createHeuristicMask
-#include <QtCore/qnamespace.h>
+#include <QString>
+#include <QTextStream>
+#include <QVector>
+#include <QRegExp>
+#include <QDir>
+#include <QFile>
+#include <QFileInfo>
+#include <QMimeData>
+#include <QImage>
+#include <QPixmap>
+#include <QColor>
+#include <QGraphicsView>
+#include <QImageReader>
+#include <QMovie>
+#include <QTextDocument> //For Qt::mightBeRichText(...)
+#include <QBitmap> //For createHeuristicMask
+#include <qnamespace.h>
 #include <QMessageBox>
 #include <QApplication>
 #include <QCoreApplication>

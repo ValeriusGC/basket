@@ -21,9 +21,9 @@
 #ifndef BNPVIEW_H
 #define BNPVIEW_H
 
-#include <QtCore/QList>
-#include <QtGui/QClipboard>
-#include <QtGui/QSplitter>
+#include <QList>
+#include <QClipboard>
+#include <QSplitter>
 
 #include <QMainWindow>
 

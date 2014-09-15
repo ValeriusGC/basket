@@ -20,10 +20,10 @@
 
 #include "focusedwidgets.h"
 
-#include <QtCore/QEvent>
-#include <QtGui/QWheelEvent>
-#include <QtGui/QKeyEvent>
-#include <QtGui/QScrollBar>
+#include <QEvent>
+#include <QWheelEvent>
+#include <QKeyEvent>
+#include <QScrollBar>
 
 #include "bnpview.h"
 #include "basketscene.h"

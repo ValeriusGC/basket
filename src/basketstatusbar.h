@@ -20,8 +20,8 @@
 #ifndef BASKETSTATUSBAR_H
 #define BASKETSTATUSBAR_H
 
-#include <QtCore/QObject>
-#include <QtGui/QPixmap>
+#include <QObject>
+#include <QPixmap>
 
 #include "basket_export.h"
 

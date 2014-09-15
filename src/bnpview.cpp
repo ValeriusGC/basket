@@ -20,20 +20,20 @@
 
 #include "bnpview.h"
 
-#include <QtCore/QList>
-#include <QtCore/QRegExp>
-#include <QtCore/QEvent>
-#include <QtGui/QStackedWidget>
-#include <QtGui/QPixmap>
-#include <QtGui/QImage>
-#include <QtGui/QResizeEvent>
-#include <QtGui/QShowEvent>
-#include <QtGui/QKeyEvent>
-#include <QtGui/QHideEvent>
-#include <QtGui/QGraphicsView>
-#include <QtCore/QSignalMapper>
-#include <QtCore/QDir>
-#include <QtGui/QUndoStack>
+#include <QList>
+#include <QRegExp>
+#include <QEvent>
+#include <QStackedWidget>
+#include <QPixmap>
+#include <QImage>
+#include <QResizeEvent>
+#include <QShowEvent>
+#include <QKeyEvent>
+#include <QHideEvent>
+#include <QGraphicsView>
+#include <QSignalMapper>
+#include <QDir>
+#include <QUndoStack>
 #include <QtXml/QDomDocument>
 #include <QAction>
 #include <QMenuBar>
@@ -271,7 +271,7 @@ void BNPView::addWelcomeBaskets()
     // Possible paths where to find the welcome basket archive, trying the translated one, and falling back to the English one:
     QStringList possiblePaths;
     QLocale l;
-    if (QString(KGlobal::locale()->encoding()) == QString("UTF-8")) { // Welcome baskets are encoded in UTF-8. If the system is not, then use the English version:
+    if (QLocale().name() == QString("UTF-8")) { // Welcome baskets are encoded in UTF-8. If the system is not, then use the English version: // TODO check this encoding thingo works
         possiblePaths.append("://welcome/Welcome_" + l.languageToString(l.language()) + ".baskets");
         possiblePaths.append("://welcome/Welcome_" + l.languageToString(l.language()).split("_")[0] + ".baskets");
     }
@@ -1907,7 +1907,7 @@ void BNPView::saveAsArchive()
         if (dir.exists(destination)) {
             int result = QMessageBox::question(this, tr("Override File?"),
                              "<qt>" + tr("The file <b>%1</b> already exists. Do you really want to override it?").arg(
-                                           KUrl(destination).fileName()),
+                                           QFileInfo(destination).fileName()),
                                                QMessageBox::Yes | QMessageBox::Cancel);
             if (result == QMessageBox::Cancel)
                 return;
@@ -1918,7 +1918,7 @@ void BNPView::saveAsArchive()
     }
     bool withSubBaskets = true;//KMessageBox::questionYesNo(this, tr("Do you want to export sub-baskets too?"), tr("Save as Basket Archive")) == KMessageBox::Yes;
 
-    settings.setValue("basketarchive/lastFolder", KUrl(destination).directory());
+    settings.setValue("basketarchive/lastFolder", QFileInfo(destination).path());
 
     Archive::save(basket, withSubBaskets, destination);
 }

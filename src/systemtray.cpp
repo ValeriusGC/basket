@@ -52,7 +52,7 @@ SystemTray::SystemTray(QWidget *parent)
 
     m_popupmenu = new QMenu(parent);
     m_popupmenu->setTitle("Basket"); // TODO use qApp here, add actions when converted from KAction
-    m_popupmenu->setIcon(SmallIcon("basket"));
+    m_popupmenu->setIcon(QIcon::fromTheme("basket").pixmap(16,16));
     
     setContextMenu(m_popupmenu);
     updateDisplay();

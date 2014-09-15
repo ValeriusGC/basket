@@ -20,10 +20,10 @@
 
 #include "filter.h"
 
-#include <QtGui/QToolButton>
-#include <QtGui/QLabel>
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QPixmap>
+#include <QToolButton>
+#include <QLabel>
+#include <QHBoxLayout>
+#include <QPixmap>
 #include <QLineEdit>
 #include <QComboBox>
 #include <QIcon>

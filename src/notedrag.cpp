@@ -20,16 +20,16 @@
 
 #include "notedrag.h"
 
-#include <QtCore/QDir>
-#include <QtCore/QTextCodec>
-#include <QtCore/QBuffer>
-#include <QtCore/QTextStream>
-#include <QtCore/QList>
-#include <QtCore/QMimeData>
-#include <QtGui/QPainter>
-#include <QtGui/QPixmap>
-#include <QtGui/QDesktopWidget>       //For kapp->desktop()
-#include <QtGui/QDragEnterEvent>
+#include <QDir>
+#include <QTextCodec>
+#include <QBuffer>
+#include <QTextStream>
+#include <QList>
+#include <QMimeData>
+#include <QPainter>
+#include <QPixmap>
+#include <QDesktopWidget>       //For kapp->desktop()
+#include <QDragEnterEvent>
 #include <QApplication>
 
 #include "basketscene.h"

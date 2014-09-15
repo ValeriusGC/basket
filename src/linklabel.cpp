@@ -20,20 +20,20 @@
 
 #include "linklabel.h"
 
-#include <QtCore/QEvent>
-#include <QtGui/QLabel>
-#include <QtGui/QLayout>
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QBoxLayout>
-#include <QtGui/QGridLayout>
-#include <QtGui/QPixmap>
-#include <QtGui/QFrame>
-#include <QtGui/QCursor>
-#include <QtGui/QCheckBox>
-#include <QtGui/QPainter>
-#include <QtGui/QStyle>
-#include <QtGui/QGroupBox>
+#include <QEvent>
+#include <QLabel>
+#include <QLayout>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
+#include <QBoxLayout>
+#include <QGridLayout>
+#include <QPixmap>
+#include <QFrame>
+#include <QCursor>
+#include <QCheckBox>
+#include <QPainter>
+#include <QStyle>
+#include <QGroupBox>
 #include <QComboBox>
 #include <QApplication>
 #include <QUrl>
@@ -171,14 +171,14 @@ QString LinkLook::toCSS(const QString &cssClass, const QColor &defaultTextColor)
 
 /** LinkLabel */
 
-LinkLabel::LinkLabel(int hAlign, int vAlign, QWidget *parent, Qt::WFlags f)
+LinkLabel::LinkLabel(int hAlign, int vAlign, QWidget *parent, Qt::WindowFlags f)
         : QFrame(parent, f), m_isSelected(false), m_isHovered(false), m_look(0)
 {
     initLabel(hAlign, vAlign);
 }
 
 LinkLabel::LinkLabel(const QString &title, const QString &icon, LinkLook *look, int hAlign, int vAlign,
-                     QWidget *parent, Qt::WFlags f)
+                     QWidget *parent, Qt::WindowFlags f)
         : QFrame(parent, f), m_isSelected(false), m_isHovered(false), m_look(0)
 {
     initLabel(hAlign, vAlign);
@@ -213,7 +213,7 @@ void LinkLabel::setLink(const QString &title, const QString &icon, LinkLook *loo
         m_look = look; // Needed for icon size
 
     m_title->setText(title);
-    m_title->setShown(! title.isEmpty());
+    m_title->setVisible(! title.isEmpty());
 
     if (icon.isEmpty())
         m_icon->clear();
@@ -222,7 +222,7 @@ void LinkLabel::setLink(const QString &title, const QString &icon, LinkLook *loo
         if (!pixmap.isNull())
             m_icon->setPixmap(pixmap);
     }
-    m_icon->setShown(! icon.isEmpty());
+    m_icon->setVisible(! icon.isEmpty());
 
     if (look)
         setLook(look);
@@ -563,7 +563,7 @@ QString LinkDisplay::toHtml(HTMLExporter *exporter, const QUrl &url, const QStri
 /** LinkLookEditWidget **/
 
 LinkLookEditWidget::LinkLookEditWidget(QWidget *module, const QString exTitle, const QString exIcon,
-                                       QWidget *parent, Qt::WFlags fl)
+                                       QWidget *parent, Qt::WindowFlags fl)
         : QWidget(parent, fl)
 {
     QLabel      *label;

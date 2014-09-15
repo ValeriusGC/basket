@@ -20,16 +20,15 @@
 
 #include "backgroundmanager.h"
 
-#include <KDE/KGlobal>
-#include <KDE/KStandardDirs>
-
 #include <QSettings>
 
-#include <QtCore/QDir>
-#include <QtGui/QPainter>
-#include <QtGui/QImage>
-#include <QtGui/QPixmap>
+#include <QDir>
+#include <QPainter>
+#include <QImage>
+#include <QPixmap>
 #include <QFileInfo>
+
+#include "global.h"
 
 /** class BackgroundEntry: */
 
@@ -69,7 +68,7 @@ OpaqueBackgroundEntry::~OpaqueBackgroundEntry()
 BackgroundManager::BackgroundManager()
 {
 /// kDebug() << "BackgroundManager: Found the following background images in  ";
-    QStringList directories = KGlobal::dirs()->resourceDirs("data"); // eg. { "/home/seb/.kde/share/apps/", "/usr/share/apps/" }
+    QStringList directories(Global::backgroundsFolder()); // eg. { "/home/seb/.kde/share/apps/", "/usr/share/apps/" }
     // For each folder:
     for (QStringList::Iterator it = directories.begin(); it != directories.end(); ++it) {
         // For each file in those directories:
@@ -266,7 +265,7 @@ QPixmap* BackgroundManager::preview(const QString &image)
         return entry->preview;
 
     // Then, try to load the preview from file:
-    QString previewPath = KGlobal::dirs()->findResource("data", "basket/backgrounds/previews/" + entry->name);
+    QString previewPath = Global::backgroundsFolder() + "previews/" + entry->name;
     QPixmap *previewPixmap = new QPixmap(previewPath);
     // Success:
     if (!previewPixmap->isNull()) {
@@ -317,7 +316,7 @@ QPixmap* BackgroundManager::preview(const QString &image)
     painter.end();
 
     // Saving it to file for later:
-    QString folder = KGlobal::dirs()->saveLocation("data", "basket/backgrounds/previews/");
+    QString folder = Global::backgroundsFolder() + "previews/";
     result->save(folder + entry->name, "PNG");
 
     // Ouf! That's done:
@@ -341,7 +340,7 @@ QString BackgroundManager::previewPathForImageName(const QString &image)
     if (entry == 0)
         return "";
     else {
-        QString previewPath = KGlobal::dirs()->findResource("data", "basket/backgrounds/previews/" + entry->name);
+        QString previewPath = Global::backgroundsFolder() + "previews/" + entry->name;
         QDir dir;
         if (!dir.exists(previewPath))
             return "";

@@ -21,8 +21,8 @@
 #ifndef HTMLEXPORTER_H
 #define HTMLEXPORTER_H
 
-#include <QtCore/QString>
-#include <QtCore/QTextStream>
+#include <QString>
+#include <QTextStream>
 #include <QCoreApplication>
 
 class QProgressDialog;

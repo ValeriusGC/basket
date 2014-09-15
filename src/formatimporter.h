@@ -21,7 +21,7 @@
 #ifndef FORMATIMPORTER_H
 #define FORMATIMPORTER_H
 
-#include <QtCore/QObject>
+#include <QObject>
 
 class QDomElement;
 

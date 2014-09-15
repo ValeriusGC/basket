@@ -20,20 +20,20 @@
 
 #include "variouswidgets.h"
 
-#include <QtCore/QList>
-#include <QtCore/QPointer>
-#include <QtCore/QString>
-#include <QtGui/QLabel>
-#include <QtGui/QSizeGrip>
-#include <QtGui/QPushButton>
-#include <QtGui/QSizePolicy>
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QResizeEvent>
-#include <QtGui/QKeyEvent>
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QWhatsThis>
-#include <QtGui/QDrag>
-#include <QtGui/QFontDatabase>
+#include <QList>
+#include <QPointer>
+#include <QString>
+#include <QLabel>
+#include <QSizeGrip>
+#include <QPushButton>
+#include <QSizePolicy>
+#include <QHBoxLayout>
+#include <QResizeEvent>
+#include <QKeyEvent>
+#include <QVBoxLayout>
+#include <QWhatsThis>
+#include <QDrag>
+#include <QFontDatabase>
 #include <QDialogButtonBox>
 #include <QListWidget>
 #include <QLineEdit>

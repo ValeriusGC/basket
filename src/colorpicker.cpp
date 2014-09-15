@@ -20,9 +20,9 @@
 
 #include "colorpicker.h"
 
-#include <QtCore/QTimer>
-#include <QtGui/QKeyEvent>
-#include <QtGui/QMouseEvent>
+#include <QTimer>
+#include <QKeyEvent>
+#include <QMouseEvent>
 #include <QColorDialog>
 
 /// ///

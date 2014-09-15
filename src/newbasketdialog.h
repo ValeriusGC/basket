@@ -23,8 +23,8 @@
 
 #include <QDialog>
 
-#include <QtCore/QMap>
-#include <QtGui/QListWidget>
+#include <QMap>
+#include <QListWidget>
 
 class QLineEdit;
 class QMimeData;

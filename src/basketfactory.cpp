@@ -20,9 +20,9 @@
 
 #include "basketfactory.h"
 
-#include <QtCore/QDir>
-#include <QtCore/QTextStream>
-#include <QtGui/QGraphicsView>
+#include <QDir>
+#include <QTextStream>
+#include <QGraphicsView>
 #include <QtXml/QDomElement>
 #include <QMessageBox>
 #include <QCoreApplication>

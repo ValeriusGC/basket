@@ -19,9 +19,9 @@
 #ifndef REGIONGRABBER_H
 #define REGIONGRABBER_H
 
-#include <QtCore/QVector>
-#include <QtCore/QTimer>
-#include <QtGui/QWidget>
+#include <QVector>
+#include <QTimer>
+#include <QWidget>
 
 class QPoint;
 class QRect;

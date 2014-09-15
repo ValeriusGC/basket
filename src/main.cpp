@@ -21,7 +21,7 @@
 #include <QApplication>
 
 #include <config.h>
-#include "basket_options.h"
+//#include "basket_options.h"
 
 #include "mainwindow.h"
 #include "settings.h"

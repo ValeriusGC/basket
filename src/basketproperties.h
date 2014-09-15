@@ -22,7 +22,7 @@
 #define BASKETPROPERTIES_H
 
 #include <QDialog>
-#include <QtCore/QMap>
+#include <QMap>
 
 #include "ui_basketproperties.h"
 

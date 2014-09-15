@@ -1,5 +1,5 @@
-include_directories(${KDE4_INCLUDES} ${KDE4_INCLUDE_DIR} ${QT_INCLUDES} ${GPGME_INCLUDES} ${QUAZIP_INCLUDE_DIRS})
-add_subdirectory(tests)
+add_subdirectory(quazip-0.7)
+include_directories(${Qt5Core_INCLUDE_DIRS} ${Qt5Widgets_INCLUDE_DIRS} ${GPGME_INCLUDES}} ${CMAKE_CURRENT_SOURCE_DIR}/quazip-0.7/quazip)
 
 ########### next target ###############
 
@@ -52,49 +52,36 @@ set(basketcommon_LIB_SRCS
     xmlwork.cpp
 )
 
-kde4_add_ui_files(basketcommon_LIB_SRCS passwordlayout.ui basketproperties.ui about.ui backupdialog.ui)
+qt5_wrap_ui(basketcommon_LIB_SRCS passwordlayout.ui basketproperties.ui about.ui backupdialog.ui)
 
-QT4_ADD_DBUS_ADAPTOR(basketcommon_LIB_SRCS org.basket.BNPView.xml bnpview.h BNPView)
+qt5_add_dbus_adaptor(basketcommon_LIB_SRCS org.basket.BNPView.xml bnpview.h BNPView)
 
-QT4_ADD_RESOURCES(basketcommon_LIB_SRCS ../basket.qrc)
+qt5_add_resources(basketcommon_LIB_SRCS ../basket.qrc)
 
-kde4_add_library(basketcommon SHARED ${basketcommon_LIB_SRCS})
+add_definitions(${Qt5Core_DEFINITIONS} ${Qt5Widgets_DEFINITIONS})
+
+add_library(basketcommon SHARED ${basketcommon_LIB_SRCS})
 
 target_link_libraries(basketcommon
-  ${KDE4_KIO_LIBS}
-  ${KDE4_KDEUI_LIBS}
-  ${KDE4_KFILE_LIBS}
-  ${KDE4_PHONON_LIBRARY}
-  ${X11_LIBRARIES}
-  ${GPGME_VANILLA_LIBRARIES}
-  ${QUAZIP_LIBRARIES})
+    Qt5::Core
+    Qt5::Widgets
+    Qt5::DBus
+    Qt5::Network
+    Qt5::Xml
+    quazip
+    ${GPGME_VANILLA_LIBRARIES})
 
-if(Q_WS_X11)
-    target_link_libraries(basketcommon ${X11_X11_LIB})
-endif(Q_WS_X11)
-
-set_target_properties(basketcommon PROPERTIES VERSION ${GENERIC_LIB_VERSION} SOVERSION ${GENERIC_LIB_SOVERSION})
-
-install(TARGETS basketcommon DESTINATION ${LIB_INSTALL_DIR})
+set_target_properties(basketcommon PROPERTIES VERSION 1.0.0 SOVERSION 1)
+install(TARGETS basketcommon LIBRARY DESTINATION ${CMAKE_BINARY_DIR} ARCHIVE DESTINATION ${CMAKE_BINARY_DIR} RUNTIME DESTINATION ${CMAKE_BINARY_DIR})
 
 ########### next target ###############
 
 set(basket_SRCS main.cpp mainwindow.cpp)
 
-kde4_add_executable(basket ${basket_SRCS})
+add_executable(basket ${basket_SRCS})
 target_link_libraries(basket
-  ${KDE4_KUTILS_LIBS}
-  ${KDE4_KFILE_LIBS}
-  ${KDE4_PHONON_LIBRARY}
-  basketcommon)
+    Qt5::Core
+    Qt5::Widgets
+    basketcommon)
 
-install(TARGETS basket DESTINATION ${BIN_INSTALL_DIR})
-
-########### next target ###############
-
-install(FILES  basket.desktop DESTINATION ${XDG_APPS_INSTALL_DIR})
-install(FILES  basket_config_general.desktop  	basket_config_baskets.desktop  	basket_config_new_notes.desktop  	basket_config_notes_appearance.desktop  	basket_config_apps.desktop  	DESTINATION ${SERVICES_INSTALL_DIR})
-
-kde4_install_icons(${ICON_INSTALL_DIR})
-
-
+install(TARGETS basket LIBRARY DESTINATION ${CMAKE_BINARY_DIR} ARCHIVE DESTINATION ${CMAKE_BINARY_DIR} RUNTIME DESTINATION ${CMAKE_BINARY_DIR})

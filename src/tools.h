@@ -21,7 +21,7 @@
 #ifndef TOOLS_H
 #define TOOLS_H
 
-#include <QtCore/QVector>
+#include <QVector>
 
 class QColor;
 class QFont;

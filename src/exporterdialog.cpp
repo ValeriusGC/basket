@@ -20,10 +20,10 @@
 
 #include "exporterdialog.h"
 
-#include <QtCore/QDir>
-#include <QtGui/QCheckBox>
-#include <QtGui/QLabel>
-#include <QtGui/QHBoxLayout>
+#include <QDir>
+#include <QCheckBox>
+#include <QLabel>
+#include <QHBoxLayout>
 #include <QSettings>
 #include <QDialogButtonBox>
 

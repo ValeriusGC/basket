@@ -21,10 +21,10 @@
 #include "basketstatusbar.h"
 
 #include <QStatusBar>
-#include <QtCore/QObject>
-#include <QtGui/QLabel>
-#include <QtGui/QPixmap>
-#include <QtGui/QMouseEvent>
+#include <QObject>
+#include <QLabel>
+#include <QPixmap>
+#include <QMouseEvent>
 
 #include "global.h"
 #include "bnpview.h"
@@ -81,7 +81,7 @@ void BasketStatusBar::setupStatusBar()
 //  addWidget( m_lockStatus, 0, true );
     m_lockStatus->installEventFilter(this);
 
-    m_savedStatusPixmap = SmallIcon("document-save");
+    m_savedStatusPixmap = QIcon::fromTheme("document-save").pixmap(16,16);
     m_savedStatus = new QLabel(parent);
     m_savedStatus->setPixmap(m_savedStatusPixmap);
     m_savedStatus->setFixedSize(m_savedStatus->sizeHint());
@@ -137,7 +137,7 @@ void BasketStatusBar::setLockStatus(bool isLocked)
         return;
 
     if (isLocked) {
-        m_lockStatus->setPixmap(SmallIcon("encrypted.png"));
+        m_lockStatus->setPixmap(QIcon::fromTheme("encrypted.png").pixmap(16,16));
         m_lockStatus->setToolTip(tr(
                                      "<p>This basket is <b>locked</b>.<br>Click to unlock it.</p>").replace(" ", "&nbsp;"));
     } else {

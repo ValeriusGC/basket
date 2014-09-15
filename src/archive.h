@@ -22,8 +22,8 @@
 #define ARCHIVE_H
 
 #include <QCoreApplication>
-#include <QtCore/QList>
-#include <QtCore/QMap>
+#include <QList>
+#include <QMap>
 
 class BasketScene;
 class Tag;

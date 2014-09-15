@@ -26,13 +26,13 @@
 #include "tools.h"
 #include "formatimporter.h" // To move a folder
 
-#include <QtCore/QDir>
-#include <QtCore/QTextStream>
-#include <QtGui/QLayout>
-#include <QtGui/QLabel>
-#include <QtGui/QPushButton>
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QGroupBox>
+#include <QDir>
+#include <QTextStream>
+#include <QLayout>
+#include <QLabel>
+#include <QPushButton>
+#include <QHBoxLayout>
+#include <QGroupBox>
 #include <QMessageBox>
 #include <QSettings>
 #include <QDialogButtonBox>

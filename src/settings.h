@@ -21,7 +21,7 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
-#include <QtCore/QDate>
+#include <QDate>
 #include <QDialog>
 #include <QAction>
 

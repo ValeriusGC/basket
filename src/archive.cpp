@@ -20,15 +20,15 @@
 
 #include "archive.h"
 
-#include <QtCore/QString>
-#include <QtCore/QStringList>
-#include <QtCore/QList>
-#include <QtCore/QMap>
-#include <QtCore/QDir>
-#include <QtCore/QTextStream>
-#include <QtGui/QPixmap>
-#include <QtGui/QPainter>
-#include <QtGui/QProgressBar>
+#include <QString>
+#include <QStringList>
+#include <QList>
+#include <QMap>
+#include <QDir>
+#include <QTextStream>
+#include <QPixmap>
+#include <QPainter>
+#include <QProgressBar>
 #include <QtXml/QDomDocument>
 #include <QMessageBox>
 #include <QApplication>
@@ -36,7 +36,6 @@
 #include <QProgressDialog>
 #include <QFile>
 
-#include <KDE/KStandardDirs>        //For KGlobal::dirs()
 #include <JlCompress.h>
 
 #include <QStack>
@@ -448,7 +447,7 @@ void Archive::importTagEmblems(const QString &extractionFolder)
 void Archive::importArchivedBackgroundImages(const QString &extractionFolder)
 {
     FormatImporter copier; // Only used to copy files synchronously
-    QString destFolder = KGlobal::dirs()->saveLocation("data", "basket/backgrounds/");
+    QString destFolder = Global::backgroundsFolder();
 
     QDir dir(extractionFolder + "backgrounds/", /*nameFilder=*/"*.png", /*sortSpec=*/QDir::Name | QDir::IgnoreCase, /*filterSpec=*/QDir::Files | QDir::NoSymLinks);
     QStringList files = dir.entryList();

@@ -20,19 +20,19 @@
 
 #include "tools.h"
 
-#include <QtCore/QString>
-#include <QtCore/QRegExp>
-#include <QtCore/QList>
-#include <QtCore/QFileInfo>
-#include <QtCore/QDir>
-#include <QtCore/QMimeData>
-#include <QtCore/QObject>
-#include <QtCore/QTime>
-#include <QtGui/QPixmap>
-#include <QtGui/QImage>
-#include <QtGui/QFont>
-#include <QtGui/QFontInfo>
-#include <QtGui/QTextDocument>  //For Qt::convertFromPlainText and Qt::WhiteSpaceNormal.
+#include <QString>
+#include <QRegExp>
+#include <QList>
+#include <QFileInfo>
+#include <QDir>
+#include <QMimeData>
+#include <QObject>
+#include <QTime>
+#include <QPixmap>
+#include <QImage>
+#include <QFont>
+#include <QFontInfo>
+#include <QTextDocument>  //For Qt::convertFromPlainText and Qt::WhiteSpaceNormal.
 #include <QDebug>
 #include <QUrl>
 
@@ -485,7 +485,7 @@ QPixmap Tools::indentPixmap(const QPixmap &source, int depth, int deltaX)
 
     // Create the images:
     QImage resultImage(indent + source.width(), source.height(), QImage::Format_ARGB32);
-    resultImage.setNumColors(32);
+    resultImage.setColorCount(32);
 
     QImage sourceImage = source.toImage();
 

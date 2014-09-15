@@ -7,19 +7,15 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # Instruct CMake to run moc automatically when needed.
 set(CMAKE_AUTOMOC ON)
 
-find_package(Qt4 REQUIRED)
-find_package(X11 REQUIRED)
-find_package(KDE4 REQUIRED)
-find_package(QuaZip REQUIRED)
+find_package(Qt5Core REQUIRED)
+find_package(Qt5Widgets REQUIRED)
+find_package(Qt5DBus REQUIRED)
+find_package(Qt5Network REQUIRED)
+find_package(Qt5Xml REQUIRED)
 find_package(Gpgme)
 find_package(Gpgmepp)
-find_package(SharedDesktopOntologies)
 
-add_definitions(${QT_DEFINITIONS} ${KDE4_DEFINITIONS})
-
-include(KDE4Defaults)
-
-include(MacroLibrary)
+include_directories(${Qt5Core_INCLUDE_DIRS} ${Qt5Widgets_INCLUDE_DIRS})
 
 IF(GPGME_FOUND)
   SET(HAVE_LIBGPGME 1)
@@ -29,12 +25,7 @@ ELSE(GPGME_FOUND)
   MESSAGE("GPG not found, configuring without")
 ENDIF(GPGME_FOUND)
 
-#TODO: find meinproc
-
-CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h )
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
-
-include_directories(${KDE4_INCLUDES} ${KDE4_INCLUDE_DIR} ${QT_INCLUDES} ${X11_INCLUDES} )
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/src/config.h)
 
 #add_subdirectory(doc)
 add_subdirectory(src)
@@ -42,5 +33,3 @@ add_subdirectory(po)
 add_subdirectory(tags)
 add_subdirectory(welcome)
 add_subdirectory(backgrounds)
-add_subdirectory(images)
-add_subdirectory(file-integration)

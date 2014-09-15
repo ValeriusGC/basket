@@ -20,14 +20,14 @@
 
 #include "noteedit.h"
 
-#include <QtGui/QLabel>
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QTextCharFormat>
-#include <QtGui/QKeyEvent>
-#include <QtGui/QGraphicsProxyWidget>
-#include <QtGui/QGridLayout>
-#include <QtGui/QScrollBar>
-#include <QtGui/QFontComboBox>
+#include <QLabel>
+#include <QHBoxLayout>
+#include <QTextCharFormat>
+#include <QKeyEvent>
+#include <QGraphicsProxyWidget>
+#include <QGridLayout>
+#include <QScrollBar>
+#include <QFontComboBox>
 #include <QToolBar>
 #include <QMessageBox>
 #include <QDebug>

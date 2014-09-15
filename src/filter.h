@@ -21,8 +21,8 @@
 #ifndef FILTER_H
 #define FILTER_H
 
-#include <QtCore/QMap>
-#include <QtGui/QWidget>
+#include <QMap>
+#include <QWidget>
 
 class QToolButton;
 class QLineEdit;

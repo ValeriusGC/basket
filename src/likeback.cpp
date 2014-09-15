@@ -21,20 +21,20 @@
 #include "likeback.h"
 #include "likeback_p.h"
 
-#include <QtCore/QBuffer>
-#include <QtCore/QPointer>
-#include <QtGui/QToolButton>
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QGridLayout>
-#include <QtGui/QPixmap>
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QCheckBox>
-#include <QtGui/QRadioButton>
-#include <QtGui/QGroupBox>
-#include <QtGui/QLabel>
-#include <QtGui/QAction>
-#include <QtGui/QValidator>
-#include <QtGui/QDesktopWidget>
+#include <QBuffer>
+#include <QPointer>
+#include <QToolButton>
+#include <QHBoxLayout>
+#include <QGridLayout>
+#include <QPixmap>
+#include <QVBoxLayout>
+#include <QCheckBox>
+#include <QRadioButton>
+#include <QGroupBox>
+#include <QLabel>
+#include <QAction>
+#include <QValidator>
+#include <QDesktopWidget>
 #include <QMenuBar>
 #include <QMessageBox>
 #include <QDebug>
@@ -43,9 +43,9 @@
 #include <QDialogButtonBox>
 #include <QPushButton>
 #include <QApplication>
-#include <QNetworkAccessManager>
-#include <QNetworkReply>
-#include <QNetworkRequest>
+#include <QtNetwork/QNetworkAccessManager>
+#include <QtNetwork/QNetworkReply>
+#include <QtNetwork/QNetworkRequest>
 #include <QInputDialog>
 
 /****************************************/
@@ -94,10 +94,10 @@ LikeBackBar::LikeBackBar(LikeBack *likeBack)
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(autoMove()));
 
     LikeBack::Button buttons = likeBack->buttons();
-    m_likeButton->setShown(buttons & LikeBack::Like);
-    m_dislikeButton->setShown(buttons & LikeBack::Dislike);
-    m_bugButton->setShown(buttons & LikeBack::Bug);
-    m_featureButton->setShown(buttons & LikeBack::Feature);
+//    m_likeButton->setShown(buttons & LikeBack::Like); // TODO nfi
+//    m_dislikeButton->setShown(buttons & LikeBack::Dislike);
+//    m_bugButton->setShown(buttons & LikeBack::Bug);
+//    m_featureButton->setShown(buttons & LikeBack::Feature);
 }
 
 LikeBackBar::~LikeBackBar()

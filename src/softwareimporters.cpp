@@ -20,14 +20,14 @@
 
 #include "softwareimporters.h"
 
-#include <QtCore/QString>
-#include <QtCore/QDir>
-#include <QtCore/QTextStream>
-#include <QtCore/QStack>
-#include <QtGui/QGroupBox>
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QRadioButton>
+#include <QString>
+#include <QDir>
+#include <QTextStream>
+#include <QStack>
+#include <QGroupBox>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
+#include <QRadioButton>
 #include <QtXml/QDomDocument>
 #include <QMessageBox>
 #include <QTextEdit>

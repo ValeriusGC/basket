@@ -20,28 +20,29 @@
 
 #include "notecontent.h"
 
-#include <QtCore/QBuffer>
-#include <QtCore/QFile>
-#include <QtCore/QFileInfo>
-#include <QtCore/QDateTime>
-#include <QtCore/QDir>
-#include <QtCore/QRegExp>
-#include <QtCore/QStringList>
-#include <QtGui/QAbstractTextDocumentLayout>    //For m_simpleRichText->documentLayout()
-#include <QtGui/QBitmap>                        //For QPixmap::createHeuristicMask()
-#include <QtGui/QFontMetrics>
-#include <QtGui/QMovie>
-#include <QtGui/QPainter>
-#include <QtGui/QPixmap>
-#include <QtGui/QWidget>
+#include <QBuffer>
+#include <QFile>
+#include <QFileInfo>
+#include <QDateTime>
+#include <QDir>
+#include <QRegExp>
+#include <QStringList>
+#include <QAbstractTextDocumentLayout>    //For m_simpleRichText->documentLayout()
+#include <QBitmap>                        //For QPixmap::createHeuristicMask()
+#include <QFontMetrics>
+#include <QMovie>
+#include <QPainter>
+#include <QPixmap>
+#include <QWidget>
 #include <QtXml/QDomDocument>
-#include <QNetworkAccessManager>
-#include <QNetworkReply>
+#include <QtNetwork/QNetworkAccessManager>
+#include <QtNetwork/QNetworkReply>
 #include <QDebug>
 #include <QProcess>
+#include <QMimeData>
 
-#include <phonon/AudioOutput>
-#include <phonon/MediaObject>
+//#include <phonon/AudioOutput>
+//#include <phonon/MediaObject>
 
 #include "note.h"
 #include "basketscene.h"
@@ -1593,17 +1594,17 @@ SoundContent::SoundContent(Note *parent, const QString &fileName)
         : FileContent(parent, fileName)
 {
     setFileName(fileName);
-    music = new Phonon::MediaObject(this);
-    music->setCurrentSource(Phonon::MediaSource(fullPath()));
-    Phonon::AudioOutput *audioOutput = new Phonon::AudioOutput(Phonon::MusicCategory, this);
-    Phonon::Path path = Phonon::createPath(music, audioOutput);
-    connect(music, SIGNAL(stateChanged(Phonon::State, Phonon::State)), this, SLOT(stateChanged(Phonon::State, Phonon::State)));
+//    music = new Phonon::MediaObject(this);
+//    music->setCurrentSource(Phonon::MediaSource(fullPath()));
+//    Phonon::AudioOutput *audioOutput = new Phonon::AudioOutput(Phonon::MusicCategory, this);
+//    Phonon::Path path = Phonon::createPath(music, audioOutput);
+//    connect(music, SIGNAL(stateChanged(Phonon::State, Phonon::State)), this, SLOT(stateChanged(Phonon::State, Phonon::State)));
 }
 
-void SoundContent::stateChanged(Phonon::State newState, Phonon::State oldState)
-{
-    qDebug() << "stateChanged " << oldState << " to " << newState;
-}
+//void SoundContent::stateChanged(Phonon::State newState, Phonon::State oldState)
+//{
+//    qDebug() << "stateChanged " << oldState << " to " << newState;
+//}
 
 QString SoundContent::zoneTip(int zone)
 {
@@ -1612,22 +1613,22 @@ QString SoundContent::zoneTip(int zone)
 
 void SoundContent::setHoveredZone(int oldZone, int newZone)
 {
-    if (newZone == Note::Custom0 || newZone == Note::Content) {
-        // Start the sound preview:
-        if (oldZone != Note::Custom0 && oldZone != Note::Content) { // Don't restart if it was already in one of those zones
-            if (music->state() == 1) {
-                music->play();
+//    if (newZone == Note::Custom0 || newZone == Note::Content) {
+//        // Start the sound preview:
+//        if (oldZone != Note::Custom0 && oldZone != Note::Content) { // Don't restart if it was already in one of those zones
+//            if (music->state() == 1) {
+//                music->play();
 
-            }
-        }
-    } else {
-//       Stop the sound preview, if it was started:
-        if (music->state() != 1) {
-            music->stop();
-//          delete music;//TODO implement this in slot connected with music alted signal
-//          music = 0;
-        }
-    }
+//            }
+//        }
+//    } else {
+////       Stop the sound preview, if it was started:
+//        if (music->state() != 1) {
+//            music->stop();
+////          delete music;//TODO implement this in slot connected with music alted signal
+////          music = 0;
+//        }
+//    }
 }
 
 
@@ -1856,7 +1857,7 @@ void LinkContent::startFetchingLinkTitle()
             newUrl.setPort(80);
 
         //If no path or query part, default to /
-        if (newUrl.encodedPath().isEmpty())
+        if (newUrl.path(QUrl::FullyEncoded).isEmpty())
             newUrl.setPath("/");
 
         //Issue request
@@ -2639,7 +2640,7 @@ void UnknownContent::addAlternateDragObjects(QMimeData *dragObject)
             array->resize(size);
             stream.readRawData(array->data(), size);
             // Creata and add the QDragObject:
-            dragObject->setData(mimes.at(i).toAscii(), *array);
+            dragObject->setData(mimes.at(i).toUtf8(), *array);
             delete array; // FIXME: Should we?
         }
         file.close();

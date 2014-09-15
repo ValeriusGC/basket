@@ -23,9 +23,9 @@
 
 #include <QDialog>
 
-#include <QtCore/QList>
-#include <QtGui/QItemDelegate>
-#include <QtGui/QTreeWidgetItem>
+#include <QList>
+#include <QItemDelegate>
+#include <QTreeWidgetItem>
 
 #include "tag.h"
 

@@ -26,8 +26,8 @@
 
 #include <gpgme.h>
 
-#include <QtCore/QList>
-#include <QtCore/QString>
+#include <QList>
+#include <QString>
 #include <QCoreApplication>
 
 /**

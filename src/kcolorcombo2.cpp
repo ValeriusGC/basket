@@ -22,21 +22,23 @@
 
 #ifndef USE_OLD_KCOLORCOMBO
 
-#include <QtGui/QApplication>
-#include <QtGui/QPixmap>
-#include <QtGui/QBitmap>
-#include <QtGui/QPainter>
+#include <QApplication>
+#include <QPixmap>
+#include <QBitmap>
+#include <QPainter>
 
-#include <QtGui/QDropEvent>
-#include <QtGui/QPaintEvent>
-#include <QtGui/QMouseEvent>
-#include <QtGui/QKeyEvent>
-#include <QtGui/QDragEnterEvent>
-#include <QtGui/QClipboard>
+#include <QDropEvent>
+#include <QPaintEvent>
+#include <QMouseEvent>
+#include <QKeyEvent>
+#include <QDragEnterEvent>
+#include <QClipboard>
 #include <QDebug>
 #include <QColorDialog>
 #include <QKeySequence>
 #include <QDesktopWidget>
+#include <QDrag>
+#include <QMimeData>
 
 //#define DEBUG_COLOR_ARRAY
 //#define OUTPUT_GIMP_PALETTE
@@ -735,7 +737,7 @@ void KColorCombo2::fontChange(const QFont &oldFont)
 {
     // Since the color-rectangle is the same height of the text, we should resize it if the font change:
     updateComboBox();
-    QComboBox::fontChange(oldFont); // To update geometry.
+//    QComboBox::fontChange(oldFont); // To update geometry. // TODO check - use QFontComboBox??
 }
 
 void KColorCombo2::virtual_hook(int /*id*/, void */*data*/)

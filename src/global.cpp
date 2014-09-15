@@ -20,12 +20,10 @@
 
 #include "global.h"
 
-#include <KDE/KGlobal>
-#include <KDE/KStandardDirs>
-
-#include <QtCore/QString>
-#include <QtCore/QDir>
+#include <QString>
+#include <QDir>
 #include <QApplication>
+#include <QStandardPaths>
 
 #include "bnpview.h"
 #include "settings.h"
@@ -60,7 +58,7 @@ QString Global::savesFolder()
             dir.mkdir(Settings::dataFolder());
             folder = new QString(Settings::dataFolder().endsWith("/") ? Settings::dataFolder() : Settings::dataFolder() + "/");
         } else { // The default path (should be that for most computers)
-            folder = new QString(KGlobal::dirs()->saveLocation("data", "basket/"));
+            folder = new QString(QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation).at(0) + "Basket/");
         }
     }
 

@@ -20,14 +20,14 @@
 
 #include "note.h"
 
-#include <QtCore/QList>
-#include <QtGui/QGraphicsItemAnimation>
-#include <QtGui/QGraphicsView>
-#include <QtGui/QPainter>
-#include <QtGui/QPixmap>
-#include <QtGui/QStyle>
-#include <QtGui/QStyleOption>
-#include <QtGui/QImage>
+#include <QList>
+#include <QGraphicsItemAnimation>
+#include <QGraphicsView>
+#include <QPainter>
+#include <QPixmap>
+#include <QStyle>
+#include <QStyleOption>
+#include <QImage>
 #include <QDebug>
 #include <QApplication>
 
@@ -820,7 +820,7 @@ QRectF Note::zoneRect(Note::Zone zone, const QPointF &pos)
     case Note::Content:
         rect = content()->zoneRect(zone, pos - QPointF(contentX(), NOTE_MARGIN));
         rect.translate(contentX(), NOTE_MARGIN);
-        return rect.intersect(QRectF(contentX(), INSERTION_HEIGHT, d->width - contentX(), d->height - 2*INSERTION_HEIGHT));     // Only IN contentRect
+        return rect.intersected(QRectF(contentX(), INSERTION_HEIGHT, d->width - contentX(), d->height - 2*INSERTION_HEIGHT));     // Only IN contentRect
     case Note::GroupExpander:
         return QRectF(NOTE_MARGIN, yExpander(), EXPANDER_WIDTH, EXPANDER_HEIGHT);
     case Note::Resizer:

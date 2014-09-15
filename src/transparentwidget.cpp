@@ -22,10 +22,10 @@
 #include "transparentwidget.h"
 #include "basketview.h"
 
-#include <QtGui/QGraphicsView>
-#include <QtGui/QPainter>
-#include <QtGui/QPaintEvent>
-#include <QtGui/QMouseEvent>
+#include <QGraphicsView>
+#include <QPainter>
+#include <QPaintEvent>
+#include <QMouseEvent>
 
 /** Class TransparentWidget */
 

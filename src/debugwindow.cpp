@@ -20,9 +20,9 @@
 
 #include "debugwindow.h"
 
-#include <QtCore/QString>
-#include <QtGui/QCloseEvent>
-#include <QtGui/QVBoxLayout>
+#include <QString>
+#include <QCloseEvent>
+#include <QVBoxLayout>
 #include <QTextBrowser>
 
 #include "global.h"

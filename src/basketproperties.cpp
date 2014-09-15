@@ -20,16 +20,16 @@
 
 #include "basketproperties.h"
 
-#include <QtCore/QStringList>
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QGridLayout>
-#include <QtGui/QPixmap>
-#include <QtGui/QLabel>
-#include <QtGui/QRadioButton>
-#include <QtGui/QGroupBox>
-#include <QtGui/QButtonGroup>
-#include <QtGui/QStyle>
+#include <QStringList>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
+#include <QGridLayout>
+#include <QPixmap>
+#include <QLabel>
+#include <QRadioButton>
+#include <QGroupBox>
+#include <QButtonGroup>
+#include <QStyle>
 #include <QComboBox>
 #include <QApplication>
 #include <QPushButton>

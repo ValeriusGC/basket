@@ -20,12 +20,12 @@
 
 #include "diskerrordialog.h"
 
-#include <QtCore/QString>
-#include <QtGui/QKeyEvent>
-#include <QtGui/QCloseEvent>
-#include <QtGui/QLabel>
-#include <QtGui/QPixmap>
-#include <QtGui/QHBoxLayout>
+#include <QString>
+#include <QKeyEvent>
+#include <QCloseEvent>
+#include <QLabel>
+#include <QPixmap>
+#include <QHBoxLayout>
 #include <QLocale>
 #include <QIcon>
 

@@ -21,15 +21,15 @@
 #ifndef BASKET_H
 #define BASKET_H
 
-#include <QtCore/QList>
-#include <QtCore/QSet>
-#include <QtCore/QTimer>
-#include <QtGui/QTextCursor>
-#include <QtGui/QClipboard>
-#include <QtGui/QGraphicsScene>
+#include <QList>
+#include <QSet>
+#include <QTimer>
+#include <QTextCursor>
+#include <QClipboard>
+#include <QGraphicsScene>
 #include <QIcon>
 
-#include "note.h" // For Note::Zone
+#include "note.h" // For Note::Zone"
 #include "config.h"
 
 class QFrame;

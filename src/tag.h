@@ -231,10 +231,8 @@ private:
 };
 
 #include <qicon.h>
-#include <qmenudata.h>
 #include <qstring.h>
 
-#include <KToggleAction>
 
 /** An action that represents a State or a Tag
  * @author Kelvie Wong

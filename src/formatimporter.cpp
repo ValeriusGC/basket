@@ -20,10 +20,10 @@
 
 #include "formatimporter.h"
 
-#include <QtCore/QString>
-#include <QtCore/QStringList>
-#include <QtCore/QDir>
-#include <QtCore/QTextStream>
+#include <QString>
+#include <QStringList>
+#include <QDir>
+#include <QTextStream>
 #include <QtXml/QDomDocument>
 #include <QMessageBox>
 #include <QDebug>

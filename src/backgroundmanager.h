@@ -21,10 +21,10 @@
 #ifndef BACKGROUNDMANAGER_H
 #define BACKGROUNDMANAGER_H
 
-#include <QtCore/QObject>
-#include <QtCore/QList>
-#include <QtCore/QTimer>
-#include <QtGui/QColor>
+#include <QObject>
+#include <QList>
+#include <QTimer>
+#include <QColor>
 
 class QPixmap;
 class QString;

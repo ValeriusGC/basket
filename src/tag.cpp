@@ -20,10 +20,10 @@
 
 #include "tag.h"
 
-#include <QtCore/QDir>
-#include <QtCore/QList>
-#include <QtCore/QTextStream>
-#include <QtGui/QFont>
+#include <QDir>
+#include <QList>
+#include <QTextStream>
+#include <QFont>
 #include <QtXml/QDomDocument>
 #include <QMenu>
 
