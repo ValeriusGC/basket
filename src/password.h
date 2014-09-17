@@ -20,8 +20,6 @@
 #ifndef PASSWORD_H
 #define PASSWORD_H
 
-#include <config.h>
-
 #ifdef HAVE_LIBGPGME
 
 #include "ui_passwordlayout.h"

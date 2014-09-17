@@ -3,7 +3,7 @@
 FIND_PROGRAM(GETTEXT_MSGFMT_EXECUTABLE msgfmt)
 
 IF(NOT GETTEXT_MSGFMT_EXECUTABLE)
-	MESSAGE(
+        MESSAGE(
 "------
                  NOTE: msgfmt not found. Translations will *not* be installed
 ------")
@@ -28,6 +28,7 @@ ELSE(NOT GETTEXT_MSGFMT_EXECUTABLE)
                                 COMMAND ${GETTEXT_MSGFMT_EXECUTABLE} --check -o ${_gmoFile} ${_poFile}
                                 DEPENDS ${_poFile})
                         INSTALL(FILES ${_gmoFile} DESTINATION ${LOCALE_INSTALL_DIR}/${_langCode}/LC_MESSAGES/ RENAME ${catalogname}.mo)
+                        INSTALL(FILES ${_poFileName} DESTINATION ${LOCALE_INSTALL_DIR}/${_langCode}/LC_MESSAGES/ RENAME ${catalogname}.mo)
                 ENDIF( _langCode )
 
         ENDFOREACH(_poFile ${PO_FILES})

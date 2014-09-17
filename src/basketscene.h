@@ -30,7 +30,6 @@
 #include <QIcon>
 
 #include "note.h" // For Note::Zone"
-#include "config.h"
 
 class QFrame;
 class QPixmap;

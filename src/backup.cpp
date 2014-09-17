@@ -38,7 +38,7 @@
 #include <QDialogButtonBox>
 #include <QApplication>
 
-#include <quazip/JlCompress.h>
+#include "JlCompress.h"
 
 #include <unistd.h> // usleep()
 
@@ -86,8 +86,7 @@ void Backup::setFolderAndRestart(const QString &folder, const QString &message)
             qApp->applicationName()));
 
     // Restart the application:
-    // TODO
-//    KRun::runCommand(binaryPath, KGlobal::mainComponent().aboutData()->programName(), KGlobal::mainComponent().aboutData()->programName(), 0);
+    Global::mainWin->slotReboot();
     exit(0);
 }
 

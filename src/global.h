@@ -21,8 +21,6 @@
 #ifndef GLOBAL_H
 #define GLOBAL_H
 
-#include "basket_export.h"
-
 class QString;
 
 class MainWindow;
@@ -39,7 +37,7 @@ class BNPView;
   * the .h files of variables he use.
   * @author Sébastien Laoût
   */
-class BASKET_EXPORT Global
+class Global
 {
 private:
     static QString s_customSavesFolder;

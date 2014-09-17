@@ -54,7 +54,6 @@
 #include "settings.h"
 #include "debugwindow.h"
 #include "htmlexporter.h"
-#include "config.h"
 
 /**
  * LinkDisplayItem definition

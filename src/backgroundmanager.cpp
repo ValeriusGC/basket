@@ -27,6 +27,7 @@
 #include <QImage>
 #include <QPixmap>
 #include <QFileInfo>
+#include <QDebug>
 
 #include "global.h"
 
@@ -256,8 +257,8 @@ QPixmap* BackgroundManager::preview(const QString &image)
     BackgroundEntry *entry = backgroundEntryFor(image);
 
     if (!entry) {
-///     kDebug() << "BackgroundManager: Requested the preview of an unexisting image: " << image;
-        return false;
+        qDebug() << "BackgroundManager: Requested the preview of an unexisting image: " << image;
+        return 0;
     }
 
     // The easiest way: already computed:

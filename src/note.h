@@ -26,7 +26,6 @@
 #include <QDateTime>
 #include <QGraphicsItemGroup>
 
-#include "basket_export.h"
 #include "tag.h"
 
 class BasketScene;
@@ -53,7 +52,7 @@ class NotePrivate;
   * @endcode
   * @author Sébastien Laoût
   */
-class BASKET_EXPORT Note : public QGraphicsItemGroup
+class Note : public QGraphicsItemGroup
 {
 /// CONSTRUCTOR AND DESTRUCTOR:
 public:

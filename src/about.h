@@ -24,13 +24,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include <QDialog>
 
-#include "basket_export.h"
-
 namespace Ui {
     class about;
 }
 
-class BASKET_EXPORT About : public QDialog {
+class About : public QDialog {
     Q_OBJECT
 public:
     About(QWidget *parent = 0);

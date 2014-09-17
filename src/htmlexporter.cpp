@@ -25,7 +25,6 @@
 #include "basketscene.h"
 #include "note.h"
 #include "tools.h"
-#include "config.h"
 #include "linklabel.h"
 #include "notecontent.h"
 
@@ -213,7 +212,7 @@ void HTMLExporter::exportBasket(BasketScene *basket, bool isSubBasket)
     "<html>\n"
     " <head>\n"
     "  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n"
-    "  <meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\"><meta name=\"Generator\" content=\"" << qApp->applicationName() << " " << VERSION << " http://basket.kde.org/\">\n"
+    "  <meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\"><meta name=\"Generator\" content=\"" << qApp->applicationName() << " " << qApp->applicationVersion() << " http://basket.kde.org/\">\n"
     "  <style type=\"text/css\">\n"
 //      "   @media print {\n"
 //      "    span.printable { display: inline; }\n"
@@ -317,7 +316,7 @@ void HTMLExporter::exportBasket(BasketScene *basket, bool isSubBasket)
         "  </div>\n"
         "  <p class=\"credits\">%1</p>\n").arg(
             tr("Made with <a href=\"http://basket.kde.org/\">%1</a> %2, a KDE tool to take notes and keep information at hand.").arg(
-                 qApp->applicationName(), VERSION));
+                 qApp->applicationName(), qApp->applicationVersion()));
 
     // Copy a transparent GIF image in the folder, needed for the JavaScript hack:
     QString gifFileName = "spacer.gif";

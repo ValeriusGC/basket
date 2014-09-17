@@ -28,13 +28,5 @@
         <file>tags/hi16-action-tag_progress_025.png</file>
         <file>tags/hi16-action-tag_progress_075.png</file>
         <file>tags/hi16-action-tag_progress_100.png</file>
-        <file>welcome/Welcome_de.baskets</file>
-        <file>welcome/Welcome_en_US.baskets</file>
-        <file>welcome/Welcome_fr.baskets</file>
-        <file>welcome/Welcome_it.baskets</file>
-        <file>welcome/Welcome_ja.baskets</file>
-        <file>welcome/Welcome_nn.baskets</file>
-        <file>welcome/Welcome_pt.baskets</file>
-        <file>welcome/Welcome_ru.baskets</file>
     </qresource>
 </RCC>

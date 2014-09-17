@@ -27,12 +27,10 @@
 class QApplication;
 class QLabel;
 
-#include "basket_export.h"
-
 /**
  * @author Sébastien Laoût <slaout@linux62.org>
  */
-class BASKET_EXPORT Backup
+class Backup
 {
     Q_DECLARE_TR_FUNCTIONS(Backup)
 public:

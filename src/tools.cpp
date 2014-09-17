@@ -37,7 +37,6 @@
 #include <QUrl>
 
 #include "debugwindow.h"
-#include "config.h"
 
 //cross reference
 #include "global.h"

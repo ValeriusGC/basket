@@ -19,9 +19,11 @@
  ***************************************************************************/
 
 #include <QApplication>
-
-#include <config.h>
-//#include "basket_options.h"
+#include <QCommandLineOption>
+#include <QCommandLineParser>
+#include <QFile>
+#include <QFileInfo>
+#include <QStringList>
 
 #include "mainwindow.h"
 #include "settings.h"
@@ -30,75 +32,63 @@
 
 int main(int argc, char *argv[])
 {
-    // KCmdLineArgs::init will modify argv[0] so we remember it:
-    const char *argv0 = (argc >= 1 ? argv[0] : "");
-
-//    KCmdLineOptions opts;
-//    setupCmdLineOptions(&opts);
-
-//    KCmdLineArgs::init(argc, argv, Global::about());
-//    KCmdLineArgs::addCmdLineOptions(opts);
-
-//    KUniqueApplication::addCmdLineOptions();
-//    // Open the basket archive or template file supplied as argument:
-//    KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
-//    if (args && args->count() >= 1) {
-//        QString fileName = args->arg(args->count() - 1);
-
-//        if (QFile::exists(fileName)) {
-//            QFileInfo fileInfo(fileName);
-//            if (fileInfo.absoluteFilePath().contains(Global::basketsFolder())) {
-//                QString folder = fileInfo.absolutePath().split("/").last();
-//                folder.append("/");
-//                BNPView::s_basketToOpen = folder;
-//                QTimer::singleShot(100, Global::bnpView, SLOT(delayedOpenBasket()));
-//            } else if (!fileInfo.isDir()) { // Do not mis-interpret data-folder param!
-//                // Tags are not loaded until Global::bnpView::lateInit() is called.
-//                // It is called 0ms after the application start.
-//                BNPView::s_fileToOpen = fileName;
-//                QTimer::singleShot(100, Global::bnpView, SLOT(delayedOpenArchive()));
-////              Global::bnpView->openArchive(fileName);
-//                args->clear();
-//            }
-//        }
-//    }
-
-    // Initialize the config file
     QCoreApplication::setOrganizationName("BasketDev");
     QCoreApplication::setOrganizationDomain("basket.kde.org");
     QCoreApplication::setApplicationName("Basket Note Pads");
 
-    QApplication app(argc, argv);
-    Backup::figureOutBinaryPath(argv0, app);
+    int currentExitCode = 0;
 
-    /* Main Window */
-    MainWindow win;
-    win.show();
-//    Global::bnpView->handleCommandLine();
-//    app.setActiveWindow(win);
+    do {
+        QApplication a(argc, argv);
+        Backup::figureOutBinaryPath(argv[0], a);
 
-//    if (Settings::useSystray()) {
-//        // The user wanted to not show the window (but it is already hidden by default, so we do nothing):
-//        if (KCmdLineArgs::parsedArgs() && KCmdLineArgs::parsedArgs()->isSet("start-hidden"))
-//            ;
-//        // When the application is restored by KDE session, restore its state:
-//        else if (app.isSessionRestored()){
-//                if (!Settings::startDocked())
-//                        win->show();
-//        }
-//        // Else, the application has been launched explicitly by the user (KMenu, keyboard shortcut...), so he need it, we show it:
-//        else
-//            win->show();
-//    } else
-//        // No system tray icon: always show:
-//        win->show();
+        QCommandLineParser parser;
+        parser.setApplicationDescription("Basket Note Pads options");
+        parser.addHelpOption();
+        parser.addVersionOption();
+        parser.addPositionalArgument("data-folders", QCoreApplication::tr("Custom folder to load and save baskets and other "
+                                                                   "application data."));
 
-//    // Self-test of the presence of basketui.rc (the only requiered file after basket executable)
-//    if (Global::bnpView->popupMenu("basket") == 0L)
-//        // An error message will be show by BNPView::popupMenu()
-//        return 1;
+        QCommandLineOption debugOption(QStringList() << "d" << "debug", QCoreApplication::tr("Show the debug window"));
+        parser.addOption(debugOption);
 
-    /* Go */
-    int result = app.exec();
-    exit(result); // Do not clean up memory to not crash while deleting the KApplication, or do not hang up on KDE exit
+        QCommandLineOption hiddenOption(QStringList() << "h" << "start-hidden", QCoreApplication::tr("Automatically hide the main window in the system tray on "
+                                                                                                     "startup."));
+        parser.addOption(hiddenOption);
+
+        // Process the actual command line arguments given by the user
+        parser.process(a);
+
+        const QStringList args = parser.positionalArguments();
+        // data is args.at(0)
+
+        bool debug = parser.isSet(debugOption);
+        bool hidden = parser.isSet(hiddenOption);
+	
+        MainWindow w;
+        w.show();
+
+        for (QStringList::const_iterator it = args.begin(); it != args.end(); ++it) {
+            QString fileName = *it;
+            if (QFile::exists(fileName)) {
+                   QFileInfo fileInfo(fileName);
+                   if (fileInfo.absoluteFilePath().contains(Global::basketsFolder())) {
+                       QString folder = fileInfo.absolutePath().split("/").last();
+                       folder.append("/");
+                       BNPView::s_basketToOpen = folder;
+                       Global::bnpView->delayedOpenBasket();
+                   } else if (!fileInfo.isDir()) { // Do not mis-interpret data-folder param!
+                       BNPView::s_fileToOpen = fileName;
+                       Global::bnpView->delayedOpenArchive();
+                   }
+            }
+        }
+	
+        if (hidden)
+          w.hide();
+
+            currentExitCode = a.exec();
+    } while (currentExitCode == MainWindow::EXIT_CODE_REBOOT);
+
+    return currentExitCode;
 }

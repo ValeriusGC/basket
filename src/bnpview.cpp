@@ -42,6 +42,9 @@
 #include <QApplication>
 #include <QProgressDialog>
 #include <QFileDialog>
+#include <QDBusConnection>
+#include <QSettings>
+#include <QResource>
 
 #include <cstdlib>
 #include <unistd.h> // usleep
@@ -75,10 +78,6 @@
 #include "history.h"
 #include "mainwindow.h"
 
-#include <quazip/JlCompress.h>
-
-#include "bnpviewadaptor.h"
-
 /** class BNPView: */
 
 const int BNPView::c_delayTooltipTime = 275;
@@ -99,7 +98,6 @@ BNPView::BNPView(QWidget *parent, const char *name, QMainWindow *aGUIClient,
         , m_tryHideTimer(0)
         , m_hideTimer(0)
 {
-    new BNPViewAdaptor(this);
     QDBusConnection dbus = QDBusConnection::sessionBus();
     dbus.registerObject("/BNPView", this);
 
@@ -236,46 +234,14 @@ void BNPView::lateInit()
 
 void BNPView::addWelcomeBaskets()
 {
-//        Archive::open("://welcome/Welcome_de.baskets");
-//        Archive::save(currentBasket(), true, "/home/keelan/Welcome_de.baskets");
-//        delBasket();
-
-//        Archive::open("://welcome/Welcome_en_US.baskets");
-//        Archive::save(currentBasket(), true, "/home/keelan/Welcome_en_US.baskets");
-//        delBasket();
-
-//        Archive::open("://welcome/Welcome_fr.baskets");
-//        Archive::save(currentBasket(), true, "/home/keelan/Welcome_fr.baskets");
-//        delBasket();
-
-//        Archive::open("://welcome/Welcome_it.baskets");
-//        Archive::save(currentBasket(), true, "/home/keelan/Welcome_it.baskets");
-//        delBasket();
-
-//        Archive::open("://welcome/Welcome_ja.baskets");
-//        Archive::save(currentBasket(), true, "/home/keelan/Welcome_ja.baskets");
-//        delBasket();
-
-//        Archive::open("://welcome/Welcome_nn.baskets");
-//        Archive::save(currentBasket(), true, "/home/keelan/Welcome_nn.baskets");
-//        delBasket();
-
-//        Archive::open("://welcome/Welcome_pt.baskets");
-//        Archive::save(currentBasket(), true, "/home/keelan/Welcome_pt.baskets");
-//        delBasket();
-
-//        Archive::open("://welcome/Welcome_ru.baskets");
-//        Archive::save(currentBasket(), true, "/home/keelan/Welcome_ru.baskets");
-//        delBasket();
-
     // Possible paths where to find the welcome basket archive, trying the translated one, and falling back to the English one:
     QStringList possiblePaths;
     QLocale l;
     if (QLocale().name() == QString("UTF-8")) { // Welcome baskets are encoded in UTF-8. If the system is not, then use the English version: // TODO check this encoding thingo works
-        possiblePaths.append("://welcome/Welcome_" + l.languageToString(l.language()) + ".baskets");
-        possiblePaths.append("://welcome/Welcome_" + l.languageToString(l.language()).split("_")[0] + ".baskets");
+        possiblePaths.append("welcome/Welcome_" + l.languageToString(l.language()) + ".baskets");
+        possiblePaths.append("welcome/Welcome_" + l.languageToString(l.language()).split("_")[0] + ".baskets");
     }
-    possiblePaths.append("://welcome/Welcome_en_US.baskets");
+    possiblePaths.append("welcome/Welcome_en_US.baskets");
 
     // Take the first EXISTING basket archive found:
     QDir dir;

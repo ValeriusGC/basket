@@ -23,8 +23,6 @@
 #include <QObject>
 #include <QPixmap>
 
-#include "basket_export.h"
-
 class QStatusBar;
 class QWidget;
 class QLabel;
@@ -32,7 +30,7 @@ class QLabel;
 /**
     @author Sébastien Laoût <slaout@linux62.org>
 */
-class BASKET_EXPORT BasketStatusBar : public QObject
+class BasketStatusBar : public QObject
 {
     Q_OBJECT
 public:

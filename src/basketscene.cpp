@@ -85,8 +85,6 @@
 #include "focusedwidgets.h"
 #include "mainwindow.h"
 
-#include "config.h"
-
 #ifdef HAVE_LIBGPGME
 #include "kgpgme.h"
 #endif

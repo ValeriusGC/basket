@@ -28,7 +28,6 @@
 #include <QMainWindow>
 
 #include "global.h"
-#include "basket_export.h"
 
 class QDomDocument;
 class QDomElement;
@@ -60,7 +59,7 @@ class Tag;
 class State;
 class Note;
 
-class BASKET_EXPORT BNPView : public QSplitter
+class BNPView : public QSplitter
 {
     Q_OBJECT
     Q_CLASSINFO("D Bus Interface", "org.basket.dbus");

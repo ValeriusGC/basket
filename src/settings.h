@@ -25,7 +25,6 @@
 #include <QDialog>
 #include <QAction>
 
-#include "basket_export.h"
 #include "bnpview.h"
 #include "systemtray.h"
 #include "mainwindow.h"
@@ -45,7 +44,7 @@ class LinkLook;
 class LinkLookEditWidget;
 class RunCommandRequester;
 
-class BASKET_EXPORT SettingsDialog : public QDialog
+class SettingsDialog : public QDialog
 {
     Q_OBJECT
 public:
@@ -56,7 +55,7 @@ private:
     QDialogButtonBox *buttonBox;
 };
 
-class BASKET_EXPORT GeneralPage : public QWidget
+class GeneralPage : public QWidget
 {
     Q_OBJECT
 public:
@@ -83,7 +82,7 @@ private:
     QLineEdit        *m_timeToShowOnMouseIn;
 };
 
-class BASKET_EXPORT BasketsPage : public QWidget
+class BasketsPage : public QWidget
 {
     Q_OBJECT
 public:
@@ -113,7 +112,7 @@ private:
     QLineEdit        *m_reLockTimeoutMinutes;
 };
 
-class BASKET_EXPORT NewNotesPage : public QWidget
+class NewNotesPage : public QWidget
 {
     Q_OBJECT
 public:
@@ -140,7 +139,7 @@ private:
     QCheckBox           *m_viewSoundFileContent;
 };
 
-class BASKET_EXPORT NotesAppearancePage : public QWidget
+class NotesAppearancePage : public QWidget
 {
     Q_OBJECT
 public:
@@ -160,7 +159,7 @@ private:
     LinkLookEditWidget  *m_crossReferenceLook;
 };
 
-class BASKET_EXPORT ApplicationsPage : public QWidget
+class ApplicationsPage : public QWidget
 {
     Q_OBJECT
 public:
@@ -185,7 +184,7 @@ private:
 /** Handle all global variables (to avoid lot of extern declarations)
   * @author Sébastien Laoût
   */
-class BASKET_EXPORT Settings // FIXME: Distaptch new config events ?
+class Settings // FIXME: Distaptch new config events ?
 {
 protected:
     /** Main window */

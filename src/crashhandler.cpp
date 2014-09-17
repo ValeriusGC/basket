@@ -11,7 +11,6 @@
  ***************************************************************************/
 
 #include "crashhandler.h"
-#include "config.h"
 
 //#include <KDE/KAboutData>
 //#include <KDE/KCmdLineArgs>

@@ -20,8 +20,6 @@
 #ifndef KGPGME_H
 #define KGPGME_H
 
-#include <config.h>
-
 #ifdef HAVE_LIBGPGME
 
 #include <gpgme.h>

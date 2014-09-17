@@ -36,7 +36,7 @@
 #include <QProgressDialog>
 #include <QFile>
 
-#include <JlCompress.h>
+#include "JlCompress.h"
 
 #include <QStack>
 
@@ -327,7 +327,7 @@ void Archive::open(const QString &path)
                 }
 
                 // Get the archive file:
-                QString tempArchive = tempFolder + "temp-archive.tar.gz";
+                QString tempArchive = tempFolder + "temp-archive.zip";
                 QFile archiveFile(tempArchive);
                 file.seek(stream.pos());
                 if (archiveFile.open(QIODevice::WriteOnly)) {

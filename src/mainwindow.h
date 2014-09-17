@@ -41,6 +41,7 @@ public:
     /** Construtor, initializer and destructor */
     MainWindow(QWidget *parent = 0);
     ~MainWindow();
+    static int const EXIT_CODE_REBOOT;
 private:
     void setupActions();
     void setupMenus();
@@ -56,6 +57,7 @@ public slots:
     void showAboutDialog();
     void minimizeRestore();
     void quit();
+    void slotReboot();
 
 protected:
     bool queryExit();

@@ -37,16 +37,13 @@
 #include "bnpview.h"
 #include "basketstatusbar.h"
 
+int const MainWindow::EXIT_CODE_REBOOT = -123456789;
+
 /** Container */
 
 MainWindow::MainWindow(QWidget *parent)
         : QMainWindow(parent), m_quit(false)
 {
-    if (QIcon::themeName().isEmpty() || QIcon::themeName() == "hicolor")
-        QIcon::setThemeName("oxygen");
-    qDebug() << QIcon::themeSearchPaths();
-    qDebug() << QIcon::themeName();
-
     Global::mainWin = this;
     setupActions();
     setupMenus();
@@ -386,3 +383,8 @@ void MainWindow::minimizeRestore()
         show();
 }
 
+void MainWindow::slotReboot()
+{
+    qDebug() << "Performing application reboot..";
+    qApp->exit( MainWindow::EXIT_CODE_REBOOT );
+}

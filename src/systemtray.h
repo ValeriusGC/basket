@@ -52,4 +52,4 @@ private:
     QMenu *m_popupmenu;
 };
 
-#endif SYSTEMTRAY_H
+#endif // SYSTEMTRAY_H
