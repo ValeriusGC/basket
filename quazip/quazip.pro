@@ -1,5 +1,5 @@
 TEMPLATE = lib
-CONFIG += qt warn_on
+CONFIG += qt warn_on staticlib
 QT -= gui
 
 # The ABI version.
@@ -39,9 +39,8 @@ unix:!symbian {
     target.path=$$PREFIX/lib/$${LIB_ARCH}
     INSTALLS += headers target
 
-	OBJECTS_DIR=.obj
-	MOC_DIR=.moc
-	
+        OBJECTS_DIR=.obj
+        MOC_DIR=.moc
 }
 
 win32 {
@@ -79,3 +78,16 @@ symbian {
         BLD_INF_RULES.prj_exports += "$$header $$exportheaders.path/$$basename(header)"
     }
 }
+
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../zlib/release/ -lzlib
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../zlib/debug/ -lzlib
+else:unix: LIBS += -L$$OUT_PWD/../zlib/ -lzlib
+
+INCLUDEPATH += $$PWD/../zlib
+DEPENDPATH += $$PWD/../zlib
+
+win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../zlib/release/libzlib.a
+else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../zlib/debug/libzlib.a
+else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../zlib/release/zlib.lib
+else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../zlib/debug/zlib.lib
+else:unix: PRE_TARGETDEPS += $$OUT_PWD/../zlib/libzlib.a
