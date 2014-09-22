@@ -24,22 +24,22 @@
 #include <cstdio>         //popen, fread
 #include <sys/types.h>    //pid_t
 //#include <sys/wait.h>     //waitpid
-#include <unistd.h>       //write, getppid
+//#include <unistd.h>       //write, getppid
 
 
 static QString
 runCommand(const QByteArray &command)
 {
-    static const uint SIZE = 40960; //40 KiB
-    static char stdoutBuf[ SIZE ];
+//    static const uint SIZE = 40960; //40 KiB
+//    static char stdoutBuf[ SIZE ];
 
 //        debug() << "Running: " << command << endl;
 
-    FILE *process = ::popen(command, "r");
-    stdoutBuf[ std::fread(static_cast<void*>(stdoutBuf), sizeof(char), SIZE-1, process)] = '\0';
-    ::pclose(process);
+//    FILE *process = ::popen(command, "r");
+//    stdoutBuf[ std::fread(static_cast<void*>(stdoutBuf), sizeof(char), SIZE-1, process)] = '\0';
+//    ::pclose(process);
 
-    return QString::fromLocal8Bit(stdoutBuf);
+//    return QString::fromLocal8Bit(stdoutBuf);
 }
 
 void

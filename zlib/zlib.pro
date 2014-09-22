@@ -1,7 +1,11 @@
 TEMPLATE = lib
-CONFIG += staticlib
-
+CONFIG += lib
 QT -= core gui
+
+TARGET = zlib
+target.path = $$OUT_PWD/../basket
+INSTALLS += target
+DESTDIR = $$OUT_PWD/../basket
 
 HEADERS += \
         crc32.h \
@@ -13,6 +17,7 @@ HEADERS += \
         inftrees.h \
         trees.h \
         zutil.h \
+        zconf.h
 
 SOURCES += \
         adler32.c \

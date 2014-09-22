@@ -2,4 +2,4 @@
 *.kdev4
 qtcreator-build
 /.project
-*.user
+*.user*

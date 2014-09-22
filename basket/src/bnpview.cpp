@@ -175,7 +175,7 @@ void BNPView::lateInit()
         }
     }
 #else
-    #warning Proper fix for the systray problem
+//    #warning Proper fix for the systray problem
 #endif
 
 

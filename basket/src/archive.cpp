@@ -35,10 +35,8 @@
 #include <QDebug>
 #include <QProgressDialog>
 #include <QFile>
-
-#include "JlCompress.h"
-
 #include <QStack>
+#include <quazip/JlCompress.h>
 
 #include "global.h"
 #include "bnpview.h"

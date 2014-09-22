@@ -1,4 +1,3 @@
- 
 FORMS += \
     $$PWD/about.ui \
     $$PWD/backupdialog.ui \

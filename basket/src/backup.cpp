@@ -37,11 +37,7 @@
 #include <QSettings>
 #include <QDialogButtonBox>
 #include <QApplication>
-
-#include "JlCompress.h"
-
-#include <unistd.h> // usleep()
-
+#include <quazip/JlCompress.h>
 
 /**
  * Backups are wrapped in a .tar.gz, inside that folder name.
