@@ -57,9 +57,6 @@ public:
     static QString backgroundsFolder(); /// << @return e.g. "/home/username/.kde/share/apps/basket/backgrounds/".
     static QString templatesFolder();   /// << @return e.g. "/home/username/.kde/share/apps/basket/templates/".
     static QString tempCutFolder();     /// << @return e.g. "/home/username/.kde/share/apps/basket/temp-cut/".   (was ".tmp/")
-
-    // Various Things:
-    static QString openNoteIcon();      /// << @return the icon used for the "Open" action on notes.
 };
 
 #endif // GLOBAL_H

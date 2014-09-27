@@ -24,26 +24,19 @@ TARGET = quazip
 # 2.0, VERSION to 2.0.0.
 # And so on.
 
-
 # This one handles dllimport/dllexport directives.
 DEFINES += QUAZIP_BUILD
-
-# You'll need to define this one manually if using a build system other
-# than qmake or using QuaZIP sources directly in your project.
-CONFIG(staticlib): DEFINES += QUAZIP_STATIC
 
 # Input
 include(quazip.pri)
 
-win32 {
-    DESTDIR = $$OUT_PWD/../basket
-    # workaround for qdatetime.h macro bug
-    DEFINES += NOMINMAX
-}
+DESTDIR = $$OUT_PWD/../basket/
 
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../zlib/release/ -lzlib
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../zlib/debug/ -lzlib
-else:unix: LIBS += -L$$OUT_PWD/../zlib/ -lzlib
+# workaround for qdatetime.h macro bug
+DEFINES += NOMINMAX
+
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../basket/ -lzlib
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../basket/ -lzlib
 
 INCLUDEPATH += $$PWD/../zlib
 DEPENDPATH += $$PWD/../zlib

@@ -84,19 +84,14 @@
 
 const int BNPView::c_delayTooltipTime = 275;
 
-BNPView::BNPView(QWidget *parent, const char *name, QMainWindow *aGUIClient,
-                 BasketStatusBar *bar, QToolBar *mainbar, QToolBar *editbar)
+BNPView::BNPView(QWidget *parent, const char *name, MainWindow *aGUIClient,
+                 BasketStatusBar *bar)
         : QSplitter(Qt::Horizontal, parent)
-        , m_actLockBasket(0)
-        , m_actPassBasket(0)
         , m_loading(true)
         , m_newBasketPopup(false)
-        , m_regionGrabber(0)
         , m_passiveDroppedSelection(0)
         , m_guiClient(aGUIClient)
         , m_statusbar(bar)
-        , m_mainbar(mainbar)
-        , m_editbar(editbar)
         , m_tryHideTimer(0)
         , m_hideTimer(0)
 {
@@ -106,9 +101,6 @@ BNPView::BNPView(QWidget *parent, const char *name, QMainWindow *aGUIClient,
 #endif
 
     setObjectName(name);
-
-    /* Settings */
-    Settings::loadConfig();
 
     Global::bnpView = this;
 
@@ -140,9 +132,6 @@ BNPView::~BNPView()
 
     Global::bnpView = 0;
 
-    delete Global::systemTray;
-    Global::systemTray = 0;
-    delete m_colorPicker;
     delete m_statusbar;
     delete m_history;
     m_history = 0;
@@ -175,7 +164,7 @@ void BNPView::lateInit()
         }
     }
 #else
-//    #warning Proper fix for the systray problem
+    #warning Proper fix for the systray problem
 #endif
 
 
@@ -184,18 +173,10 @@ void BNPView::lateInit()
     Settings::setStartDocked(true);
     Settings::saveConfig();
 
-    /* System tray icon */
-    Global::systemTray = new SystemTray(Global::mainWin);
-    Global::systemTray->setIcon(QIcon::fromTheme("basket"));
-    connect(Global::systemTray, SIGNAL(showPart()), this, SIGNAL(showPart()));
-    if (Settings::useSystray())
-        Global::systemTray->show();
-
     // Load baskets
     DEBUG_WIN << "Baskets are loaded from " + Global::basketsFolder();
 
     NoteDrag::createAndEmptyCuttingTmpFolder(); // If last exec hasn't done it: clean the temporary folder we will use
-    Tag::loadTags(); // Tags should be ready before loading baskets, but tags need the mainContainer to be ready to create KActions!
     load();
 
     // If no basket has been found, try to import from an older version,
@@ -302,14 +283,6 @@ void BNPView::initialize()
     connect(m_tree, SIGNAL(itemExpanded(QTreeWidgetItem*)),  this, SIGNAL(basketChanged()));
     connect(m_tree, SIGNAL(itemCollapsed(QTreeWidgetItem*)), this, SIGNAL(basketChanged()));
 
-    connect(this, SIGNAL(basketChanged()),          this, SLOT(slotBasketChanged()));
-
-    connect(m_history, SIGNAL(canRedoChanged(bool)), this, SLOT(canUndoRedoChanged()));
-    connect(m_history, SIGNAL(canUndoChanged(bool)), this, SLOT(canUndoRedoChanged()));
-
-    setupActions();
-    InlineEditors::instance()->initToolBars(m_editbar);
-
     /// What's This Help for the tree:
     m_tree->setWhatsThis(tr(
                              "<h2>Basket Tree</h2>"
@@ -319,248 +292,6 @@ void BNPView::initialize()
                              "You can browse between them by clicking a basket to open it, or reorganize them using drag and drop."));
 
     setTreePlacement(Settings::treeOnLeft());
-}
-
-void BNPView::setupActions()
-{
-    QAction *a1 = NULL;
-    QMenu *m1, *m2 = NULL;
-
-    /** Basket : **************************************************************/
-    m1 = Global::mainWin->m_basketMenu;
-
-    m2 = m1->addMenu("&New");
-
-    actNewBasket = m2->addAction(QIcon::fromTheme("basket"), tr("&New Basket..."), this, SLOT(askNewBasket()),
-                       QKeySequence::New);
-    actNewSubBasket = m2->addAction(tr("New &Sub-Basket..."), this, SLOT(askNewSubBasket()),
-                       QKeySequence("Ctrl+Shift+N"));
-    actNewSiblingBasket = m2->addAction(tr("New Si&bling Basket..."), this, SLOT(askNewSiblingBasket()));
-
-    m1->addSeparator();
-
-    m_actPropBasket = m1->addAction(QIcon::fromTheme("document-properties"), tr("&Properties..."), this, SLOT(propBasket()),
-                  QKeySequence("F2"));
-
-    m2 = m1->addMenu("&Export");
-
-    m_actSaveAsArchive = m2->addAction(QIcon::fromTheme("basket"), tr("&Basket Archive..."), this, SLOT(saveAsArchive()));
-    m_actExportToHtml = m2->addAction(QIcon::fromTheme("text-html"), tr("&HTML Web Page..."), this, SLOT(exportToHTML()));
-
-    m2 = m1->addMenu("&Sort");
-
-    m_actSortChildrenAsc = m2->addAction(QIcon::fromTheme("view-sort-ascending"), tr("Sort Children Ascending"), this, SLOT(sortChildrenAsc()));
-    m_actSortChildrenDesc = m2->addAction(QIcon::fromTheme("view-sort-descending"), tr("Sort Children Descending"), this, SLOT(sortChildrenDesc()));
-    m_actSortSiblingsAsc = m2->addAction(QIcon::fromTheme("view-sort-ascending"), tr("Sort Siblings Ascending"), this, SLOT(sortSiblingsAsc()));
-    m_actSortSiblingsDesc = m2->addAction(QIcon::fromTheme("view-sort-descending"), tr("Sort Siblings Descending"), this, SLOT(sortSiblingsDesc()));
-
-    m_actDelBasket = m1->addAction(tr("&Remove"), this, SLOT(delBasket()));
-
-    m1->addSeparator();
-
-#ifdef HAVE_LIBGPGME
-    m_actPassBasket = m1->addAction(tr("Pass&word..."), this, SLOT(password()));
-    m_actLockBasket = m1->addAction(tr("&Lock"), this, SLOT(lockBasket()), QKeySequence("Ctrl+L"));
-#endif
-
-    m2 = m1->addMenu("&Import");
-
-    m_actOpenArchive = m2->addAction(QIcon::fromTheme("basket"), tr("&Basket Archive..."), this, SLOT(openArchive()));
-    m2->addSeparator();
-    m2->addAction(QIcon::fromTheme("knotes"), tr("K&Notes"), this, SLOT(importKNotes()));
-    m2->addAction(QIcon::fromTheme("kjots"), tr("K&Jots"), this, SLOT(importKJots()));
-    m2->addAction(QIcon::fromTheme("knowit"), tr("&KnowIt..."), this, SLOT(importKnowIt()));
-    m2->addAction(QIcon::fromTheme("tuxcards"), tr("Tux&Cards..."), this, SLOT(importTuxCards()));
-    m2->addSeparator();
-    m2->addAction(QIcon::fromTheme("gnome"), tr("&Sticky Notes"), this, SLOT(importStickyNotes()));
-    m2->addAction(QIcon::fromTheme("tintin"), tr("&Tomboy"), this, SLOT(importTomboy()));
-    m2->addSeparator();
-    m2->addAction(QIcon::fromTheme("text-xml"), tr("J&reepad XML File..."), this, SLOT(importJreepadFile()));
-    m2->addAction(QIcon::fromTheme("text-plain"), tr("Text &File..."), this, SLOT(importTextFile()));
-
-    m1->addAction(tr("&Backup && Restore..."), this, SLOT(backupRestore()));
-
-    m1->addSeparator();
-
-    a1 = m1->addAction(tr("&Check && Cleanup..."), this, SLOT(checkCleanup()));
-//    if (KCmdLineArgs::parsedArgs() && KCmdLineArgs::parsedArgs()->isSet("debug")) { // TODO
-//        a1->setEnabled(true);
-//    } else {
-//        a1->setEnabled(false);
-//    }
-
-    m1->addSeparator();
-
-    m_actHideWindow = m1->addAction(tr("&Hide Window"), this, SLOT(hideOnEscape()), QKeySequence::Close);
-    m_actHideWindow->setEnabled(Settings::useSystray()); // Init here !
-
-    /** Edit : ****************************************************************/
-    m1 = Global::mainWin->m_editMenu;
-
-    m_actCutNote  = m1->addAction(QIcon::fromTheme("edit-cut"), tr("C&ut"), this, SLOT(cutNote()), QKeySequence(QKeySequence::Cut));
-    m_actCopyNote = m1->addAction(QIcon::fromTheme("edit-copy"), tr("&Copy"), this, SLOT(copyNote()), QKeySequence(QKeySequence::Copy));
-    m_actPaste = m1->addAction(QIcon::fromTheme("edit-paste"), tr("&Paste"), this, SLOT(pasteInCurrentBasket()), QKeySequence(QKeySequence::Paste));
-    m_actDelNote = m1->addAction(QIcon::fromTheme("edit-delete"), tr("D&elete"), this, SLOT(delNote()), QKeySequence("Delete"));
-
-    m1->addSeparator();
-    m_actSelectAll = m1->addAction(QIcon::fromTheme("edit-select-all"), tr("Select &All"), this, SLOT(slotSelectAll()));
-    m_actSelectAll->setStatusTip(tr("Selects all notes"));
-
-    m_actUnselectAll = m1->addAction(tr("U&nselect All"), this, SLOT(slotUnselectAll()));
-    m_actUnselectAll->setStatusTip(tr("Unselects all selected notes"));
-
-    m_actInvertSelection = m1->addAction(tr("&Invert Selection"), this, SLOT(slotInvertSelection()), QKeySequence(Qt::CTRL + Qt::Key_Asterisk));
-    m_actInvertSelection->setStatusTip(tr("Inverts the current selection of notes"));
-
-    m1->addSeparator();
-    m_actShowFilter = m1->addAction(QIcon::fromTheme("view-filter"), tr("&Filter"), this, SLOT(showHideFilterBar(bool)), QKeySequence::Find);
-    m_actShowFilter->setCheckable(true);
-
-    m_actFilterAllBaskets = m1->addAction(QIcon::fromTheme("edit-find"), tr("&Search All"), this, SLOT(toggleFilterAllBaskets(bool)), QKeySequence("Ctrl+Shift+F"));
-    m_actFilterAllBaskets->setCheckable(true);
-
-    m_actResetFilter = m1->addAction(QIcon::fromTheme("edit-clear-locationbar-rtl"), tr("&Reset Filter"), this, SLOT(slotResetFilter()), QKeySequence("Ctrl+R"));
-
-    /** Go : ******************************************************************/
-    m1 = Global::mainWin->m_goMenu;
-
-    m_actPreviousBasket = m1->addAction(QIcon::fromTheme("go-previous"), tr("&Previous Basket"), this, SLOT(goToPreviousBasket()), QKeySequence("Alt+Left"));
-    m_actNextBasket = m1->addAction(QIcon::fromTheme("go-next"), tr("&Next Basket"), this, SLOT(goToNextBasket()), QKeySequence("Alt+Right"));
-    m_actFoldBasket = m1->addAction(QIcon::fromTheme("go-up"), tr("&Fold Basket"), this, SLOT(foldBasket()), QKeySequence("Alt+Up"));
-    m_actExpandBasket = m1->addAction(QIcon::fromTheme("go-down"), tr("&Expand Basket"), this, SLOT(expandBasket()), QKeySequence("Alt+Down"));
-
-    /** Note : ****************************************************************/
-    m1 = Global::mainWin->m_noteMenu;
-
-    m_actEditNote = m1->addAction(tr("&Edit..."), this, SLOT(editNote()), QKeySequence("Return"));
-    m_actOpenNote = m1->addAction(QIcon::fromTheme("window-new"), tr("&Open"), this, SLOT(openNote()), QKeySequence("F9"));
-    m_actOpenNoteWith = m1->addAction(tr("Open &With..."), this, SLOT(openNoteWith), QKeySequence("Shift+F9"));
-    m_actSaveNoteAs = m1->addAction(tr("&Save to File..."), this, SLOT(saveNoteAs()), QKeySequence("F10"));
-
-    m1->addSeparator();
-
-    m_actGroup = m1->addAction(QIcon::fromTheme("mail-attachment"), tr("&Group"), this, SLOT(noteGroup()), QKeySequence("Ctrl+G"));
-    m_actUngroup = m1->addAction(tr("U&ngroup"), this, SLOT(noteUngroup()), QKeySequence("Ctrl+Shift+G"));
-
-    m1->addSeparator();
-
-    m_actMoveOnTop = m1->addAction(QIcon::fromTheme("arrow-up-double"), tr("Move on &Top"), this, SLOT(moveOnTop()), QKeySequence("Ctrl+Shift+Home"));
-    m_actMoveNoteUp = m1->addAction(QIcon::fromTheme("arrow-up"), tr("Move &Up"), this, SLOT(moveNoteUp()), QKeySequence("Ctrl+Shift+Up"));
-    m_actMoveNoteDown = m1->addAction(QIcon::fromTheme("arrow-down"), tr("Move &Down"), this, SLOT(moveNoteDown()), QKeySequence("Ctrl+Shift+Down"));
-    m_actMoveOnBottom = m1->addAction(QIcon::fromTheme("arrow-down-double"), tr("Move on &Bottom"), this, SLOT(moveOnBottom()), QKeySequence("Ctrl+Shift+End"));
-
-    /** Insert : **************************************************************/
-    m1 = Global::mainWin->m_insertMenu;
-
-    m_actInsertHtml = m1->addAction(QIcon::fromTheme("text-html"), tr("&Text"));
-    m_actInsertHtml->setShortcut(QKeySequence("Insert"));
-
-    m_actInsertImage = m1->addAction(QIcon::fromTheme("image-x-generic"), tr("&Image"));
-
-    m_actInsertLink = m1->addAction(QIcon::fromTheme("link"), tr("&Link"));
-    m_actInsertLink->setShortcut(QKeySequence("Ctrl+Y"));
-
-    m_actInsertCrossReference = m1->addAction(QIcon::fromTheme("link"), tr("Cross &Reference"));
-
-    m_actInsertLauncher = m1->addAction(QIcon::fromTheme("launch"), tr("L&auncher"));
-
-    m_actInsertColor = m1->addAction(QIcon::fromTheme("colorset"), tr("&Color"));
-
-    m1->addSeparator();
-
-    m_actGrabScreenshot = m1->addAction(QIcon::fromTheme("ksnapshot"), tr("Grab Screen &Zone"), this, SLOT(grabScreenshot()));
-
-    m_colorPicker = new DesktopColorPicker();
-
-    m_actColorPicker = m1->addAction(QIcon::fromTheme("kcolorchooser"), tr("C&olor from Screen"), this, SLOT(slotColorFromScreen()));
-
-    connect(m_colorPicker, SIGNAL(pickedColor(const QColor&)),
-            this, SLOT(colorPicked(const QColor&)));
-    connect(m_colorPicker, SIGNAL(canceledPick()),
-            this, SLOT(colorPickingCanceled()));
-
-    m1->addSeparator();
-
-    m_actLoadFile = m1->addAction(QIcon::fromTheme("document-import"), tr("Load From &File..."));
-
-    m_actImportKMenu = m1->addAction(QIcon::fromTheme("kmenu"), tr("Import Launcher from &KDE Menu..."));
-
-    m_actImportIcon = m1->addAction(QIcon::fromTheme("icons"), tr("Im&port Icon..."));
-
-    m_insertActions.append(m_actInsertHtml);
-    m_insertActions.append(m_actInsertLink);
-    m_insertActions.append(m_actInsertCrossReference);
-    m_insertActions.append(m_actInsertImage);
-    m_insertActions.append(m_actInsertColor);
-    m_insertActions.append(m_actImportKMenu);
-    m_insertActions.append(m_actInsertLauncher);
-    m_insertActions.append(m_actImportIcon);
-    m_insertActions.append(m_actLoadFile);
-    m_insertActions.append(m_actColorPicker);
-    m_insertActions.append(m_actGrabScreenshot);
-
-    QSignalMapper *insertEmptyMapper  = new QSignalMapper(this);
-    insertEmptyMapper->setMapping(m_actInsertHtml,     NoteType::Html);
-    insertEmptyMapper->setMapping(m_actInsertImage,    NoteType::Image);
-    insertEmptyMapper->setMapping(m_actInsertLink,     NoteType::Link);
-    insertEmptyMapper->setMapping(m_actInsertCrossReference,NoteType::CrossReference);
-    insertEmptyMapper->setMapping(m_actInsertColor,    NoteType::Color);
-    insertEmptyMapper->setMapping(m_actInsertLauncher, NoteType::Launcher);
-    connect(m_actInsertHtml,     SIGNAL(triggered()), insertEmptyMapper, SLOT(map()));
-    connect(m_actInsertImage,    SIGNAL(triggered()), insertEmptyMapper, SLOT(map()));
-    connect(m_actInsertLink,     SIGNAL(triggered()), insertEmptyMapper, SLOT(map()));
-    connect(m_actInsertCrossReference,SIGNAL(triggered()),insertEmptyMapper, SLOT(map()));
-    connect(m_actInsertColor,    SIGNAL(triggered()), insertEmptyMapper, SLOT(map()));
-    connect(m_actInsertLauncher, SIGNAL(triggered()), insertEmptyMapper, SLOT(map()));
-
-    QSignalMapper *insertWizardMapper = new QSignalMapper(this);
-    insertWizardMapper->setMapping(m_actImportKMenu,  1);
-    insertWizardMapper->setMapping(m_actImportIcon,   2);
-    insertWizardMapper->setMapping(m_actLoadFile,     3);
-    connect(m_actImportKMenu, SIGNAL(triggered()), insertWizardMapper, SLOT(map()));
-    connect(m_actImportIcon,  SIGNAL(triggered()), insertWizardMapper, SLOT(map()));
-    connect(m_actLoadFile,    SIGNAL(triggered()), insertWizardMapper, SLOT(map()));
-
-    connect(insertEmptyMapper,  SIGNAL(mapped(int)), this, SLOT(insertEmpty(int)));
-    connect(insertWizardMapper, SIGNAL(mapped(int)), this, SLOT(insertWizard(int)));
-
-    /** Help : ****************************************************************/
-    m1 = Global::mainWin->m_helpMenu;
-
-    m1->addAction(tr("&Welcome Baskets"), this, SLOT(addWelcomeBaskets()));
-
-    /* LikeBack */
-    Global::likeBack = new LikeBack(LikeBack::AllButtons, /*showBarByDefault=*/false);
-    Global::likeBack->setServer("basket.linux62.org", "/likeback/send.php");
-
-// There are too much comments, and people reading comments are more and more international, so we accept only English:
-//  Global::likeBack->setAcceptedLanguages(QStringList::split(";", "en;fr"), tr("Please write in English or French."));
-
-//  if (isPart())
-//      Global::likeBack->disableBar(); // See BNPView::shown() and BNPView::hide().
-
-    Global::likeBack->sendACommentAction(m1); // Just create it!
-
-    /** Main toolbar : ********************************************************/
-    m_mainbar->addAction(actNewBasket);
-    m_mainbar->addAction(m_actPropBasket);
-
-    m_mainbar->addSeparator();
-    m_mainbar->addAction(m_actPreviousBasket);
-    m_mainbar->addAction(m_actNextBasket);
-
-    m_mainbar->addSeparator();
-    m_mainbar->addAction(m_actCutNote);
-    m_mainbar->addAction(m_actCopyNote);
-    m_mainbar->addAction(m_actPaste);
-    m_mainbar->addAction(m_actDelNote);
-
-    m_mainbar->addSeparator();
-    m_mainbar->addAction(m_actGroup);
-
-    m_mainbar->addSeparator();
-    m_mainbar->addAction(m_actShowFilter);
-    m_mainbar->addAction(m_actFilterAllBaskets);
 }
 
 BasketListViewItem* BNPView::topLevelItem(int i)
@@ -884,13 +615,7 @@ bool BNPView::convertTexts()
 
 void BNPView::toggleFilterAllBaskets(bool doFilter)
 {
-    // Set the state:
-    m_actFilterAllBaskets->setChecked(doFilter);
-
-    // If the filter isn't already showing, we make sure it does.
-    if (doFilter)
-        m_actShowFilter->setChecked(true);
-
+    showFilterBar(doFilter);
     //currentBasket()->decoration()->filterBar()->setFilterAll(doFilter);
 
 //  BasketScene *current = currentBasket();
@@ -934,7 +659,7 @@ void BNPView::newFilter()
     while (*it) {
         BasketListViewItem *item = ((BasketListViewItem*) * it);
         if (item->basket() != current) {
-            if (isFilteringAllBaskets())
+            if (m_guiClient->isFilteringAllBaskets())
                 item->basket()->decoration()->filterBar()->setFilterData(filterData); // Set the new FilterData for every other baskets
             else
                 item->basket()->decoration()->filterBar()->setFilterData(FilterData()); // We just disabled the global filtering: remove the FilterData
@@ -977,15 +702,9 @@ void BNPView::newFilter()
 
 void BNPView::newFilterFromFilterBar()
 {
-    if (isFilteringAllBaskets())
+    if (m_guiClient->isFilteringAllBaskets())
         QTimer::singleShot(0, this, SLOT(newFilter())); // Keep time for the QLineEdit to display the filtered character and refresh correctly!
 }
-
-bool BNPView::isFilteringAllBaskets()
-{
-    return m_actFilterAllBaskets->isChecked();
-}
-
 
 BasketListViewItem* BNPView::listViewItemForBasket(BasketScene *basket)
 {
@@ -1470,119 +1189,7 @@ void BNPView::notesStateChanged()
             QCoreApplication::translate("e.g. '18 notes, 10 matches, 5 selected'", "%1, %2, %3").arg(count, showns, selecteds));
     }
 
-    if (currentBasket()->redirectEditActions()) {
-        m_actSelectAll         ->setEnabled(!currentBasket()->selectedAllTextInEditor());
-        m_actUnselectAll       ->setEnabled(currentBasket()->hasSelectedTextInEditor());
-    } else {
-        m_actSelectAll         ->setEnabled(basket->countSelecteds() < basket->countFounds());
-        m_actUnselectAll       ->setEnabled(basket->countSelecteds() > 0);
-    }
-    m_actInvertSelection   ->setEnabled(basket->countFounds() > 0);
-
     updateNotesActions();
-}
-
-void BNPView::updateNotesActions()
-{
-    bool isLocked             = currentBasket()->isLocked();
-    bool oneSelected          = currentBasket()->countSelecteds() == 1;
-    bool oneOrSeveralSelected = currentBasket()->countSelecteds() >= 1;
-    bool severalSelected      = currentBasket()->countSelecteds() >= 2;
-
-    // FIXME: m_actCheckNotes is also modified in void BNPView::areSelectedNotesCheckedChanged(bool checked)
-    //        bool BasketScene::areSelectedNotesChecked() should return false if bool BasketScene::showCheckBoxes() is false
-//  m_actCheckNotes->setChecked( oneOrSeveralSelected &&
-//                               currentBasket()->areSelectedNotesChecked() &&
-//                               currentBasket()->showCheckBoxes()             );
-
-    Note *selectedGroup = (severalSelected ? currentBasket()->selectedGroup() : 0);
-
-    m_actEditNote            ->setEnabled(!isLocked && oneSelected && !currentBasket()->isDuringEdit());
-    if (currentBasket()->redirectEditActions()) {
-        m_actCutNote         ->setEnabled(currentBasket()->hasSelectedTextInEditor());
-        m_actCopyNote        ->setEnabled(currentBasket()->hasSelectedTextInEditor());
-        m_actPaste           ->setEnabled(true);
-        m_actDelNote         ->setEnabled(currentBasket()->hasSelectedTextInEditor());
-    } else {
-        m_actCutNote         ->setEnabled(!isLocked && oneOrSeveralSelected);
-        m_actCopyNote        ->setEnabled(oneOrSeveralSelected);
-        m_actPaste           ->setEnabled(!isLocked);
-        m_actDelNote         ->setEnabled(!isLocked && oneOrSeveralSelected);
-    }
-    m_actOpenNote        ->setEnabled(oneOrSeveralSelected);
-    m_actOpenNoteWith    ->setEnabled(oneSelected);                         // TODO: oneOrSeveralSelected IF SAME TYPE
-    m_actSaveNoteAs      ->setEnabled(oneSelected);                         // IDEM?
-    m_actGroup           ->setEnabled(!isLocked && severalSelected && (!selectedGroup || selectedGroup->isColumn()));
-    m_actUngroup         ->setEnabled(!isLocked && selectedGroup && !selectedGroup->isColumn());
-    m_actMoveOnTop       ->setEnabled(!isLocked && oneOrSeveralSelected && !currentBasket()->isFreeLayout());
-    m_actMoveNoteUp      ->setEnabled(!isLocked && oneOrSeveralSelected);   // TODO: Disable when unavailable!
-    m_actMoveNoteDown    ->setEnabled(!isLocked && oneOrSeveralSelected);
-    m_actMoveOnBottom    ->setEnabled(!isLocked && oneOrSeveralSelected && !currentBasket()->isFreeLayout());
-
-    for (QList<QAction *>::const_iterator action = m_insertActions.constBegin(); action != m_insertActions.constEnd(); ++action)
-        (*action)->setEnabled(!isLocked);
-
-    // From the old Note::contextMenuEvent(...) :
-    /*  if (useFile() || m_type == Link) {
-        m_type == Link ? tr("&Open target")         : tr("&Open")
-        m_type == Link ? tr("Open target &with...") : tr("Open &with...")
-        m_type == Link ? tr("&Save target as...")   : tr("&Save a copy as...")
-            // If useFile() theire is always a file to open / open with / save, but :
-        if (m_type == Link) {
-                if (url().prettyUrl().isEmpty() && runCommand().isEmpty())     // no URL nor runCommand :
-        popupMenu->setItemEnabled(7, false);                       //  no possible Open !
-                if (url().prettyUrl().isEmpty())                               // no URL :
-        popupMenu->setItemEnabled(8, false);                       //  no possible Open with !
-                if (url().prettyUrl().isEmpty() || url().path().endsWith("/")) // no URL or target a folder :
-        popupMenu->setItemEnabled(9, false);                       //  not possible to save target file
-    }
-    } else if (m_type != Color) {
-        popupMenu->insertSeparator();
-        popupMenu->insertItem( KIcon("document-save-as"), tr("&Save a copy as..."), this, SLOT(slotSaveAs()), 0, 10 );
-    }*/
-}
-
-// BEGIN Color picker (code from KColorEdit):
-
-/* Activate the mode
- */
-void BNPView::slotColorFromScreen(bool global)
-{
-    m_colorPickWasGlobal = global;
-    hideMainWindow();
-
-    currentBasket()->saveInsertionData();
-    m_colorPicker->pickColor();
-
-    /*  m_gettingColorFromScreen = true;
-            kapp->processEvents();
-            QTimer::singleShot( 100, this, SLOT(grabColorFromScreen()) );*/
-}
-
-void BNPView::slotColorFromScreenGlobal()
-{
-    slotColorFromScreen(true);
-}
-
-void BNPView::colorPicked(const QColor &color)
-{
-    if (!currentBasket()->isLoaded()) {
-        showPassiveLoading(currentBasket());
-        currentBasket()->load();
-    }
-    currentBasket()->insertColor(color);
-
-    if (m_colorPickWasShown)
-        showMainWindow();
-
-    if (Settings::usePassivePopup())
-        showPassiveDropped(tr("Picked color to basket <i>%1</i>"));
-}
-
-void BNPView::colorPickingCanceled()
-{
-    if (m_colorPickWasShown)
-        showMainWindow();
 }
 
 void BNPView::slotConvertTexts()
@@ -1622,7 +1229,7 @@ void BNPView::showHideFilterBar(bool show, bool switchFocus)
 {
 //  if (show != m_actShowFilter->isChecked())
 //      m_actShowFilter->setChecked(show);
-    m_actShowFilter->setChecked(show);
+    showFilterBar(show);
 
     currentDecoratedBasket()->setFilterBarVisible(show, switchFocus);
     if (!show)
@@ -1632,7 +1239,7 @@ void BNPView::showHideFilterBar(bool show, bool switchFocus)
 void BNPView::insertEmpty(int type)
 {
     if (currentBasket()->isLocked()) {
-        showPassiveImpossible(tr("Cannot add note."));
+        m_guiClient->showPassiveImpossible(tr("Cannot add note."));
         return;
     }
     currentBasket()->insertEmptyNote(type);
@@ -1641,78 +1248,10 @@ void BNPView::insertEmpty(int type)
 void BNPView::insertWizard(int type)
 {
     if (currentBasket()->isLocked()) {
-        showPassiveImpossible(tr("Cannot add note."));
+        m_guiClient->showPassiveImpossible(tr("Cannot add note."));
         return;
     }
     currentBasket()->insertWizard(type);
-}
-
-// BEGIN Screen Grabbing:
-void BNPView::grabScreenshot(bool global)
-{
-    if (m_regionGrabber) {
-        //KWindowSystem::activateWindow(m_regionGrabber->winId());
-        m_regionGrabber->activateWindow();
-        return;
-    }
-
-    // Delay before to take a screenshot because if we hide the main window OR the systray popup menu,
-    // we should wait the windows below to be repainted!!!
-    // A special case is where the action is triggered with the global keyboard shortcut.
-    // In this case, global is true, and we don't wait.
-    // In the future, if global is also defined for other cases, check for
-    // enum KAction::ActivationReason { UnknownActivation, EmulatedActivation, AccelActivation, PopupMenuActivation, ToolBarActivation };
-    int delay = (isMainWindowActive() ? 500 : (global/*kapp->activePopupWidget()*/ ? 0 : 200));
-
-    m_colorPickWasGlobal = global;
-    hideMainWindow();
-
-    currentBasket()->saveInsertionData();
-    usleep(delay * 1000);
-    m_regionGrabber = new RegionGrabber;
-    connect(m_regionGrabber, SIGNAL(regionGrabbed(const QPixmap&)), this, SLOT(screenshotGrabbed(const QPixmap&)));
-}
-
-void BNPView::hideMainWindow() 
-{
-    if (isMainWindowActive()) {
-        if (Global::mainWin) {
-            m_HiddenMainWindow = Global::mainWin;
-            m_HiddenMainWindow->hide();
-        }
-        m_colorPickWasShown = true;
-    } else
-        m_colorPickWasShown = false;
-}
-
-void BNPView::grabScreenshotGlobal()
-{
-    grabScreenshot(true);
-}
-
-void BNPView::screenshotGrabbed(const QPixmap &pixmap)
-{
-    delete m_regionGrabber;
-    m_regionGrabber = 0;
-
-    // Cancelled (pressed Escape):
-    if (pixmap.isNull()) {
-        if (m_colorPickWasShown)
-            showMainWindow();
-        return;
-    }
-
-    if (!currentBasket()->isLoaded()) {
-        showPassiveLoading(currentBasket());
-        currentBasket()->load();
-    }
-    currentBasket()->insertImage(pixmap);
-
-    if (m_colorPickWasShown)
-        showMainWindow();
-
-    if (Settings::usePassivePopup())
-        showPassiveDropped(tr("Grabbed screen zone to basket <i>%1</i>"));
 }
 
 BasketScene* BNPView::basketForFolderName(const QString &folderName)
@@ -1755,14 +1294,6 @@ Note* BNPView::noteForFileName(const QString &fileName, BasketScene &basket, Not
         child = child->next();
     }
     return 0;
-}
-
-void BNPView::setFiltering(bool filtering)
-{
-    m_actShowFilter->setChecked(filtering);
-    m_actResetFilter->setEnabled(filtering);
-    if (!filtering)
-        m_actFilterAllBaskets->setEnabled(false);
 }
 
 void BNPView::undo()
@@ -1915,41 +1446,8 @@ void BNPView::openArchive()
         Archive::open(path);
 }
 
-void BNPView::activatedTagShortcut()
-{
-    Tag *tag = Tag::tagForKAction((QAction*)sender());
-    currentBasket()->activatedTagShortcut(tag);
-}
-
-void BNPView::slotBasketChanged()
-{
-    m_actFoldBasket->setEnabled(canFold());
-    m_actExpandBasket->setEnabled(canExpand());
-	setFiltering(currentBasket() && currentBasket()->decoration()->filterData().isFiltering);
-    this->canUndoRedoChanged();
-}
-
-void BNPView::canUndoRedoChanged()
-{
-    if(m_history) {
-        m_actPreviousBasket->setEnabled(m_history->canUndo());
-        m_actNextBasket    ->setEnabled(m_history->canRedo());
-    }
-}
-
-void BNPView::currentBasketChanged()
-{
-}
-
 void BNPView::isLockedChanged()
 {
-    bool isLocked = currentBasket()->isLocked();
-
-    setLockStatus(isLocked);
-
-//  m_actLockBasket->setChecked(isLocked);
-    m_actPropBasket->setEnabled(!isLocked);
-    m_actDelBasket ->setEnabled(!isLocked);
     updateNotesActions();
 }
 
@@ -1995,7 +1493,7 @@ void BNPView::pasteInCurrentBasket()
     currentBasket()->pasteNote();
 
     if (Settings::usePassivePopup())
-        showPassiveDropped(tr("Clipboard content pasted to basket <i>%1</i>"));
+        Global::mainWin->showPassiveDropped(tr("Clipboard content pasted to basket <i>%1</i>"));
 }
 
 void BNPView::pasteSelInCurrentBasket()
@@ -2003,153 +1501,7 @@ void BNPView::pasteSelInCurrentBasket()
     currentBasket()->pasteNote(QClipboard::Selection);
 
     if (Settings::usePassivePopup())
-        showPassiveDropped(tr("Selection pasted to basket <i>%1</i>"));
-}
-
-void BNPView::showPassiveDropped(const QString &title)
-{
-    if (! currentBasket()->isLocked()) {
-        // TODO: Keep basket, so that we show the message only if something was added to a NOT visible basket
-        m_passiveDroppedTitle     = title;
-        m_passiveDroppedSelection = currentBasket()->selectedNotes();
-        QTimer::singleShot(c_delayTooltipTime, this, SLOT(showPassiveDroppedDelayed()));
-        // DELAY IT BELOW:
-    } else
-        showPassiveImpossible(tr("No note was added."));
-}
-
-// TODO create qframe to show passive content
-void BNPView::showPassiveDroppedDelayed()
-{
-    if (isMainWindowActive() || m_passiveDroppedSelection == 0)
-        return;
-
-    QString title = m_passiveDroppedTitle;
-
-    QImage contentsImage = NoteDrag::feedbackPixmap(m_passiveDroppedSelection).toImage();
-    QResource::registerResource(contentsImage.bits(), ":/images/passivepopup_image");
-
-//    if (Settings::useSystray()){
-
-//    KPassivePopup::message(KPassivePopup::Boxed,
-//        title.arg(Tools::textToHTMLWithoutP(currentBasket()->basketName())),
-//        (contentsImage.isNull() ? "" : "<img src=\":/images/passivepopup_image\">"),
-//        KIconLoader::global()->loadIcon(
-//            currentBasket()->icon(), KIconLoader::NoGroup, 16,
-//            KIconLoader::DefaultState, QStringList(), 0L, true
-//        ),
-//        Global::systemTray);
-//    }
-//    else{
-//        KPassivePopup::message(KPassivePopup::Boxed,
-//        title.arg(Tools::textToHTMLWithoutP(currentBasket()->basketName())),
-//        (contentsImage.isNull() ? "" : "<img src=\":/images/passivepopup_image\">"),
-//        KIconLoader::global()->loadIcon(
-//            currentBasket()->icon(), KIconLoader::NoGroup, 16,
-//            KIconLoader::DefaultState, QStringList(), 0L, true
-//        ),
-//        (QWidget*)this);
-//    }
-}
-
-void BNPView::showPassiveImpossible(const QString &message)
-{
-//        if (Settings::useSystray()){
-//                KPassivePopup::message(KPassivePopup::Boxed,
-//                                QString("<font color=red>%1</font>")
-//                                .arg(tr("Basket <i>%1</i> is locked"))
-//                                .arg(Tools::textToHTMLWithoutP(currentBasket()->basketName())),
-//                                message,
-//                                KIconLoader::global()->loadIcon(
-//                                    currentBasket()->icon(), KIconLoader::NoGroup, 16,
-//                                    KIconLoader::DefaultState, QStringList(), 0L, true
-//                                ),
-//                Global::systemTray);
-//        }
-//        else{
-//                KPassivePopup::message(KPassivePopup::Boxed,
-//                                QString("<font color=red>%1</font>")
-//                                .arg(tr("Basket <i>%1</i> is locked"))
-//                                .arg(Tools::textToHTMLWithoutP(currentBasket()->basketName())),
-//                                message,
-//                                KIconLoader::global()->loadIcon(
-//                                    currentBasket()->icon(), KIconLoader::NoGroup, 16,
-//                                    KIconLoader::DefaultState, QStringList(), 0L, true
-//                                ),
-//                (QWidget*)this);
-
-//        }
-}
-
-void BNPView::showPassiveContentForced()
-{
-    showPassiveContent(/*forceShow=*/true);
-}
-
-void BNPView::showPassiveContent(bool forceShow/* = false*/)
-{
-//    if (!forceShow && isMainWindowActive())
-//        return;
-
-//    // FIXME: Duplicate code (2 times)
-//    QString message;
-
-//   if(Settings::useSystray()){
-//    KPassivePopup::message(KPassivePopup::Boxed,
-//        "<qt>" + KDialog::makeStandardCaption(
-//            currentBasket()->isLocked() ? QString("%1 <font color=gray30>%2</font>")
-//            .arg(Tools::textToHTMLWithoutP(currentBasket()->basketName()), tr("(Locked)"))
-//            : Tools::textToHTMLWithoutP(currentBasket()->basketName())
-//        ),
-//        message,
-//        KIconLoader::global()->loadIcon(
-//            currentBasket()->icon(), KIconLoader::NoGroup, 16,
-//            KIconLoader::DefaultState, QStringList(), 0L, true
-//        ),
-//    Global::systemTray);
-//   }
-//   else{
-//    KPassivePopup::message(KPassivePopup::Boxed,
-//        "<qt>" + KDialog::makeStandardCaption(
-//            currentBasket()->isLocked() ? QString("%1 <font color=gray30>%2</font>")
-//            .arg(Tools::textToHTMLWithoutP(currentBasket()->basketName()), tr("(Locked)"))
-//            : Tools::textToHTMLWithoutP(currentBasket()->basketName())
-//        ),
-//        message,
-//        KIconLoader::global()->loadIcon(
-//            currentBasket()->icon(), KIconLoader::NoGroup, 16,
-//            KIconLoader::DefaultState, QStringList(), 0L, true
-//        ),
-//    (QWidget*)this);
-
-//   }
-}
-
-void BNPView::showPassiveLoading(BasketScene *basket)
-{
-//    if (isMainWindowActive())
-//        return;
-
-//    if (Settings::useSystray()){
-//    KPassivePopup::message(KPassivePopup::Boxed,
-//        Tools::textToHTMLWithoutP(basket->basketName()),
-//        tr("Loading..."),
-//        KIconLoader::global()->loadIcon(
-//            basket->icon(), KIconLoader::NoGroup, 16, KIconLoader::DefaultState,
-//            QStringList(), 0L, true
-//        ),
-//        Global::systemTray);
-//    }
-//    else{
-//    KPassivePopup::message(KPassivePopup::Boxed,
-//        Tools::textToHTMLWithoutP(basket->basketName()),
-//        tr("Loading..."),
-//        KIconLoader::global()->loadIcon(
-//            basket->icon(), KIconLoader::NoGroup, 16, KIconLoader::DefaultState,
-//            QStringList(), 0L, true
-//        ),
-//        (QWidget *)this);
-//    }
+        Global::mainWin->showPassiveDropped(tr("Selection pasted to basket <i>%1</i>"));
 }
 
 void BNPView::addNoteText()
@@ -2386,24 +1738,6 @@ void BNPView::changedSelectedNotes()
     m_actCheckNotes->setChecked(checked && currentBasket()->showCheckBoxes());
 }*/
 
-void BNPView::enableActions()
-{
-    BasketScene *basket = currentBasket();
-    if (!basket)
-        return;
-    if (m_actLockBasket)
-        m_actLockBasket->setEnabled(!basket->isLocked() && basket->isEncrypted());
-    if (m_actPassBasket)
-        m_actPassBasket->setEnabled(!basket->isLocked());
-    m_actPropBasket->setEnabled(!basket->isLocked());
-    m_actDelBasket->setEnabled(!basket->isLocked());
-    m_actExportToHtml->setEnabled(!basket->isLocked());
-    m_actShowFilter->setEnabled(!basket->isLocked());
-    m_actFilterAllBaskets->setEnabled(!basket->isLocked());
-    m_actResetFilter->setEnabled(!basket->isLocked());
-	basket->decoration()->filterBar()->setEnabled(!basket->isLocked());
-}
-
 void BNPView::showMainWindow()
 {
     if (m_HiddenMainWindow) {
@@ -2418,82 +1752,6 @@ void BNPView::showMainWindow()
     }
 
     setActive(true);
-    emit showPart();
-}
-
-void BNPView::populateTagsMenu()
-{
-    if (currentBasket() == 0)
-        return;
-
-    Note *referenceNote;
-    if (currentBasket()->focusedNote() && currentBasket()->focusedNote()->isSelected())
-        referenceNote = currentBasket()->focusedNote();
-    else
-        referenceNote = currentBasket()->firstSelected();
-
-    currentBasket()->m_tagPopupNote = referenceNote;
-    bool enable = currentBasket()->countSelecteds() > 0;
-
-    Global::mainWin->m_tagsMenu->clear();
-
-    QList<Tag*>::iterator it;
-    Tag *currentTag;
-    State *currentState;
-    int i = 10;
-    for (it = Tag::all.begin(); it != Tag::all.end(); ++it) {
-        // Current tag and first state of it:
-        currentTag = *it;
-        currentState = currentTag->states().first();
-
-        QKeySequence sequence;
-        if (!currentTag->shortcut().isEmpty())
-            sequence = currentTag->shortcut();
-
-        StateAction *mi = new StateAction(currentState, sequence, this, true);
-
-        // The previously set ID will be set in the actions themselves as data.
-        mi->setData(i);
-
-        if (referenceNote && referenceNote->hasTag(currentTag))
-            mi->setChecked(true);
-
-        Global::mainWin->m_tagsMenu->addAction(mi);
-
-        if (!currentTag->shortcut().isEmpty())
-            mi->setShortcut(sequence);
-
-        mi->setEnabled(enable);
-        ++i;
-    }
-
-    Global::mainWin->m_tagsMenu->addSeparator();
-
-    // I don't like how this is implemented; but I can't think of a better way
-    // to do this, so I will have to leave it for now
-    Global::mainWin->m_tagsMenu->addAction(tr("&Assign new Tag..."));
-    Global::mainWin->m_tagsMenu->addAction(QIcon::fromTheme("edit-delete"), tr("&Remove All"));
-    Global::mainWin->m_tagsMenu->addAction(QIcon::fromTheme("configure"), tr("&Customize..."));
-
-    connect(Global::mainWin->m_tagsMenu, SIGNAL(triggered(QAction *)), currentBasket(), SLOT(toggledTagInMenu(QAction *)));
-    connect(Global::mainWin->m_tagsMenu, SIGNAL(aboutToHide()),  currentBasket(), SLOT(unlockHovering()));
-    connect(Global::mainWin->m_tagsMenu, SIGNAL(aboutToHide()),  currentBasket(), SLOT(disableNextClick()));
-}
-
-/*
- * The Tags menu is ONLY created once the BasKet KPart is first shown.
- * So we can use this menu only from then?
- * When the KPart is changed in Kontact, and then the BasKet KPart is shown again,
- * Kontact created a NEW Tags menu. So we should connect again.
- * But when Kontact main window is hidden and then re-shown, the menu does not change.
- * So we disconnect at hide event to ensure only one connection: the next show event will not connects another time.
- */
-
-void BNPView::disconnectTagsMenu()
-{
-    disconnect(Global::mainWin->m_tagsMenu, SIGNAL(triggered(QAction *)), currentBasket(), SLOT(toggledTagInMenu(QAction *)));
-    disconnect(Global::mainWin->m_tagsMenu, SIGNAL(aboutToHide()),  currentBasket(), SLOT(unlockHovering()));
-    disconnect(Global::mainWin->m_tagsMenu, SIGNAL(aboutToHide()),  currentBasket(), SLOT(disableNextClick()));
 }
 
 void BNPView::loadCrossReference(QString link)
@@ -2593,4 +1851,9 @@ void BNPView::sortSiblingsDesc()
         m_tree->sortItems(0, Qt::DescendingOrder);
     else
         parent->sortChildren(0, Qt::DescendingOrder);
+}
+
+QUndoStack* BNPView::undoStack()
+{
+    return m_history;
 }

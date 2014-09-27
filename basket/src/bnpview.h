@@ -55,7 +55,6 @@ class BasketListViewItem;
 class BasketTreeListView;
 class NoteSelection;
 class BasketStatusBar;
-class Tag;
 class State;
 class Note;
 
@@ -65,8 +64,8 @@ class BNPView : public QSplitter
     Q_CLASSINFO("D Bus Interface", "org.basket.dbus");
 public:
     /// CONSTRUCTOR AND DESTRUCTOR:
-    BNPView(QWidget *parent, const char *name, QMainWindow *aGUIClient,
-            BasketStatusBar *bar, QToolBar *mainbar, QToolBar *editbar);
+    BNPView(QWidget *parent, const char *name, MainWindow *aGUIClient,
+            BasketStatusBar *bar);
     ~BNPView();
     /// MANAGE CONFIGURATION EVENTS!:
     void setTreePlacement(bool onLeft);
@@ -89,7 +88,6 @@ public:
     int basketCount(QTreeWidgetItem *parent = 0);
     bool canFold();
     bool canExpand();
-    void enableActions();
 
 private:
     QDomElement basketElement(QTreeWidgetItem *item, QDomDocument &document, QDomElement &parentElement);
@@ -114,7 +112,6 @@ public slots:
     void toggleFilterAllBaskets(bool doFilter);
     void newFilter();
     void newFilterFromFilterBar();
-    bool isFilteringAllBaskets();
     // From main window
     void importKNotes();
     void importKJots();
@@ -128,7 +125,6 @@ public slots:
     void checkCleanup();
 
     /** Note */
-    void activatedTagShortcut();
     void exportToHTML();
     void editNote();
     void cutNote();
@@ -148,10 +144,6 @@ public slots:
     void slotInvertSelection();
     void slotResetFilter();
 
-    void slotColorFromScreen(bool global = false);
-    void slotColorFromScreenGlobal();
-    void colorPicked(const QColor &color);
-    void colorPickingCanceled();
     void slotConvertTexts();
 
     /** Global shortcuts */
@@ -161,15 +153,7 @@ public slots:
     void addNoteLink();
     void addNoteCrossReference();
     void addNoteColor();
-    /** Passive Popups for Global Actions */
-    void showPassiveDropped(const QString &title);
-    void showPassiveDroppedDelayed(); // Do showPassiveDropped(), but delayed
-    void showPassiveContent(bool forceShow = false);
-    void showPassiveContentForced();
-    void showPassiveImpossible(const QString &message);
-    void showPassiveLoading(BasketScene *basket);
-    // For GUI :
-    void setFiltering(bool filtering);
+
     /** Edit */
     void undo();
     void redo();
@@ -181,9 +165,6 @@ public slots:
     /** Insert **/
     void insertEmpty(int type);
     void insertWizard(int type);
-    void grabScreenshot(bool global = false);
-    void grabScreenshotGlobal();
-    void screenshotGrabbed(const QPixmap &pixmap);
     /** BasketScene */
     void askNewBasket();
     void askNewBasket(BasketScene *parent, BasketScene *pickProperties);
@@ -222,77 +203,10 @@ public:
 public slots:
     void addWelcomeBaskets();
 private slots:
-    void updateNotesActions();
-    void slotBasketChanged();
-    void canUndoRedoChanged();
-    void currentBasketChanged();
     void isLockedChanged();
     void lateInit();
 
-public:
-    QAction       *m_actEditNote;
-    QAction       *m_actOpenNote;
-    QAction       *m_actPaste;
-    QAction       *m_actGrabScreenshot;
-    QAction       *m_actColorPicker;
-    QAction       *m_actLockBasket;
-    QAction       *m_actPassBasket;
-    QAction       *actNewBasket;
-    QAction       *actNewSubBasket;
-    QAction       *actNewSiblingBasket;
-    QAction       *m_actHideWindow;
-    QAction       *m_actExportToHtml;
-    QAction       *m_actPropBasket;
-    QAction       *m_actSortChildrenAsc;
-    QAction       *m_actSortChildrenDesc;
-    QAction       *m_actSortSiblingsAsc;
-    QAction       *m_actSortSiblingsDesc;
-    QAction       *m_actDelBasket;
-    QAction       *m_actFilterAllBaskets;
-
 private:
-    // Basket actions:
-    QAction       *m_actSaveAsArchive;
-    QAction       *m_actOpenArchive;
-    // Notes actions :
-    QAction       *m_actOpenNoteWith;
-    QAction       *m_actSaveNoteAs;
-    QAction       *m_actGroup;
-    QAction       *m_actUngroup;
-    QAction       *m_actMoveOnTop;
-    QAction       *m_actMoveNoteUp;
-    QAction       *m_actMoveNoteDown;
-    QAction       *m_actMoveOnBottom;
-    // Edit actions :
-    QAction       *m_actUndo;
-    QAction       *m_actRedo;
-    QAction       *m_actCutNote;
-    QAction       *m_actCopyNote;
-    QAction       *m_actDelNote;
-    QAction       *m_actSelectAll;
-    QAction       *m_actUnselectAll;
-    QAction       *m_actInvertSelection;
-    // Insert actions :
-    QAction       *m_actInsertHtml;
-    QAction       *m_actInsertLink;
-    QAction       *m_actInsertCrossReference;
-    QAction       *m_actInsertImage;
-    QAction       *m_actInsertColor;
-    QAction       *m_actImportKMenu;
-    QAction       *m_actInsertLauncher;
-    QAction       *m_actImportIcon;
-    QAction       *m_actLoadFile;
-    QList<QAction*> m_insertActions;
-    // Basket actions :
-    QAction       *m_actShowFilter;
-    QAction       *m_actResetFilter;
-    // Go actions :
-    QAction       *m_actPreviousBasket;
-    QAction       *m_actNextBasket;
-    QAction       *m_actFoldBasket;
-    QAction       *m_actExpandBasket;
-
-    void setupActions();
     DecoratedBasket* currentDecoratedBasket();
 
 public:
@@ -304,8 +218,8 @@ public:
     bool isPart();
     bool isMainWindowActive();
     void showMainWindow();
-    QToolBar    *m_mainbar;
-    QToolBar    *m_editbar; // TODO private
+    QUndoStack* undoStack();
+
 
     // TODO: dcop calls -- dbus these
 public Q_SLOTS:
@@ -326,9 +240,6 @@ public slots:
     void setUnsavedStatus(bool isUnsaved);
     void setActive(bool active = true);
 
-    void populateTagsMenu();
-    void disconnectTagsMenu();
-
 private slots:
     void slotPressed(QTreeWidgetItem *item, int column);
     void needSave(QTreeWidgetItem*);
@@ -339,33 +250,29 @@ private slots:
 signals:
     void basketChanged();
     void setWindowCaption(const QString &s);
-    void showPart();
+    void updateNotesActions();
+    void enableActions();
+    void showFilterBar(bool show);
+    void setFiltering(bool filtering);
 
 protected:
     void enterEvent(QEvent*);
     void leaveEvent(QEvent*);
-
-protected:
-    void hideMainWindow();
 
 private:
     BasketTreeListView *m_tree;
     QStackedWidget      *m_stack;
     bool                m_loading;
     bool                m_newBasketPopup;
-    DesktopColorPicker  *m_colorPicker;
-    bool                m_colorPickWasShown;
-    bool                m_colorPickWasGlobal;
-    RegionGrabber       *m_regionGrabber;
     QString m_passiveDroppedTitle;
     NoteSelection       *m_passiveDroppedSelection;
     static const int    c_delayTooltipTime;
-    QMainWindow         *m_guiClient;
+    MainWindow          *m_guiClient;
     BasketStatusBar     *m_statusbar;
     QTimer              *m_tryHideTimer;
     QTimer              *m_hideTimer;
+    QUndoStack          *m_history;
 
-    QUndoStack *m_history;
     QMainWindow *m_HiddenMainWindow;
 };
 

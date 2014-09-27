@@ -241,7 +241,7 @@ private:
 class StateAction : public QAction
 {
     Q_OBJECT
-    Q_DISABLE_COPY(StateAction);
+    Q_DISABLE_COPY(StateAction)
 public:
     StateAction(State *state,
                 const QKeySequence &shortcut,

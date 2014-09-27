@@ -863,7 +863,7 @@ void BasketScene::equalizeColumnSizes()
 
 void BasketScene::enableActions()
 {
-    Global::bnpView->enableActions();
+    Global::mainWin->enableActions();
     m_view->setFocusPolicy(isLocked() ? Qt::NoFocus : Qt::StrongFocus);
     if (isLocked())
         m_view->viewport()->setCursor(Qt::ArrowCursor); // When locking, the cursor stays the last form it was
@@ -1038,7 +1038,7 @@ void BasketScene::newFilter(const FilterData &data, bool andEnsureVisible/* = tr
     if (andEnsureVisible && m_focusedNote != 0L)
         ensureNoteVisible(m_focusedNote);
 
-    Global::bnpView->setFiltering(data.isFiltering);
+    Global::mainWin->setFiltering(data.isFiltering);
 
 //StopWatch::check(20);
 }
@@ -1383,7 +1383,7 @@ void BasketScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
         m_posToInsert     = event->scenePos();
 
         QMenu menu(m_view);
-        menu.addActions(Global::mainWin->m_insertMenu->actions());
+        menu.addActions(Global::mainWin->insertMenu()->actions());
 
         // tr: Verbs (for the "insert" menu)
         if (zone == Note::TopGroup || zone == Note::BottomGroup)
@@ -1796,7 +1796,7 @@ void BasketScene::blindDrop(QGraphicsSceneDragDropEvent* event)
             m_editor->lineEdit()->paste();
     } else {
         if (!isLoaded()) {
-            Global::bnpView->showPassiveLoading(this);
+            Global::mainWin->showPassiveLoading(this);
             load();
         }
         closeEditor();
@@ -1807,7 +1807,7 @@ void BasketScene::blindDrop(QGraphicsSceneDragDropEvent* event)
             insertCreatedNote(note);
             //unselectAllBut(note);
             if (Settings::usePassivePopup())
-                Global::bnpView->showPassiveDropped(tr("Dropped to basket <i>%1</i>"));
+                Global::mainWin->showPassiveDropped(tr("Dropped to basket <i>%1</i>"));
         }
     }
     save();
@@ -1822,7 +1822,7 @@ void BasketScene::blindDrop(const QMimeData *mimeData, Qt::DropAction dropAction
             m_editor->lineEdit()->paste();
     } else {
         if (!isLoaded()) {
-            Global::bnpView->showPassiveLoading(this);
+            Global::mainWin->showPassiveLoading(this);
             load();
         }
         closeEditor();
@@ -1833,7 +1833,7 @@ void BasketScene::blindDrop(const QMimeData *mimeData, Qt::DropAction dropAction
             insertCreatedNote(note);
             //unselectAllBut(note);
             if (Settings::usePassivePopup())
-                Global::bnpView->showPassiveDropped(tr("Dropped to basket <i>%1</i>"));
+                Global::mainWin->showPassiveDropped(tr("Dropped to basket <i>%1</i>"));
         }
     }
     save();
@@ -1895,7 +1895,7 @@ void BasketScene::pasteNote(QClipboard::Mode mode)
             m_editor->lineEdit()->paste();
     } else {
         if (!isLoaded()) {
-            Global::bnpView->showPassiveLoading(this);
+            Global::mainWin->showPassiveLoading(this);
             load();
         }
         closeEditor();
@@ -2067,10 +2067,10 @@ void BasketScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
             switch (Settings::middleAction()) {
             case 5: type = NoteType::Color;    break;
             case 6:
-                Global::bnpView->grabScreenshot();
+                Global::mainWin->grabScreenshot();
                 return;
             case 7:
-                Global::bnpView->slotColorFromScreen();
+                Global::mainWin->slotColorFromScreen();
                 return;
             case 8:
                 Global::bnpView->insertWizard(3); // loadFromFile
@@ -3352,10 +3352,10 @@ void BasketScene::popupTagsMenu(Note *note)
 {
     m_tagPopupNote = note;
 
-    Global::bnpView->populateTagsMenu(); // TEST (should send note)
-    Global::mainWin->m_tagsMenu->setTitle(tr("Tags"));
+    Global::mainWin->populateTagsMenu(); // TEST (should send note)
+    Global::mainWin->tagsMenu()->setTitle(tr("Tags"));
     m_lockedHovering = true;
-    Global::mainWin->m_tagsMenu->popup(QCursor::pos());
+    Global::mainWin->tagsMenu()->popup(QCursor::pos());
 }
 
 void BasketScene::unlockHovering()
@@ -3725,7 +3725,7 @@ bool BasketScene::closeEditor()
     doHoverEffects();
 //  save();
 
-    Global::bnpView->m_actEditNote->setEnabled(!isLocked() && countSelecteds() == 1 /*&& !isDuringEdit()*/);
+    Global::mainWin->editNoteAction()->setEnabled(!isLocked() && countSelecteds() == 1 /*&& !isDuringEdit()*/);
 
     emit resetStatusBarText(); // Remove the "Editing. ... to validate." text.
 
@@ -3900,7 +3900,7 @@ void BasketScene::noteEdit(Note *note, bool justAdded, const QPointF &clickedPoi
         filterAgain();
         unselectAll();
     }
-    Global::bnpView->m_actEditNote->setEnabled(false);
+    Global::mainWin->editNoteAction()->setEnabled(false);
 }
 
 void BasketScene::noteDelete()

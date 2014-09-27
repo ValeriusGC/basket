@@ -446,8 +446,8 @@ void LinkDisplay::paint(QPainter *painter, qreal x, qreal y, qreal width, qreal 
     // ... Or the icon (if no preview or if the "Open" icon should be shown):
     else {
         qreal           iconSize   = m_look->iconSize();
-        QString       iconName   = (isHovered ? Global::openNoteIcon() : m_icon);
-        pixmap = QIcon(iconName).pixmap(iconSize, iconSize);
+        QIcon           icon       = (isHovered ? QIcon::fromTheme("text-plain") : QIcon(m_icon));
+        pixmap =icon.pixmap(iconSize, iconSize);
     }
     qreal iconPreviewWidth  = qMax(m_look->iconSize(), (m_look->previewEnabled() ? m_preview.width()  : 0));
     qreal pixmapX = (iconPreviewWidth - pixmap.width()) / 2;

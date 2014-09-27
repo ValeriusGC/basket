@@ -81,8 +81,3 @@ QString Global::tempCutFolder()
 {
     return savesFolder() + "temp-cut/";
 }
-
-QString Global::openNoteIcon() // FIXME: Now an edit icon
-{
-    return QVariant(Global::bnpView->m_actEditNote->icon()).toString();
-}

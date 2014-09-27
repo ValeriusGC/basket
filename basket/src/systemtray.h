@@ -32,8 +32,7 @@ class QMenu;
 class SystemTray : public QSystemTrayIcon
 {
     Q_OBJECT
-    Q_DISABLE_COPY(SystemTray);
-
+    Q_DISABLE_COPY(SystemTray)
 public:
     SystemTray(QWidget *parent = 0);
     ~SystemTray();
@@ -42,14 +41,10 @@ public slots:
     void updateDisplay();
     void toggleActive();
 
-signals:
-    void showPart();
-
 private:
     QSize m_iconSize;
     QIcon m_icon;
     QIcon m_lockedIcon;
-    QMenu *m_popupmenu;
 };
 
 #endif // SYSTEMTRAY_H

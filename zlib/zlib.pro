@@ -3,8 +3,6 @@ CONFIG += lib
 QT -= core gui
 
 TARGET = zlib
-target.path = $$OUT_PWD/../basket
-INSTALLS += target
 DESTDIR = $$OUT_PWD/../basket
 
 HEADERS += \

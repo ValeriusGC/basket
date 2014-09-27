@@ -22,14 +22,18 @@
 #define CONTAINER_H
 
 #include <QMainWindow>
+#include <QMenu>
+#include <QAction>
 
-class QMenu;
 class QMoveEvent;
 class QResizeEvent;
 class QVBoxLayout;
 class QWidget;
 
+class DesktopColorPicker;
 class BNPView;
+class BasketScene;
+class RegionGrabber;
 
 /** The window that contain baskets, organized by tabs.
   * @author Sébastien Laoût
@@ -42,6 +46,7 @@ public:
     MainWindow(QWidget *parent = 0);
     ~MainWindow();
     static int const EXIT_CODE_REBOOT;
+
 private:
     void setupActions();
     void setupMenus();
@@ -49,8 +54,16 @@ private:
 public slots:
     bool askForQuit();
     void slotDebug();
+    void updateNotesActions();
+    void showFilterBar(bool show);
+    bool isFilteringAllBaskets();
+    void setFiltering(bool filtering);
+    void enableActions();
+    void slotBasketChanged();
+    void canUndoRedoChanged();
+    void populateTagsMenu();
 
-    /** Settings **/
+    /** Settings */
     void toggleToolBar();
     void toggleStatusBar();
     void configureToolbars();
@@ -61,6 +74,25 @@ public slots:
     void quit();
     void slotReboot();
 
+    /** Passive Popups for Global Actions */
+    void showPassiveDropped(const QString &title);
+    void showPassiveDroppedDelayed(); // Do showPassiveDropped(), but delayed
+    void showPassiveContent(bool forceShow = false);
+    void showPassiveContentForced();
+    void showPassiveImpossible(const QString &message);
+    void showPassiveLoading(BasketScene *basket);
+
+    /** Note */
+    void slotColorFromScreen(bool global = false);
+    void slotColorFromScreenGlobal();
+    void colorPicked(const QColor &color);
+    void colorPickingCanceled();
+
+    /** Screenshots */
+    void grabScreenshot(bool global = false);
+    void grabScreenshotGlobal();
+    void screenshotGrabbed(const QPixmap &pixmap);
+
 protected:
     bool queryExit();
     bool queryClose();
@@ -69,26 +101,111 @@ protected:
 
 public:
     void ensurePolished();
-    // TODO make private
-    QMenu       *m_basketMenu;
-    QMenu       *m_editMenu;
-    QMenu       *m_goMenu;
-    QMenu       *m_noteMenu;
-    QMenu       *m_tagsMenu;
-    QMenu       *m_insertMenu;
-    QMenu       *m_helpMenu;
 
-private:
+    QMenu *tagsMenu() {
+        return m_tagsMenu;
+    }
+
+    QMenu *insertMenu() {
+        return m_insertMenu;
+    }
+
+    QAction *editNoteAction() {
+        return m_actEditNote;
+    }
+
+private: // Properties
+    bool                m_startDocked;
+    bool                m_quit;
+    bool                m_colorPickWasShown;
+    bool                m_colorPickWasGlobal;
+
+private: // Objects
+    BNPView             *m_baskets;
+    DesktopColorPicker  *m_colorPicker;
+    RegionGrabber       *m_regionGrabber;
+
     // Settings actions :
 //    KToggleAction *m_actShowToolbar;
 //    KToggleAction *m_actShowStatusbar;
-    QAction             *actQuit;
-    QAction             *actAppConfig;
-    BNPView             *m_baskets;
-    bool                m_startDocked;
-    bool                m_quit;
+    QMenu               *m_basketMenu;
+    QMenu               *m_editMenu;
+    QMenu               *m_goMenu;
+    QMenu               *m_noteMenu;
+    QMenu               *m_tagsMenu;
+    QMenu               *m_insertMenu;
+    QMenu               *m_helpMenu;
+    QMenu               *m_sysTrayMenu;
+
     QToolBar            *m_mainToolBar;
     QToolBar            *m_editToolBar;
+
+    // Basket actions:
+    QAction             *m_actNewBasket;
+    QAction             *m_actNewSubBasket;
+    QAction             *m_actNewSiblingBasket;
+    QAction             *m_actPropBasket;
+    QAction             *m_actSaveAsArchive;
+    QAction             *m_actExportToHtml;
+    QAction             *m_actSortChildrenAsc;
+    QAction             *m_actSortChildrenDesc;
+    QAction             *m_actSortSiblingsAsc;
+    QAction             *m_actSortSiblingsDesc;
+    QAction             *m_actDelBasket;
+    QAction             *m_actLockBasket;
+    QAction             *m_actPassBasket;
+    QAction             *m_actOpenArchive;
+    QAction             *m_actHideWindow;
+    QAction             *m_actQuit;
+
+    // Edit actions :
+    QAction             *m_actCutNote;
+    QAction             *m_actCopyNote;
+    QAction             *m_actPaste;
+    QAction             *m_actDelNote;
+    QAction             *m_actSelectAll;
+    QAction             *m_actUnselectAll;
+    QAction             *m_actInvertSelection;
+    QAction             *m_actShowFilter;
+    QAction             *m_actFilterAllBaskets;
+    QAction             *m_actResetFilter;
+
+    // Go actions :
+    QAction             *m_actPreviousBasket;
+    QAction             *m_actNextBasket;
+    QAction             *m_actFoldBasket;
+    QAction             *m_actExpandBasket;
+
+    // Notes actions :
+    QAction             *m_actEditNote;
+    QAction             *m_actOpenNote;
+    QAction             *m_actOpenNoteWith;
+    QAction             *m_actSaveNoteAs;
+    QAction             *m_actGroup;
+    QAction             *m_actUngroup;
+    QAction             *m_actMoveOnTop;
+    QAction             *m_actMoveNoteUp;
+    QAction             *m_actMoveNoteDown;
+    QAction             *m_actMoveOnBottom;
+
+    // Insert actions :
+    QAction             *m_actInsertHtml;
+    QAction             *m_actInsertImage;
+    QAction             *m_actInsertLink;
+    QAction             *m_actInsertCrossReference;
+    QAction             *m_actInsertLauncher;
+    QAction             *m_actInsertColor;
+    QAction             *m_actGrabScreenshot;
+    QAction             *m_actColorPicker;
+    QAction             *m_actLoadFile;
+    QAction             *m_actImportKMenu;
+    QAction             *m_actImportIcon;
+
+
+
+    QAction             *m_actUndo;
+    QAction             *m_actRedo;
+    QAction             *actAppConfig;
 };
 
 #endif // CONTAINER_H

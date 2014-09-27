@@ -412,8 +412,6 @@ public:  /* And the following methods are just getter / setters */
                     if (Global::mainWin) Global::mainWin->show();
                 }
             }
-            if (Global::bnpView)
-                Global::bnpView->m_actHideWindow->setEnabled(useSystray);
         }
     }
     static void setShowIconInSystray(bool show) {

@@ -224,10 +224,10 @@ Tag::Tag()
     ++tagNumber;
     QString sAction = "tag_shortcut_number_" + QString::number(tagNumber);
 
-    QMenu *ac = Global::mainWin->m_tagsMenu;
-    m_action = ac->addAction(QIcon(), QString(), Global::bnpView,
-                             SLOT(activatedTagShortcut()));
-
+    QMenu *ac = Global::mainWin->tagsMenu();
+    m_action = ac->addAction(QIcon(), QString());//, Global::bnpView, SLOT(activatedTagShortcut()));
+//    m_action = new QAction(QIcon(), QString());
+    m_action->setShortcut(QKeySequence());
     m_inheritedBySiblings = false;
 }
 
@@ -235,6 +235,12 @@ Tag::~Tag()
 {
     delete m_action;
 }
+
+//void BNPView::activatedTagShortcut()
+//{
+//    Tag *tag = Tag::tagForKAction((QAction*)sender());
+//    currentBasket()->activatedTagShortcut(tag);
+//}
 
 void Tag::setName(const QString &name)
 {
