@@ -50,9 +50,9 @@ About::About(QWidget *parent) :
     ui->writtenBy->append(tr("Maintainer:"));
     ui->writtenBy->append(PERSON(tr("Kelvie Wong"), tr("kelvie@ieee.org")));
     ui->writtenBy->append(tr("Original Author:"));
-    ui->writtenBy->append(PERSON(tr("S" "\xe9" "bastien Lao\xfbt"), tr("slaout@linux62.org")));
+    ui->writtenBy->append(PERSON(tr("S\303\251bastien Lao\303\273t"), tr("slaout@linux62.org")));
     ui->writtenBy->append(tr("Basket encryption, Kontact integration, KnowIt importer:"));
-    ui->writtenBy->append(PERSON(tr("Petri Damst\xe9n"), tr("damu@iki.fi")));
+    ui->writtenBy->append(PERSON(tr("Petri Damst\303\251n"), tr("damu@iki.fi")));
     ui->writtenBy->append(tr("Baskets auto lock, save-status icon, HTML copy/paste, basket name tooltip, drop to basket name: "));
     ui->writtenBy->append(PERSON(tr("Alex Gontmakher"), tr("gsasha@cs.technion.ac.il")));
 

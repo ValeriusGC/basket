@@ -24,6 +24,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QStringList>
+#include <QTranslator>
 
 #include "mainwindow.h"
 #include "settings.h"
@@ -41,6 +42,11 @@ int main(int argc, char *argv[])
     do {
         QApplication a(argc, argv);
         Backup::figureOutBinaryPath(argv[0], a);
+
+        QTranslator translator;
+        QString locale = QLocale::system().name();
+        translator.load(QString("ts/") + locale);
+        a.installTranslator(&translator);
 
         QCommandLineParser parser;
         parser.setApplicationDescription("Basket Note Pads options");

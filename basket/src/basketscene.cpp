@@ -3917,9 +3917,9 @@ void BasketScene::noteDelete()
         return;
     int really = QMessageBox::Yes;
     if (Settings::confirmNoteDeletion())
-        really = QMessageBox::question(m_view, tr("Delete %n note(s)", 0, countSelecteds()),
+        really = QMessageBox::question(m_view, tr("Delete %n note(s)", "", countSelecteds()),
                                             countSelecteds() == 1 ? tr("<qt>Do you really want to delete this note?</qt>") :
-                                                  tr("<qt>Do you really want to delete these <b>%1</b> notes?</qt>"),
+                                                  tr("<qt>Do you really want to delete these <b>%1</b> notes?</qt>").arg(countSelecteds()),
                                        QMessageBox::Yes | QMessageBox::No);
     if (really == QMessageBox::No)
         return;
