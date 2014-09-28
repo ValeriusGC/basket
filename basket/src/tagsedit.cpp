@@ -70,15 +70,15 @@ void StateCopy::copyBack()
 TagCopy::TagCopy(Tag *old/* = 0*/)
 {
     oldTag = old;
-    newTag = new Tag();
-    if (oldTag)
-        oldTag->copyTo(newTag);
+//    newTag = new Tag(Global::tagManager->getNextTagNumber(), m_actions); // TODO im drunk
+//    if (oldTag)
+//        oldTag->copyTo(newTag);
 
-    if (old)
-        for (State::List::iterator it = old->states().begin(); it != old->states().end(); ++it)
-            stateCopies.append(new StateCopy(*it));
-    else
-        stateCopies.append(new StateCopy());
+//    if (old)
+//        for (QList<State*>::iterator it = old->states().begin/(); it != old->states().end(); ++it)
+//            stateCopies.append(new StateCopy(*it));
+//    else
+//        stateCopies.append(new StateCopy());
 }
 
 TagCopy::~TagCopy()
@@ -560,7 +560,7 @@ TagsEditDialog::TagsEditDialog(QWidget *parent, State *stateToEdit, bool addNewT
     textEquivalentLabel->setFixedWidth(maxWidth);
 
     // Load Tags:
-    for (Tag::List::iterator tagIt = Tag::all.begin(); tagIt != Tag::all.end(); ++tagIt)
+    for (QList<Tag*>::iterator tagIt = Global::tagManager->tagList().begin(); tagIt != Global::tagManager->tagList().end(); ++tagIt)
         m_tagCopies.append(new TagCopy(*tagIt));
 
     TagListViewItem *lastInsertedItem = 0;
@@ -721,7 +721,7 @@ void TagsEditDialog::newTag()
 {
     // Add to the "model":
     TagCopy *newTagCopy = new TagCopy();
-    newTagCopy->stateCopies[0]->newState->setId("tag_state_" + QString::number(Tag::getNextStateUid()));   //TODO: Check if it's really unique
+    newTagCopy->stateCopies[0]->newState->setId("tag_state_" + QString::number(Global::tagManager->getNextStateUid()));   //TODO: Check if it's really unique
     m_tagCopies.append(newTagCopy);
     m_addedStates.append(newTagCopy->stateCopies[0]->newState);
 
@@ -767,7 +767,7 @@ void TagsEditDialog::newState()
     // Add to the "model":
     StateCopy *newStateCopy = new StateCopy();
     firstState->copyTo(newStateCopy->newState);
-    newStateCopy->newState->setId("tag_state_" + QString::number(Tag::getNextStateUid()));   //TODO: Check if it's really unique
+    newStateCopy->newState->setId("tag_state_" + QString::number(Global::tagManager->getNextStateUid()));   //TODO: Check if it's really unique
     newStateCopy->newState->setName(""); // We copied it too but it's likely the name will not be the same
     tagItem->tagCopy()->stateCopies.append(newStateCopy);
     m_addedStates.append(newStateCopy->newState);
@@ -1207,7 +1207,7 @@ void TagsEditDialog::slotCancel()
 
 void TagsEditDialog::slotOk()
 {
-    Tag::all.clear();
+    Global::tagManager->tagList().clear();
     for (TagCopy::List::iterator tagCopyIt = m_tagCopies.begin(); tagCopyIt != m_tagCopies.end(); ++tagCopyIt) {
         TagCopy *tagCopy = *tagCopyIt;
         // Copy changes to the tag and append in the list of tags::
@@ -1216,9 +1216,9 @@ void TagsEditDialog::slotOk()
             delete tagCopy->newTag;
         }
         Tag *tag = (tagCopy->oldTag ? tagCopy->oldTag : tagCopy->newTag);
-        Tag::all.append(tag);
+        Global::tagManager->tagList().append(tag);
         // And change all states:
-        State::List &states = tag->states();
+        QList<State*> &states = tag->states();
         StateCopy::List &stateCopies = tagCopy->stateCopies;
         states.clear();
         for (StateCopy::List::iterator stateCopyIt = stateCopies.begin(); stateCopyIt != stateCopies.end(); ++stateCopyIt) {
@@ -1231,7 +1231,7 @@ void TagsEditDialog::slotOk()
             state->setParentTag(tag);
         }
     }
-    Tag::saveTags();
+    Global::tagManager->saveTags();
 
     // Notify removed states and tags, and then remove them:
     if (!m_deletedStates.isEmpty())

@@ -28,5 +28,6 @@
         <file>tags/hi16-action-tag_progress_025.png</file>
         <file>tags/hi16-action-tag_progress_075.png</file>
         <file>tags/hi16-action-tag_progress_100.png</file>
+        <file>tags/hi16-action-tag_progress_050.png</file>
     </qresource>
 </RCC>

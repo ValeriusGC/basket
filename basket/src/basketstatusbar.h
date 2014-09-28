@@ -22,19 +22,19 @@
 
 #include <QObject>
 #include <QPixmap>
+#include <QStatusBar>
 
-class QStatusBar;
 class QWidget;
 class QLabel;
 
 /**
     @author Sébastien Laoût <slaout@linux62.org>
 */
-class BasketStatusBar : public QObject
+class BasketStatusBar : public QStatusBar
 {
     Q_OBJECT
 public:
-    BasketStatusBar(QStatusBar *bar);
+    BasketStatusBar(QWidget *parent);
     ~BasketStatusBar();
 
 public slots:
@@ -48,12 +48,9 @@ public slots:
     void setUnsavedStatus(bool isUnsaved);
 
 protected:
-    QStatusBar *statusBar() const;
-    void addWidget(QWidget * widget, int stretch = 0, bool permanent = false);
     void setStatusText(const QString &txt);
     bool eventFilter(QObject * obj, QEvent * event);
 private:
-    QStatusBar                 *m_bar;
     QLabel                     *m_selectionStatus;
     QLabel                     *m_lockStatus;
     QLabel                     *m_basketStatus;

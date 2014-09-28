@@ -171,7 +171,7 @@ QString Note::toText(const QString &cuttedFullPath)
         // Compute the text equivalent of the tag states:
         QString firstLine;
         QString otherLines;
-        for (State::List::Iterator it = m_states.begin(); it != m_states.end(); ++it) {
+        for (QList<State*>::Iterator it = m_states.begin(); it != m_states.end(); ++it) {
             if (!(*it)->textEquivalent().isEmpty()) {
                 firstLine += (*it)->textEquivalent() + " ";
                 if ((*it)->onAllTextLines())
@@ -1938,7 +1938,7 @@ void Note::draw(QPainter *painter, const QRectF &/*clipRect*/)
     // Draw the Emblems:
     qreal yIcon = (height() - EMBLEM_SIZE) / 2;
     qreal xIcon = HANDLE_WIDTH + NOTE_MARGIN;
-    for (State::List::Iterator it = m_states.begin(); it != m_states.end(); ++it) {
+    for (QList<State*>::Iterator it = m_states.begin(); it != m_states.end(); ++it) {
         if (!(*it)->emblem().isEmpty()) {
             QPixmap stateEmblem = QIcon("://tags/hi16-action-" + (*it)->emblem() + ".png").pixmap(16,16);
             painter2.drawPixmap(xIcon, yIcon, stateEmblem);
@@ -2050,9 +2050,9 @@ void Note::setContent(NoteContent *content)
     m_content = content;
 }
 
-/*const */State::List& Note::states() const
+/*const */QList<State*>& Note::states() const
 {
-    return (State::List&)m_states;
+    return (QList<State*>&)m_states;
 }
 
 void Note::addState(State *state, bool orReplace)
@@ -2061,10 +2061,10 @@ void Note::addState(State *state, bool orReplace)
         return;
 
     Tag *tag = state->parentTag();
-    State::List::iterator itStates = m_states.begin();
+    QList<State*>::iterator itStates = m_states.begin();
     // Browse all tags, see if the note has it, increment itSates if yes, and then insert the state at this position...
     // For each existing tags:
-    for (Tag::List::iterator it = Tag::all.begin(); it != Tag::all.end(); ++it) {
+    for (QList<Tag*>::iterator it = Global::tagManager->tagList().begin(); it != Global::tagManager->tagList().end(); ++it) {
         // If the current tag isn't the one to assign or the current one on the note, go to the next tag:
         if (*it != tag && itStates != m_states.end() && *it != (*itStates)->parentTag())
             continue;
@@ -2162,7 +2162,7 @@ void Note::addTag(Tag *tag)
 
 void Note::removeState(State *state)
 {
-    for (State::List::iterator it = m_states.begin(); it != m_states.end(); ++it)
+    for (QList<State*>::iterator it = m_states.begin(); it != m_states.end(); ++it)
         if (*it == state) {
             m_states.erase(it);
             recomputeStyle();
@@ -2172,7 +2172,7 @@ void Note::removeState(State *state)
 
 void Note::removeTag(Tag *tag)
 {
-    for (State::List::iterator it = m_states.begin(); it != m_states.end(); ++it)
+    for (QList<State*>::iterator it = m_states.begin(); it != m_states.end(); ++it)
         if ((*it)->parentTag() == tag) {
             m_states.erase(it);
             recomputeStyle();
@@ -2250,7 +2250,7 @@ bool Note::selectedNotesHaveTags()
 
 bool Note::hasState(State *state)
 {
-    for (State::List::iterator it = m_states.begin(); it != m_states.end(); ++it)
+    for (QList<State*>::iterator it = m_states.begin(); it != m_states.end(); ++it)
         if (*it == state)
             return true;
     return false;
@@ -2258,7 +2258,7 @@ bool Note::hasState(State *state)
 
 bool Note::hasTag(Tag *tag)
 {
-    for (State::List::iterator it = m_states.begin(); it != m_states.end(); ++it)
+    for (QList<State*>::iterator it = m_states.begin(); it != m_states.end(); ++it)
         if ((*it)->parentTag() == tag)
             return true;
     return false;
@@ -2266,7 +2266,7 @@ bool Note::hasTag(Tag *tag)
 
 State* Note::stateOfTag(Tag *tag)
 {
-    for (State::List::iterator it = m_states.begin(); it != m_states.end(); ++it)
+    for (QList<State*>::iterator it = m_states.begin(); it != m_states.end(); ++it)
         if ((*it)->parentTag() == tag)
             return *it;
     return 0;
@@ -2274,7 +2274,7 @@ State* Note::stateOfTag(Tag *tag)
 
 bool Note::allowCrossReferences()
 {
-    for (State::List::iterator it = m_states.begin(); it != m_states.end(); ++it)
+    for (QList<State*>::iterator it = m_states.begin(); it != m_states.end(); ++it)
         if (!(*it)->allowCrossReferences())
             return false;
     return true;
@@ -2283,7 +2283,7 @@ bool Note::allowCrossReferences()
 State* Note::stateForEmblemNumber(int number) const
 {
     int i = -1;
-    for (State::List::const_iterator it = m_states.begin(); it != m_states.end(); ++it)
+    for (QList<State*>::const_iterator it = m_states.begin(); it != m_states.end(); ++it)
         if (!(*it)->emblem().isEmpty()) {
             ++i;
             if (i == number)
@@ -2337,7 +2337,7 @@ void Note::inheritTagsOf(Note *note)
     if (!note || !content())
         return;
 
-    for (State::List::iterator it = note->states().begin(); it != note->states().end(); ++it)
+    for (QList<State*>::iterator it = note->states().begin(); it != note->states().end(); ++it)
         if ((*it)->parentTag() && (*it)->parentTag()->inheritedBySiblings())
             addTag((*it)->parentTag());
 }
@@ -2441,7 +2441,7 @@ Note* Note::noteForFullPath(const QString &path)
 
 void Note::listUsedTags(QList<Tag*> &list)
 {
-    for (State::List::Iterator it = m_states.begin(); it != m_states.end(); ++it) {
+    for (QList<State*>::Iterator it = m_states.begin(); it != m_states.end(); ++it) {
         Tag *tag = (*it)->parentTag();
         if (!list.contains(tag))
             list.append(tag);
@@ -2455,7 +2455,7 @@ void Note::listUsedTags(QList<Tag*> &list)
 void Note::usedStates(QList<State*> &states)
 {
     if (content())
-        for (State::List::Iterator it = m_states.begin(); it != m_states.end(); ++it)
+        for (QList<State*>::Iterator it = m_states.begin(); it != m_states.end(); ++it)
             if (!states.contains(*it))
                 states.append(*it);
 

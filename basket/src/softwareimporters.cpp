@@ -234,7 +234,7 @@ Note* SoftwareImporters::insertTitledNote(BasketScene *parent, const QString &ti
     Note *nGroup = new Note(parent);
 
     Note *nTitle = NoteFactory::createNoteText(title, parent);
-    nTitle->addState(Tag::stateForId("title"));
+    nTitle->addState(Global::tagManager->stateForId("title"));
 
     Note *nContent;
     if (format == Qt::PlainText)

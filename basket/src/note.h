@@ -283,12 +283,12 @@ private:
 
 /// TAGS:
 private:
-    State::List m_states;
-    State       m_computedState;
-    int         m_emblemsCount;
-    bool        m_haveInvisibleTags;
+    QList<State*>   m_states;
+    State           m_computedState;
+    int             m_emblemsCount;
+    bool            m_haveInvisibleTags;
 public:
-    /*const */State::List& states() const;
+    /*const */QList<State*>& states() const;
     inline int emblemsCount() {
         return m_emblemsCount;
     }

@@ -1180,7 +1180,7 @@ void BNPView::notesStateChanged()
     else if (basket->count() == 0)
         setSelectionStatus(tr("No notes"));
     else {
-        QString count     = tr("%1 note(s)", 0,    basket->count());
+        QString count     = tr("%1 note(s)", 0,    basket->count()).arg(basket->count());
         QString selecteds = tr("%1 selected").arg(basket->countSelecteds());
         QString showns    = (currentDecoratedBasket()->filterData().isFiltering ? tr("all matches") : tr("no filter"));
         if (basket->countFounds() != basket->count())

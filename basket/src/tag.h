@@ -24,7 +24,10 @@
 #include <QAction>
 #include <QCoreApplication>
 #include <QList>
+#include <QIcon>
+#include <QString>
 
+class QActionGroup;
 class QColor;
 class QFont;
 class QPainter;
@@ -38,10 +41,6 @@ class Tag;
 class State
 {
     Q_DECLARE_TR_FUNCTIONS(State)
-public:
-    /// LIST OF STATES:
-    typedef QList<State*> List;
-
 public:
     /// CONSTRUCTOR AND DESTRUCTOR:
     explicit State(const QString &id = QString(), Tag *tag = 0);
@@ -143,7 +142,7 @@ public:
     QString fullName();
     QFont font(QFont base);
     QString toCSS(const QString &gradientFolderPath, const QString &gradientFolderName, const QFont &baseFont);
-    static void merge(const List &states, State *result, int *emblemsCount, bool *haveInvisibleTags, const QColor &backgroundColor);
+    static void merge(const QList<State*> &states, State *result, int *emblemsCount, bool *haveInvisibleTags, const QColor &backgroundColor);
     void copyTo(State *other);
 private:
     /// PROPERTIES:
@@ -169,90 +168,78 @@ private:
   * A Tag can have a unique State or several States.
   * @author Sébastien Laoût
   */
-class Tag
+class Tag : public QAction
 {
-    Q_DECLARE_TR_FUNCTIONS(Tag)
-public:
-    /// LIST OF ALL TAGS IN THE APPLICATION:
-    typedef QList<Tag*> List;
-    static Tag::List all;
-    static State* stateForId(const QString &id);
-    static Tag* tagForKAction(QAction *action);
-    static Tag* tagSimilarTo(Tag *tagToTest);
-    static QMap<QString, QString> loadTags(const QString &path = QString()/*, bool merge = false*/); /// << Load the tags contained in the XML file @p path or those in the application settings if @p path isEmpty(). If @p merge is true and a tag with the id of a tag that should be loaded already exist, the tag will get a new id. Otherwise, the tag will be dismissed.
-    static void saveTags();
-    static void saveTagsTo(QList<Tag*> &list, const QString &fullPath);
-    static void createDefaultTagsSet(const QString &file);
-    static long getNextStateUid();
-private:
-    static long nextStateUid;
-
+    Q_OBJECT
 public:
     /// CONSTRUCTOR AND DESTRUCTOR:
-    Tag(/*State *firstState, const QString &name, bool inheritedBySiblings*/);
+    Tag(int tagNumber, QWidget *parent);
     ~Tag();
     /// SET PROPERTIES:
     void setName(const QString &name);
-    void setShortcut(const QKeySequence &shortcut) {
-        m_action->setShortcut(shortcut);
-    }
     void setInheritedBySiblings(bool inherited) {
         m_inheritedBySiblings = inherited;
     }
-    void appendState(State *state)              {
-        m_states.append(state); state->setParentTag(this);
-    }
-    void removeState(State *state)              {
-        m_states.removeOne(state); state->setParentTag(0);
-    }
+    void appendState(State *state);
     /// GET PROPERTIES:
     QString      name()                const {
         return m_name;
     }
-    QKeySequence shortcut()            const {
-        return m_action->shortcut();
-    }
     bool         inheritedBySiblings() const {
         return m_inheritedBySiblings;
     }
-    State::List& states()              const {
-        return (State::List&)m_states;
+    QList<State*>& states()              const {
+        return (QList<State*>&)m_states;
     }
     int          countStates()         const {
         return m_states.count();
     }
     void copyTo(Tag *other);
+//public slots:
+//    void activatedTagShortcut();
 private:
     /// PROPERTIES:
-    QString      m_name;
-    QAction     *m_action;
-    bool         m_inheritedBySiblings;
-    State::List  m_states;
+    QString         m_name;
+    bool            m_inheritedBySiblings;
+    QList<State*>   m_states;
+    int             m_tagNumber;
 };
 
-#include <qicon.h>
-#include <qstring.h>
-
-
-/** An action that represents a State or a Tag
- * @author Kelvie Wong
- * Based off of StateMenuItem by Sébastien Laoût
+/** Tag manager class, contains all tags
+ * and management functions
  */
-class StateAction : public QAction
+class TagManager
 {
-    Q_OBJECT
-    Q_DISABLE_COPY(StateAction)
+    Q_DECLARE_TR_FUNCTIONS(TagManager)
 public:
-    StateAction(State *state,
-                const QKeySequence &shortcut,
-                QWidget * parent,
-                bool withTagName = false);
+    TagManager();
 
-    ~StateAction();
+    Tag* tagForAction(QAction *action);
+    Tag* tagSimilarTo(Tag *tagToTest);
+    State* stateForId(const QString &id);
+
+    long getNextStateUid()
+    {
+        return m_nextStateUid++; // Return the next Uid and THEN increment the Uid
+    }
+    int  getNextTagNumber()
+    {
+        return m_nextTagNumber++;
+    }
+
+    QMap<QString, QString> importTags(const QString &path);
+    void loadTags();
+    void saveTags();
+    void saveTagsTo(QList<Tag*> &list, const QString &fullPath);
+    void createDefaultTagsSet(const QString &file);
+
+    QList<Tag*> &tagList() const {
+        return (QList<Tag*>&)m_tags;
+    }
 private:
-    State   *m_state;
-    QString  m_name;
-    QKeySequence  m_shortcut;
+    QList<Tag*>     m_tags;
+    long            m_nextStateUid;
+    int             m_nextTagNumber;
 };
 
 #endif // TAG_H

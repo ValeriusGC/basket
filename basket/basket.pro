@@ -4,6 +4,9 @@ QT += core widgets gui network xml
 
 unix: QT += dbus
 
+RESOURCES += \
+    basket.qrc
+
 include(src/basket.pri)
 
 win32:DESTDIR = $$OUT_PWD

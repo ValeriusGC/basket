@@ -123,8 +123,8 @@ void NoteDrag::serializeNotes(NoteSelection *noteList, QDataStream &stream, bool
                 stream << QString("");
             stream << content->note()->addedDate() << content->note()->lastModificationDate();
             content->serialize(stream);
-            State::List states = node->note->states();
-            for (State::List::Iterator it = states.begin(); it != states.end(); ++it)
+            QList<State*> states = node->note->states();
+            for (QList<State*>::Iterator it = states.begin(); it != states.end(); ++it)
                 stream << (quint64)(*it);
             stream << (quint64)0;
         }

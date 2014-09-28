@@ -50,9 +50,10 @@ public:
 private:
     void setupActions();
     void setupMenus();
+    void readSettings();
 
 public slots:
-    bool askForQuit();
+    void askForQuit();
     void slotDebug();
     void updateNotesActions();
     void showFilterBar(bool show);
@@ -61,17 +62,12 @@ public slots:
     void enableActions();
     void slotBasketChanged();
     void canUndoRedoChanged();
+    void activatedTagShortcut();
     void populateTagsMenu();
 
     /** Settings */
-    void toggleToolBar();
-    void toggleStatusBar();
-    void configureToolbars();
-    void configureNotifications();
     void showSettingsDialog();
     void showAboutDialog();
-    void minimizeRestore();
-    void quit();
     void slotReboot();
 
     /** Passive Popups for Global Actions */
@@ -94,14 +90,11 @@ public slots:
     void screenshotGrabbed(const QPixmap &pixmap);
 
 protected:
-    bool queryExit();
-    bool queryClose();
-    virtual void resizeEvent(QResizeEvent*);
-    virtual void moveEvent(QMoveEvent*);
+    virtual void showEvent(QShowEvent *);
+    virtual void hideEvent(QHideEvent *);
+    virtual void closeEvent(QCloseEvent *);
 
 public:
-    void ensurePolished();
-
     QMenu *tagsMenu() {
         return m_tagsMenu;
     }
@@ -110,13 +103,15 @@ public:
         return m_insertMenu;
     }
 
+    QMenu *sysTrayMenu() {
+        return m_sysTrayMenu;
+    }
+
     QAction *editNoteAction() {
         return m_actEditNote;
     }
 
 private: // Properties
-    bool                m_startDocked;
-    bool                m_quit;
     bool                m_colorPickWasShown;
     bool                m_colorPickWasGlobal;
 
@@ -126,14 +121,13 @@ private: // Objects
     RegionGrabber       *m_regionGrabber;
 
     // Settings actions :
-//    KToggleAction *m_actShowToolbar;
-//    KToggleAction *m_actShowStatusbar;
     QMenu               *m_basketMenu;
     QMenu               *m_editMenu;
     QMenu               *m_goMenu;
     QMenu               *m_noteMenu;
     QMenu               *m_tagsMenu;
     QMenu               *m_insertMenu;
+    QMenu               *m_settingsMenu;
     QMenu               *m_helpMenu;
     QMenu               *m_sysTrayMenu;
 
@@ -201,6 +195,10 @@ private: // Objects
     QAction             *m_actImportKMenu;
     QAction             *m_actImportIcon;
 
+    // Settings actions:
+    QAction             *m_actShowMainToolbar;
+    QAction             *m_actShowEditToolbar;
+    QAction             *m_actShowStatusbar;
 
 
     QAction             *m_actUndo;

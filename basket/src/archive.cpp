@@ -81,14 +81,14 @@ void Archive::save(BasketScene *basket, bool withSubBaskets, const QString &dest
     // Save a Small tags.xml Document:
     QList<Tag*> tags;
     listUsedTags(basket, withSubBaskets, tags);
-    Tag::saveTagsTo(tags, tempFolder + "tags.xml");
+    Global::tagManager->saveTagsTo(tags, tempFolder + "tags.xml");
 
     // Save Tag Emblems (in case they are loaded on a computer that do not have those icons):
     if (!QDir().exists(tempFolder + "tag-emblems/"))
         dir.mkdir(tempFolder + "tag-emblems/");
-    for (Tag::List::iterator it = tags.begin(); it != tags.end(); ++it) {
-        State::List states = (*it)->states();
-        for (State::List::iterator it2 = states.begin(); it2 != states.end(); ++it2) {
+    for (QList<Tag*>::iterator it = tags.begin(); it != tags.end(); ++it) {
+        QList<State*> states = (*it)->states();
+        for (QList<State*>::iterator it2 = states.begin(); it2 != states.end(); ++it2) {
             State *state = (*it2);
             QIcon icon = QIcon(state->emblem());
             if (!icon.isNull()) {
@@ -347,10 +347,9 @@ void Archive::open(const QString &path)
 
                     // Import the Tags:
                     importTagEmblems(extractionFolder); // Import and rename tag emblems BEFORE loading them!
-                    QMap<QString, QString> mergedStates = Tag::loadTags(extractionFolder + "tags.xml");
-                    QMap<QString, QString>::Iterator it;
+                    QMap<QString, QString> mergedStates = Global::tagManager->importTags(extractionFolder + "tags.xml");
                     if (mergedStates.count() > 0) {
-                        Tag::saveTags();
+                        Global::tagManager->saveTags();
                     }
 
                     // Import the Background Images:

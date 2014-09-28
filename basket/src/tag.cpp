@@ -20,6 +20,7 @@
 
 #include "tag.h"
 
+#include <QActionGroup>
 #include <QDir>
 #include <QList>
 #include <QTextStream>
@@ -53,12 +54,12 @@ State* State::nextState(bool cycle /*= true*/)
     if (!parentTag())
         return 0;
 
-    List states = parentTag()->states();
+    QList<State*> states = parentTag()->states();
     // The tag contains only one state:
     if (states.count() == 1)
         return 0;
     // Find the next state:
-    for (List::iterator it = states.begin(); it != states.end(); ++it)
+    for (QList<State*>::iterator it = states.begin(); it != states.end(); ++it)
         // Found the current state in the list:
         if (*it == this) {
             // Find the next state:
@@ -68,7 +69,6 @@ State* State::nextState(bool cycle /*= true*/)
             return next;
         }
     // Should not happens:
-    Q_ASSERT(false);
     return 0;
 }
 
@@ -135,13 +135,13 @@ QString State::toCSS(const QString &gradientFolderPath, const QString &gradientF
         return "   .tag_" + id() + " {" + css + " }\n";
 }
 
-void State::merge(const List &states, State *result, int *emblemsCount, bool *haveInvisibleTags, const QColor &backgroundColor)
+void State::merge(const QList<State*> &states, State *result, int *emblemsCount, bool *haveInvisibleTags, const QColor &backgroundColor)
 {
     *result            = State(); // Reset to default values.
     *emblemsCount      = 0;
     *haveInvisibleTags = false;
 
-    for (List::const_iterator it = states.begin(); it != states.end(); ++it) {
+    for (QList<State*>::const_iterator it = states.begin(); it != states.end(); ++it) {
         State *state = *it;
         bool isVisible = false;
         // For each propertie, if that properties have a value (is not default) is the current state of the list,
@@ -209,178 +209,60 @@ void State::copyTo(State *other)
 
 /** class Tag: */
 
-Tag::List Tag::all = Tag::List();
-
-long Tag::nextStateUid = 1;
-
-long Tag::getNextStateUid()
+Tag::Tag(int tagNumber, QWidget *parent):
+    QAction(parent)
+    , m_tagNumber(tagNumber)
+    , m_inheritedBySiblings(false)
 {
-    return nextStateUid++; // Return the next Uid and THEN increment the Uid
-}
-
-Tag::Tag()
-{
-    static int tagNumber = 0;
-    ++tagNumber;
     QString sAction = "tag_shortcut_number_" + QString::number(tagNumber);
-
-    QMenu *ac = Global::mainWin->tagsMenu();
-    m_action = ac->addAction(QIcon(), QString());//, Global::bnpView, SLOT(activatedTagShortcut()));
-//    m_action = new QAction(QIcon(), QString());
-    m_action->setShortcut(QKeySequence());
-    m_inheritedBySiblings = false;
+    setText(sAction);
+//    m_action = Global::mainWin->tagsMenu()->addAction(sAction);//, this, SLOT(activatedTagShortcut()), QKeySequence());
+    setCheckable(true);
 }
 
 Tag::~Tag()
 {
-    delete m_action;
 }
 
-//void BNPView::activatedTagShortcut()
-//{
-//    Tag *tag = Tag::tagForKAction((QAction*)sender());
-//    currentBasket()->activatedTagShortcut(tag);
-//}
+void Tag::appendState(State *state)
+{
+    m_states.append(state);
+    state->setParentTag(this);
+    if (m_states.count() == 1)
+        setIcon(QIcon("://tags/hi16-action-" + m_states[0]->emblem() + ".png"));
+}
 
 void Tag::setName(const QString &name)
 {
     m_name = name;
-    m_action->setText("TAG SHORTCUT: " + name); // TODO: i18n  (for debug purpose only by now).
+    setText(m_name);
+    //    setText(m_states[0]->name());
 }
 
-State* Tag::stateForId(const QString &id)
+void Tag::copyTo(Tag *other)
 {
-    for (List::iterator it = all.begin(); it != all.end(); ++it)
-        for (State::List::iterator it2 = (*it)->states().begin(); it2 != (*it)->states().end(); ++it2)
-            if ((*it2)->id() == id)
-                return *it2;
-    return 0;
+    other->m_name = m_name;
+    other->setShortcut(shortcut());
+    other->m_inheritedBySiblings =  m_inheritedBySiblings;
 }
 
-Tag* Tag::tagForKAction(QAction *action)
+/** class TagManager: */
+TagManager::TagManager():
+    m_nextStateUid(1)
+  , m_nextTagNumber(1)
 {
-    for (List::iterator it = all.begin(); it != all.end(); ++it)
-        if ((*it)->m_action == action)
+    loadTags();
+}
+
+Tag* TagManager::tagForAction(QAction *action)
+{
+    for (QList<Tag*>::iterator it = m_tags.begin(); it != m_tags.end(); ++it)
+        if (static_cast<QAction*>(*it) == action)
             return *it;
     return 0;
 }
 
-QMap<QString, QString> Tag::loadTags(const QString &path/* = QString()*//*, bool merge = false*/)
-{
-    QMap<QString, QString> mergedStates;
-
-    bool merge = !path.isEmpty();
-    QString fullPath = (merge ? path : Global::savesFolder() + "tags.xml");
-    QString doctype  = "basketTags";
-
-    QDir dir;
-    if (!dir.exists(fullPath)) {
-        if (merge)
-            return mergedStates;
-        DEBUG_WIN << "Tags file does not exist: Creating it...";
-        createDefaultTagsSet(fullPath);
-    }
-
-    QDomDocument *document = XMLWork::openFile(doctype, fullPath);
-    if (!document) {
-        DEBUG_WIN << "<font color=red>FAILED to read the tags file</font>";
-        return mergedStates;
-    }
-
-    QDomElement docElem = document->documentElement();
-    if (!merge)
-        nextStateUid = docElem.attribute("nextStateUid", QString::number(nextStateUid)).toLong();
-
-    QDomNode node = docElem.firstChild();
-    while (!node.isNull()) {
-        QDomElement element = node.toElement();
-        if ((!element.isNull()) && element.tagName() == "tag") {
-            Tag *tag = new Tag();
-            // Load properties:
-            QString name      = XMLWork::getElementText(element, "name");
-            QString shortcut  = XMLWork::getElementText(element, "shortcut");
-            QString inherited = XMLWork::getElementText(element, "inherited", "false");
-            tag->setName(name);
-            tag->setShortcut(QKeySequence(shortcut));
-            tag->setInheritedBySiblings(XMLWork::trueOrFalse(inherited));
-            // Load states:
-            QDomNode subNode = element.firstChild();
-            while (!subNode.isNull()) {
-                QDomElement subElement = subNode.toElement();
-                if ((!subElement.isNull()) && subElement.tagName() == "state") {
-                    State *state = new State(subElement.attribute("id"), tag);
-                    state->setName(XMLWork::getElementText(subElement, "name"));
-                    state->setEmblem(XMLWork::getElementText(subElement, "emblem"));
-                    QDomElement textElement = XMLWork::getElement(subElement, "text");
-                    state->setBold(XMLWork::trueOrFalse(textElement.attribute("bold",      "false")));
-                    state->setItalic(XMLWork::trueOrFalse(textElement.attribute("italic",    "false")));
-                    state->setUnderline(XMLWork::trueOrFalse(textElement.attribute("underline", "false")));
-                    state->setStrikeOut(XMLWork::trueOrFalse(textElement.attribute("strikeOut", "false")));
-                    QString textColor = textElement.attribute("color", "");
-                    state->setTextColor(textColor.isEmpty() ? QColor() : QColor(textColor));
-                    QDomElement fontElement = XMLWork::getElement(subElement, "font");
-                    state->setFontName(fontElement.attribute("name", ""));
-                    QString fontSize = fontElement.attribute("size", "");
-                    state->setFontSize(fontSize.isEmpty() ? -1 : fontSize.toInt());
-                    QString backgroundColor = XMLWork::getElementText(subElement, "backgroundColor", "");
-                    state->setBackgroundColor(backgroundColor.isEmpty() ? QColor() : QColor(backgroundColor));
-                    QDomElement textEquivalentElement = XMLWork::getElement(subElement, "textEquivalent");
-                    state->setTextEquivalent(textEquivalentElement.attribute("string", ""));
-                    state->setOnAllTextLines(XMLWork::trueOrFalse(textEquivalentElement.attribute("onAllTextLines", "false")));
-                    QString allowXRef = XMLWork::getElementText(subElement, "allowCrossReferences", "true");
-                    state->setAllowCrossReferences(XMLWork::trueOrFalse(allowXRef));
-                    tag->appendState(state);
-                }
-                subNode = subNode.nextSibling();
-            }
-            // If the Tag is Valid:
-            if (tag->countStates() > 0) {
-                // Rename Things if Needed:
-                State *firstState = tag->states().first();
-                if (tag->countStates() == 1 && firstState->name().isEmpty())
-                    firstState->setName(tag->name());
-                if (tag->name().isEmpty())
-                    tag->setName(firstState->name());
-                // Add or Merge the Tag:
-                if (!merge) {
-                    all.append(tag);
-                } else {
-                    Tag *similarTag = tagSimilarTo(tag);
-                    // Tag does not exists, add it:
-                    if (similarTag == 0) {
-                        // We are merging the new states, so we should choose new and unique (on that computer) ids for those states:
-                        for (State::List::iterator it = tag->states().begin(); it != tag->states().end(); ++it) {
-                            State *state = *it;
-                            QString uid    = state->id();
-                            QString newUid = "tag_state_" + QString::number(getNextStateUid());
-                            state->setId(newUid);
-                            mergedStates[uid] = newUid;
-                        }
-                        // TODO: if shortcut is already assigned to a previous note, do not import it, keep the user settings!
-                        all.append(tag);
-                        // Tag already exists, rename to theire ids:
-                    } else {
-                        State::List::iterator it2 = similarTag->states().begin();
-                        for (State::List::iterator it = tag->states().begin(); it != tag->states().end(); ++it, ++it2) {
-                            State *state        = *it;
-                            State *similarState = *it2;
-                            QString uid    = state->id();
-                            QString newUid = similarState->id();
-                            if (uid != newUid)
-                                mergedStates[uid] = newUid;
-                        }
-                        delete tag; // Already exists, not to be merged. Delete the shortcut and all.
-                    }
-                }
-            }
-        }
-        node = node.nextSibling();
-    }
-
-    return mergedStates;
-}
-
-Tag* Tag::tagSimilarTo(Tag *tagToTest)
+Tag* TagManager::tagSimilarTo(Tag *tagToTest)
 {
     // Tags are considered similar if they have the same name, the same number of states, in the same order, and the same look.
     // Keyboard shortcut, text equivalent and onEveryLines are user settings, and thus not considered during the comparison.
@@ -390,7 +272,7 @@ Tag* Tag::tagSimilarTo(Tag *tagToTest)
     // User tags begins with "tag_state_" followed by a number. Default tags are the other ones.
 
     // Browse all tags:
-    for (List::iterator it = all.begin(); it != all.end(); ++it) {
+    for (QList<Tag*>::iterator it = m_tags.begin(); it != m_tags.end(); ++it) {
         Tag *tag = *it;
         bool same = true;
         bool sameName;
@@ -400,8 +282,8 @@ Tag* Tag::tagSimilarTo(Tag *tagToTest)
         if (tag->countStates() != tagToTest->countStates())
             continue; // Tag is different!
         // We found a tag with same name, check if every states/look are same too:
-        State::List::iterator itTest = tagToTest->states().begin();
-        for (State::List::iterator it2 = (*it)->states().begin(); it2 != (*it)->states().end(); ++it2, ++itTest) {
+        QList<State*>::iterator itTest = tagToTest->states().begin();
+        for (QList<State*>::iterator it2 = (*it)->states().begin(); it2 != (*it)->states().end(); ++it2, ++itTest) {
             State *state       = *it2;
             State *stateToTest = *itTest;
             if (state->id().startsWith(QLatin1String("tag_state_")) || stateToTest->id().startsWith(QLatin1String("tag_state_"))) {
@@ -448,22 +330,212 @@ Tag* Tag::tagSimilarTo(Tag *tagToTest)
     return 0;
 }
 
-void Tag::saveTags()
+State* TagManager::stateForId(const QString &id)
 {
-    DEBUG_WIN << "Saving tags...";
-    saveTagsTo(all, Global::savesFolder() + "tags.xml");
+    for (QList<Tag*>::iterator it = m_tags.begin(); it != m_tags.end(); ++it)
+        for (QList<State*>::iterator it2 = (*it)->states().begin(); it2 != (*it)->states().end(); ++it2)
+            if ((*it2)->id() == id)
+                return *it2;
+    return 0;
 }
 
-void Tag::saveTagsTo(QList<Tag*> &list, const QString &fullPath)
+QMap<QString, QString> TagManager::importTags(const QString &path)
+{
+    QMap<QString, QString> mergedStates;
+
+    QString doctype  = "basketTags";
+
+    QDir dir;
+    if (!dir.exists(path)) {
+        return mergedStates;
+    }
+
+    QDomDocument *document = XMLWork::openFile(doctype, path);
+    if (!document) {
+        DEBUG_WIN << "<font color=red>FAILED to read the tags file</font>";
+        return mergedStates;
+    }
+
+    QDomElement docElem = document->documentElement();
+    QDomNode node = docElem.firstChild();
+    while (!node.isNull()) {
+        QDomElement element = node.toElement();
+        if ((!element.isNull()) && element.tagName() == "tag") {
+            Tag *tag = new Tag(getNextTagNumber(), Global::mainWin);
+            // Load properties:
+            QString name      = XMLWork::getElementText(element, "name");
+            QString shortcut  = XMLWork::getElementText(element, "shortcut");
+            QString inherited = XMLWork::getElementText(element, "inherited", "false");
+            tag->setName(name);
+            tag->setShortcut(QKeySequence(shortcut));
+            tag->setInheritedBySiblings(XMLWork::trueOrFalse(inherited));
+            // Load states:
+            QDomNode subNode = element.firstChild();
+            while (!subNode.isNull()) {
+                QDomElement subElement = subNode.toElement();
+                if ((!subElement.isNull()) && subElement.tagName() == "state") {
+                    State *state = new State(subElement.attribute("id"), tag);
+                    state->setName(XMLWork::getElementText(subElement, "name"));
+                    state->setEmblem(XMLWork::getElementText(subElement, "emblem"));
+                    QDomElement textElement = XMLWork::getElement(subElement, "text");
+                    state->setBold(XMLWork::trueOrFalse(textElement.attribute("bold",      "false")));
+                    state->setItalic(XMLWork::trueOrFalse(textElement.attribute("italic",    "false")));
+                    state->setUnderline(XMLWork::trueOrFalse(textElement.attribute("underline", "false")));
+                    state->setStrikeOut(XMLWork::trueOrFalse(textElement.attribute("strikeOut", "false")));
+                    QString textColor = textElement.attribute("color", "");
+                    state->setTextColor(textColor.isEmpty() ? QColor() : QColor(textColor));
+                    QDomElement fontElement = XMLWork::getElement(subElement, "font");
+                    state->setFontName(fontElement.attribute("name", ""));
+                    QString fontSize = fontElement.attribute("size", "");
+                    state->setFontSize(fontSize.isEmpty() ? -1 : fontSize.toInt());
+                    QString backgroundColor = XMLWork::getElementText(subElement, "backgroundColor", "");
+                    state->setBackgroundColor(backgroundColor.isEmpty() ? QColor() : QColor(backgroundColor));
+                    QDomElement textEquivalentElement = XMLWork::getElement(subElement, "textEquivalent");
+                    state->setTextEquivalent(textEquivalentElement.attribute("string", ""));
+                    state->setOnAllTextLines(XMLWork::trueOrFalse(textEquivalentElement.attribute("onAllTextLines", "false")));
+                    QString allowXRef = XMLWork::getElementText(subElement, "allowCrossReferences", "true");
+                    state->setAllowCrossReferences(XMLWork::trueOrFalse(allowXRef));
+                    tag->appendState(state);
+                }
+                subNode = subNode.nextSibling();
+            }
+            // If the Tag is Valid:
+            if (tag->countStates() > 0) {
+                // Rename Things if Needed:
+                State *firstState = tag->states().first();
+                if (tag->countStates() == 1 && firstState->name().isEmpty())
+                    firstState->setName(tag->name());
+                if (tag->name().isEmpty())
+                    tag->setName(firstState->name());
+                // Add or Merge the Tag:
+                Tag *similarTag = Global::tagManager->tagSimilarTo(tag);
+                // Tag does not exists, add it:
+                if (similarTag == 0) {
+                    // We are merging the new states, so we should choose new and unique (on that computer) ids for those states:
+                    for (QList<State*>::iterator it = tag->states().begin(); it != tag->states().end(); ++it) {
+                        State *state = *it;
+                        QString uid    = state->id();
+                        QString newUid = "tag_state_" + QString::number(getNextStateUid());
+                        state->setId(newUid);
+                        mergedStates[uid] = newUid;
+                    }
+                    // TODO: if shortcut is already assigned to a previous note, do not import it, keep the user settings!
+                    m_tags.append(tag);
+                    // Tag already exists, rename to theire ids:
+                } else {
+                    QList<State*>::iterator it2 = similarTag->states().begin();
+                    for (QList<State*>::iterator it = tag->states().begin(); it != tag->states().end(); ++it, ++it2) {
+                        State *state        = *it;
+                        State *similarState = *it2;
+                        QString uid    = state->id();
+                        QString newUid = similarState->id();
+                        if (uid != newUid)
+                            mergedStates[uid] = newUid;
+                    }
+                    delete tag; // Already exists, not to be merged. Delete the shortcut and all.
+                }
+            }
+        }
+        node = node.nextSibling();
+    }
+
+    return mergedStates;
+}
+
+void TagManager::loadTags()
+{
+    QString fullPath = Global::savesFolder() + "tags.xml";
+    QString doctype  = "basketTags";
+
+    QDir dir;
+    if (!dir.exists(fullPath)) {
+        DEBUG_WIN << "Tags file does not exist: Creating it...";
+        createDefaultTagsSet(fullPath);
+    }
+
+    QDomDocument *document = XMLWork::openFile(doctype, fullPath);
+    if (!document) {
+        DEBUG_WIN << "<font color=red>FAILED to read the tags file</font>";
+        return;
+    }
+
+    QDomElement docElem = document->documentElement();
+    m_nextStateUid = docElem.attribute("nextStateUid", QString::number(m_nextStateUid)).toLong();
+
+    QDomNode node = docElem.firstChild();
+    while (!node.isNull()) {
+        QDomElement element = node.toElement();
+        if ((!element.isNull()) && element.tagName() == "tag") {
+            Tag *tag = new Tag(getNextTagNumber(), Global::mainWin);
+            // Load properties:
+            QString name      = XMLWork::getElementText(element, "name");
+            QString shortcut  = XMLWork::getElementText(element, "shortcut");
+            QString inherited = XMLWork::getElementText(element, "inherited", "false");
+            tag->setName(name);
+            tag->setShortcut(QKeySequence(shortcut));
+            tag->setInheritedBySiblings(XMLWork::trueOrFalse(inherited));
+            // Load states:
+            QDomNode subNode = element.firstChild();
+            while (!subNode.isNull()) {
+                QDomElement subElement = subNode.toElement();
+                if ((!subElement.isNull()) && subElement.tagName() == "state") {
+                    State *state = new State(subElement.attribute("id"), tag);
+                    state->setName(XMLWork::getElementText(subElement, "name"));
+                    state->setEmblem(XMLWork::getElementText(subElement, "emblem"));
+                    QDomElement textElement = XMLWork::getElement(subElement, "text");
+                    state->setBold(XMLWork::trueOrFalse(textElement.attribute("bold",      "false")));
+                    state->setItalic(XMLWork::trueOrFalse(textElement.attribute("italic",    "false")));
+                    state->setUnderline(XMLWork::trueOrFalse(textElement.attribute("underline", "false")));
+                    state->setStrikeOut(XMLWork::trueOrFalse(textElement.attribute("strikeOut", "false")));
+                    QString textColor = textElement.attribute("color", "");
+                    state->setTextColor(textColor.isEmpty() ? QColor() : QColor(textColor));
+                    QDomElement fontElement = XMLWork::getElement(subElement, "font");
+                    state->setFontName(fontElement.attribute("name", ""));
+                    QString fontSize = fontElement.attribute("size", "");
+                    state->setFontSize(fontSize.isEmpty() ? -1 : fontSize.toInt());
+                    QString backgroundColor = XMLWork::getElementText(subElement, "backgroundColor", "");
+                    state->setBackgroundColor(backgroundColor.isEmpty() ? QColor() : QColor(backgroundColor));
+                    QDomElement textEquivalentElement = XMLWork::getElement(subElement, "textEquivalent");
+                    state->setTextEquivalent(textEquivalentElement.attribute("string", ""));
+                    state->setOnAllTextLines(XMLWork::trueOrFalse(textEquivalentElement.attribute("onAllTextLines", "false")));
+                    QString allowXRef = XMLWork::getElementText(subElement, "allowCrossReferences", "true");
+                    state->setAllowCrossReferences(XMLWork::trueOrFalse(allowXRef));
+                    tag->appendState(state);
+                }
+                subNode = subNode.nextSibling();
+            }
+            // If the Tag is Valid:
+            if (tag->countStates() > 0) {
+                // Rename Things if Needed:
+                State *firstState = tag->states().first();
+                if (tag->countStates() == 1 && firstState->name().isEmpty())
+                    firstState->setName(tag->name());
+                if (tag->name().isEmpty())
+                    tag->setName(firstState->name());
+                // Add the Tag:
+                m_tags.append(tag);
+            }
+        }
+        node = node.nextSibling();
+    }
+}
+
+void TagManager::saveTags()
+{
+    DEBUG_WIN << "Saving tags...";
+    saveTagsTo(m_tags, Global::savesFolder() + "tags.xml");
+}
+
+void TagManager::saveTagsTo(QList<Tag*> &list, const QString &fullPath)
 {
     // Create Document:
     QDomDocument document(/*doctype=*/"basketTags");
     QDomElement root = document.createElement("basketTags");
-    root.setAttribute("nextStateUid", static_cast<long long int>(nextStateUid));
+    root.setAttribute("nextStateUid", static_cast<long long int>(m_nextStateUid));
     document.appendChild(root);
 
     // Save all tags:
-    for (List::iterator it = list.begin(); it != list.end(); ++it) {
+    for (QList<Tag*>::iterator it = list.begin(); it != list.end(); ++it) {
         Tag *tag = *it;
         // Create tag node:
         QDomElement tagNode = document.createElement("tag");
@@ -473,7 +545,7 @@ void Tag::saveTagsTo(QList<Tag*> &list, const QString &fullPath)
         XMLWork::addElement(document, tagNode, "shortcut", tag->shortcut().toString());
         XMLWork::addElement(document, tagNode, "inherited", XMLWork::trueOrFalse(tag->inheritedBySiblings()));
         // Save all states:
-        for (State::List::iterator it2 = (*it)->states().begin(); it2 != (*it)->states().end(); ++it2) {
+        for (QList<State*>::iterator it2 = (*it)->states().begin(); it2 != (*it)->states().end(); ++it2) {
             State *state = *it2;
             // Create state node:
             QDomElement stateNode = document.createElement("state");
@@ -509,14 +581,7 @@ void Tag::saveTagsTo(QList<Tag*> &list, const QString &fullPath)
         DEBUG_WIN << "<font color=red>FAILED to save tags</font>!";
 }
 
-void Tag::copyTo(Tag *other)
-{
-    other->m_name = m_name;
-    other->m_action->setShortcut(m_action->shortcut());
-    other->m_inheritedBySiblings =  m_inheritedBySiblings;
-}
-
-void Tag::createDefaultTagsSet(const QString &fullPath)
+void TagManager::createDefaultTagsSet(const QString &fullPath)
 {
     QString xml = QString(
                       "<!DOCTYPE basketTags>\n"
@@ -615,7 +680,7 @@ void Tag::createDefaultTagsSet(const QString &fullPath)
                       "    </state>\n"
                       "    <state id=\"preference_excellent\">\n"
                       "      <name>%8</name>\n" // "Excellent"
-                      "      <emblem>tag_preference_excellent</emblem>\n" 
+                      "      <emblem>tag_preference_excellent</emblem>\n"
                       "      <textEquivalent string=\"(***)\" />\n"
                       "    </state>\n"
                       "  </tag>\n"
@@ -730,24 +795,4 @@ void Tag::createDefaultTagsSet(const QString &fullPath)
         file.close();
     } else
         DEBUG_WIN << "<font color=red>FAILED to create the tags file</font>!";
-}
-
-// StateAction
-StateAction::StateAction(State *state, const QKeySequence &shortcut, QWidget* parent, bool withTagName)
-        : QAction(parent)
-        , m_state(state)
-        , m_shortcut(shortcut)
-{
-    setCheckable(true);
-    setText(m_state->name());
-
-    if (withTagName && m_state->parentTag())
-        setText(m_state->parentTag()->name());
-
-    setIcon(QIcon("://tags/hi16-action-" + m_state->emblem() + ".png"));
-}
-
-StateAction::~StateAction()
-{
-    // pass
 }

@@ -68,21 +68,17 @@ OpaqueBackgroundEntry::~OpaqueBackgroundEntry()
 
 BackgroundManager::BackgroundManager()
 {
-/// kDebug() << "BackgroundManager: Found the following background images in  ";
-    QStringList directories(Global::backgroundsFolder()); // eg. { "/home/seb/.kde/share/apps/", "/usr/share/apps/" }
+    QStringList directories;
+    directories << Global::backgroundsFolder();
+    directories << QDir::currentPath() + "/backgrounds/";
     // For each folder:
     for (QStringList::Iterator it = directories.begin(); it != directories.end(); ++it) {
         // For each file in those directories:
-        QDir dir(*it + "basket/backgrounds/", /*nameFilder=*/"*.png", /*sortSpec=*/QDir::Name | QDir::IgnoreCase, /*filterSpec=*/QDir::Files | QDir::NoSymLinks);
-///     kDebug() << *it + "basket/backgrounds/  ";
+        QDir dir(*it, /*nameFilder=*/"*.png", /*sortSpec=*/QDir::Name | QDir::IgnoreCase, /*filterSpec=*/QDir::Files | QDir::NoSymLinks);
         QStringList files = dir.entryList();
         for (QStringList::Iterator it2 = files.begin(); it2 != files.end(); ++it2) // TODO: If an image name is present in two folders?
-            addImage(*it + "basket/backgrounds/" + *it2);
+            addImage(*it + *it2);
     }
-
-/// kDebug() << ":";
-/// for (BackgroundsList::Iterator it = m_backgroundsList.begin(); it != m_backgroundsList.end(); ++it)
-///     kDebug() << "* " << (*it)->location << "  [ref: " << (*it)->name << "]";
 
     connect(&m_garbageTimer, SIGNAL(timeout()), this, SLOT(doGarbage()));
 }

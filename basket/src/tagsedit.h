@@ -130,10 +130,10 @@ class TagsEditDialog : public QDialog
 public:
     explicit TagsEditDialog(QWidget *parent = 0, State *stateToEdit = 0, bool addNewTag = false);
     ~TagsEditDialog();
-    State::List deletedStates() {
+    QList<State*> deletedStates() {
         return m_deletedStates;
     }
-    State::List addedStates()   {
+    QList<State*> addedStates()   {
         return m_addedStates;
     }
     TagListViewItem* itemForState(State *state);
@@ -189,8 +189,8 @@ private:
     QCheckBox     *m_allowCrossRefernce;
 
     TagCopy::List m_tagCopies;
-    State::List   m_deletedStates;
-    State::List   m_addedStates;
+    QList<State*>   m_deletedStates;
+    QList<State*>   m_addedStates;
 
     bool m_loading;
 };

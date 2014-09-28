@@ -260,7 +260,7 @@ void HTMLExporter::exportBasket(BasketScene *basket, bool isSubBasket)
     "   .unknown { margin: 1px 2px; border: 1px solid " << borderColor << "; -moz-border-radius: 4px; }\n";
     QList<State*> states = basket->usedStates();
     QString statesCss;
-    for (State::List::Iterator it = states.begin(); it != states.end(); ++it)
+    for (QList<State*>::Iterator it = states.begin(); it != states.end(); ++it)
         statesCss += (*it)->toCSS(imagesFolderPath, imagesFolderName, basket->QGraphicsScene::font());
     stream <<
     statesCss <<
@@ -441,13 +441,13 @@ void HTMLExporter::exportNote(Note *note, int indent)
         if (!additionalClasses.isEmpty())
             additionalClasses = " " + additionalClasses;
         // Assign the style of each associted tags:
-        for (State::List::Iterator it = note->states().begin(); it != note->states().end(); ++it)
+        for (QList<State*>::Iterator it = note->states().begin(); it != note->states().end(); ++it)
             additionalClasses += " tag_" + (*it)->id();
         //stream << spaces.fill(' ', indent);
         stream << "<table class=\"note" << additionalClasses << "\"" << freeStyle << "><tr>";
         if (note->emblemsCount() > 0) {
             stream << "<td class=\"tags\"><nobr>";
-            for (State::List::Iterator it = note->states().begin(); it != note->states().end(); ++it)
+            for (QList<State*>::Iterator it = note->states().begin(); it != note->states().end(); ++it)
                 if (!(*it)->emblem().isEmpty()) {
                     int emblemSize = 16;
                     QString iconFileName = copyIcon((*it)->emblem(), emblemSize);

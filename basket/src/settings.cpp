@@ -34,6 +34,7 @@
 #include <QLineEdit>
 #include <QPointer>
 #include <QSettings>
+#include <QSpinBox>
 #include <QTabWidget>
 #include <QUrl>
 #include <QMimeDatabase>
@@ -91,8 +92,6 @@ int     Settings::s_basketTreeWidth      = -1;
 bool    Settings::s_welcomeBasketsAdded  = false;
 QString Settings::s_dataFolder           = "";
 QDate   Settings::s_lastBackup           = QDate();
-QPoint  Settings::s_mainWindowPosition   = QPoint();
-QSize   Settings::s_mainWindowSize       = QSize();
 bool    Settings::s_showEmptyBasketInfo  = true;
 bool    Settings::s_spellCheckTextNotes  = true;
 
@@ -148,8 +147,6 @@ void Settings::loadConfig()
     setWelcomeBasketsAdded(settings.value("welcomeBasketsAdded",  false).toBool());
     setDataFolder(settings.value("dataFolder",           "").toString());
     setLastBackup(settings.value("lastBackup", QDate()).toDate());
-    setMainWindowPosition(settings.value("position", QPoint()).toPoint());
-    setMainWindowSize(settings.value("size",     QSize()).toSize());
     settings.endGroup();
 
     setShowEmptyBasketInfo(settings.value("notificationmessages/emptyBasketInfo",      true).toBool());
@@ -236,8 +233,6 @@ void Settings::saveConfig()
     settings.setValue("welcomeBasketsAdded",  welcomeBasketsAdded());
     settings.setValue("dataFolder",        dataFolder());
     settings.setValue("lastBackup",           QDate(lastBackup()));
-    settings.setValue("position",             mainWindowPosition());
-    settings.setValue("size",                 mainWindowSize());
     settings.endGroup();
 
     settings.setValue("notificationmessages/emptyBasketInfo",      showEmptyBasketInfo());
@@ -760,8 +755,8 @@ NewNotesPage::NewNotesPage(QWidget * parent)
     // New Images Size:
 
     hLay = new QHBoxLayout;
-    m_imgSizeX = new QLineEdit("100", this);
-    m_imgSizeX->setValidator(new QIntValidator(1, 4096, this));
+    m_imgSizeX = new QSpinBox(this);
+    m_imgSizeX->setRange(1, 4096);
     connect(m_imgSizeX, SIGNAL(valueChanged(int)), this, SLOT(changed()));
 
     label = new QLabel(this);
@@ -771,8 +766,8 @@ NewNotesPage::NewNotesPage(QWidget * parent)
     hLay->addWidget(label);
     hLay->addWidget(m_imgSizeX);
 
-    m_imgSizeY = new QLineEdit("100", this);
-    m_imgSizeY->setValidator(new QIntValidator(1, 4096, this));
+    m_imgSizeY = new QSpinBox(this);
+    m_imgSizeY->setRange(1, 4096);
     connect(m_imgSizeY, SIGNAL(valueChanged(int)), this, SLOT(changed()));
 
     label = new QLabel(this);
@@ -818,8 +813,8 @@ void NewNotesPage::load()
 {
     m_newNotesPlace->setCurrentIndex(Settings::newNotesPlace());
 
-    m_imgSizeX->setText(QString(Settings::defImageX()));
-    m_imgSizeY->setText(QString(Settings::defImageY()));
+    m_imgSizeX->setValue(Settings::defImageX());
+    m_imgSizeY->setValue(Settings::defImageY());
 
     m_viewTextFileContent->setChecked(Settings::viewTextFileContent());
     m_viewHtmlFileContent->setChecked(Settings::viewHtmlFileContent());
@@ -831,8 +826,8 @@ void NewNotesPage::save()
 {
     Settings::setNewNotesPlace(m_newNotesPlace->currentIndex());
 
-    Settings::setDefImageX(m_imgSizeX->text().toInt());
-    Settings::setDefImageY(m_imgSizeY->text().toInt());
+    Settings::setDefImageX(m_imgSizeX->value());
+    Settings::setDefImageY(m_imgSizeY->value());
 
     Settings::setViewTextFileContent(m_viewTextFileContent->isChecked());
     Settings::setViewHtmlFileContent(m_viewHtmlFileContent->isChecked());
@@ -849,8 +844,8 @@ void NewNotesPage::visualize()
 {
     QPointer<ViewSizeDialog> size = new ViewSizeDialog(this, m_imgSizeX->text().toInt(), m_imgSizeY->text().toInt());
     size->exec();
-    m_imgSizeX->setText(QString(size->width()));
-    m_imgSizeY->setText(QString(size->height()));
+    m_imgSizeX->setValue(size->width());
+    m_imgSizeY->setValue(size->height());
 }
 
 /** class NotesAppearancePage: */

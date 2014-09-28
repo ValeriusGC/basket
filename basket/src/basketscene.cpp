@@ -552,7 +552,7 @@ void BasketScene::loadNotes(const QDomElement &notes, Note *parent)
                 QString tagsString = XMLWork::getElementText(e, "tags", "");
                 QStringList tagsId = tagsString.split(";");
                 for (QStringList::iterator it = tagsId.begin(); it != tagsId.end(); ++it) {
-                    State *state = Tag::stateForId(*it);
+                    State *state = Global::tagManager->stateForId(*it);
                     if (state)
                         note->addState(state, /*orReplace=*/true);
                 }
@@ -593,7 +593,7 @@ void BasketScene::saveNotes(QDomDocument &document, QDomElement &element, Note *
             // Save Tags:
             if (note->states().count() > 0) {
                 QString tags;
-                for (State::List::iterator it = note->states().begin(); it != note->states().end(); ++it)
+                for (QList<State*>::iterator it = note->states().begin(); it != note->states().end(); ++it)
                     tags += (tags.isEmpty() ? "" : ";") + (*it)->id();
                 XMLWork::addElement(document, noteElement, "tags", tags);
             }
@@ -2123,7 +2123,7 @@ void BasketScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
     if (zone >= Note::Emblem0) {
         if (event->button() == Qt::LeftButton) {
             int icons = -1;
-            for (State::List::iterator it = clicked->states().begin(); it != clicked->states().end(); ++it) {
+            for (QList<State*>::iterator it = clicked->states().begin(); it != clicked->states().end(); ++it) {
                 if (!(*it)->emblem().isEmpty())
                     icons++;
                 if (icons == zone - Note::Emblem0) {
@@ -2716,7 +2716,7 @@ void BasketScene::tooltipEvent(QHelpEvent *event)
             if (note->states().count() > 0) {
                 message = "<qt><nobr>" + message + "</nobr><br>" + tr("<b>Assigned Tags</b>: %1");
                 QString tagsString = "";
-                for (State::List::iterator it = note->states().begin(); it != note->states().end(); ++it) {
+                for (QList<State*>::iterator it = note->states().begin(); it != note->states().end(); ++it) {
                     QString tagName = "<nobr>" + Tools::textToHTMLWithoutP((*it)->fullName()) + "</nobr>";
                     if (tagsString.isEmpty())
                         tagsString = tagName;
@@ -3225,20 +3225,20 @@ void BasketScene::popupEmblemMenu(Note *note, int emblemNumber)
         // buttons on some styles.
         QActionGroup *emblemGroup = new QActionGroup(&menu);
         for (it = tag->states().begin(); it != tag->states().end(); ++it) {
-            currentState = *it;
-            QKeySequence sequence;
-            if (currentState == nextState && !tag->shortcut().isEmpty())
-                sequence = tag->shortcut();
+//            currentState = *it; // TODO
+//            QKeySequence sequence;
+//            if (currentState == nextState && !tag->shortcut().isEmpty())
+//                sequence = tag->shortcut();
 
-            StateAction *sa = new StateAction(currentState, sequence, 0, false);
-            sa->setChecked(state == currentState);
-            sa->setActionGroup(emblemGroup);
-            sa->setData(i);
+//            StateAction *sa = new StateAction(currentState, sequence, 0, false);
+//            sa->setChecked(state == currentState);
+//            sa->setActionGroup(emblemGroup);
+//            sa->setData(i);
 
-            menu.addAction(sa);
-            if (currentState == nextState && !tag->shortcut().isEmpty())
-                sa->setShortcut(sequence);
-            ++i;
+//            menu.addAction(sa);
+//            if (currentState == nextState && !tag->shortcut().isEmpty())
+//                sa->setShortcut(sequence);
+//            ++i;
         }
 
         menu.addSeparator();
@@ -3371,8 +3371,8 @@ void BasketScene::toggledTagInMenu(QAction *act)
         TagsEditDialog dialog(m_view, /*stateToEdit=*/0, /*addNewTag=*/true);
         dialog.exec();
         if (!dialog.addedStates().isEmpty()) {
-            State::List states = dialog.addedStates();
-            for (State::List::iterator itState = states.begin(); itState != states.end(); ++itState)
+            QList<State*> states = dialog.addedStates();
+            for (QList<State*>::iterator itState = states.begin(); itState != states.end(); ++itState)
                 FOR_EACH_NOTE(note)
                 note->addStateToSelectedNotes(*itState);
             updateEditorAppearance();
@@ -3393,7 +3393,7 @@ void BasketScene::toggledTagInMenu(QAction *act)
         return;
     }
 
-    Tag *tag = Tag::all[id - 10];
+    Tag *tag = Global::tagManager->tagList()[id - 10];
     if (!tag)
         return;
 

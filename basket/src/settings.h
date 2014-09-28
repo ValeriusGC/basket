@@ -39,6 +39,7 @@ class QPushButton;
 class QPoint;
 class QSize;
 class QComboBox;
+class QSpinBox;
 
 class LinkLook;
 class LinkLookEditWidget;
@@ -127,8 +128,8 @@ private slots:
 
 private:
     // Notes Image Size
-    QLineEdit        *m_imgSizeX;
-    QLineEdit        *m_imgSizeY;
+    QSpinBox            *m_imgSizeX;
+    QSpinBox            *m_imgSizeY;
     QPushButton         *m_pushVisualize;
 
     // Note Addition
@@ -205,8 +206,6 @@ protected:
     static bool    s_welcomeBasketsAdded;
     static QString s_dataFolder;
     static QDate   s_lastBackup;
-    static QPoint  s_mainWindowPosition;
-    static QSize   s_mainWindowSize;
     static bool    s_showEmptyBasketInfo;
     static bool    s_blinkedFilter;
     static bool    s_enableReLockTimeout;
@@ -323,12 +322,6 @@ public:  /* And the following methods are just getter / setters */
     }
     static inline QDate   lastBackup()           {
         return s_lastBackup;
-    }
-    static inline QPoint  mainWindowPosition()   {
-        return s_mainWindowPosition;
-    }
-    static inline QSize   mainWindowSize()       {
-        return s_mainWindowSize;
     }
     static inline bool    showEmptyBasketInfo()  {
         return s_showEmptyBasketInfo;
@@ -479,12 +472,6 @@ public:  /* And the following methods are just getter / setters */
     }
     static inline void setLastBackup(const QDate &date)         {
         s_lastBackup           = date;
-    }
-    static inline void setMainWindowPosition(const QPoint &pos) {
-        s_mainWindowPosition   = pos;
-    }
-    static inline void setMainWindowSize(const QSize &size)     {
-        s_mainWindowSize       = size;
     }
     static inline void setShowEmptyBasketInfo(bool show)        {
         s_showEmptyBasketInfo  = show;

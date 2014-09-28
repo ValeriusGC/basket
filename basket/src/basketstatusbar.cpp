@@ -31,49 +31,37 @@
 #include "basketscene.h"
 #include "tools.h"
 
-BasketStatusBar::BasketStatusBar(QStatusBar *bar)
-        : m_bar(bar), m_selectionStatus(0), m_lockStatus(0), m_basketStatus(0), m_savedStatus(0)
+BasketStatusBar::BasketStatusBar(QWidget *parent)
+        : QStatusBar(parent)
+        , m_selectionStatus(0)
+        , m_lockStatus(0)
+        , m_basketStatus(0)
+        , m_savedStatus(0)
 {
 }
 
 BasketStatusBar::~BasketStatusBar()
 {
-    //delete m_extension;
-}
-
-QStatusBar *BasketStatusBar::statusBar() const
-{
-    return m_bar;
-}
-
-void BasketStatusBar::addWidget(QWidget * widget, int stretch, bool permanent)
-{
-    if (permanent)
-        m_bar->addPermanentWidget(widget, stretch);
-    else
-        m_bar->addWidget(widget, stretch);
 }
 
 void BasketStatusBar::setupStatusBar()
 {
-    QWidget* parent = statusBar();
-    QObjectList lst = parent->findChildren<QObject*>("KRSqueezedTextLabel");
+    QObjectList lst = findChildren<QObject*>("KRSqueezedTextLabel");
 
-    //Tools::printChildren(parent);
     if (lst.count() == 0) {
-        m_basketStatus = new QLabel(parent);
+        m_basketStatus = new QLabel(this);
         QSizePolicy policy(QSizePolicy::Ignored, QSizePolicy::Ignored);
         policy.setHorizontalStretch(0);
         policy.setVerticalStretch(0);
         policy.setHeightForWidth(false);
         m_basketStatus->setSizePolicy(policy);
-        addWidget(m_basketStatus, 1, false);  // Fit all extra space and is hiddable
+        addWidget(m_basketStatus, 1);  // Fit all extra space and is hiddable
     } else
         m_basketStatus = static_cast<QLabel*>(lst.at(0));
     lst.clear();
 
-    m_selectionStatus = new QLabel(tr("Loading..."), parent);
-    addWidget(m_selectionStatus, 0, true);
+    m_selectionStatus = new QLabel(tr("Loading..."), this);
+    addPermanentWidget(m_selectionStatus);
 
     m_lockStatus = new QLabel(0/*this*/);
     m_lockStatus->setMinimumSize(18, 18);
@@ -82,22 +70,19 @@ void BasketStatusBar::setupStatusBar()
     m_lockStatus->installEventFilter(this);
 
     m_savedStatusPixmap = QIcon::fromTheme("document-save").pixmap(16,16);
-    m_savedStatus = new QLabel(parent);
+    m_savedStatus = new QLabel(this);
     m_savedStatus->setPixmap(m_savedStatusPixmap);
     m_savedStatus->setFixedSize(m_savedStatus->sizeHint());
     m_savedStatus->clear();
     //m_savedStatus->setPixmap(m_savedStatusIconSet.pixmap(QIconSet::Small, QIconSet::Disabled));
     //m_savedStatus->setEnabled(false);
-    addWidget(m_savedStatus, 0, true);
+    addPermanentWidget(m_savedStatus, 0);
     m_savedStatus->setToolTip("<p>" + tr("Shows if there are changes that have not yet been saved."));
-
-
 }
 
 void BasketStatusBar::postStatusbarMessage(const QString& text)
 {
-    if (statusBar())
-        statusBar()->showMessage(text, 2000);
+    showMessage(text, 2000);
 }
 
 void BasketStatusBar::setStatusText(const QString &txt)
@@ -138,12 +123,10 @@ void BasketStatusBar::setLockStatus(bool isLocked)
 
     if (isLocked) {
         m_lockStatus->setPixmap(QIcon::fromTheme("encrypted.png").pixmap(16,16));
-        m_lockStatus->setToolTip(tr(
-                                     "<p>This basket is <b>locked</b>.<br>Click to unlock it.</p>").replace(" ", "&nbsp;"));
+        m_lockStatus->setToolTip(tr("<p>This basket is <b>locked</b>.<br>Click to unlock it.</p>").replace(" ", "&nbsp;"));
     } else {
         m_lockStatus->clear();
-        m_lockStatus->setToolTip(tr(
-                                     "<p>This basket is <b>unlocked</b>.<br>Click to lock it.</p>").replace(" ", "&nbsp;"));
+        m_lockStatus->setToolTip(tr("<p>This basket is <b>unlocked</b>.<br>Click to lock it.</p>").replace(" ", "&nbsp;"));
     }
 }
 

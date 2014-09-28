@@ -45,11 +45,8 @@ FilterBar::FilterBar(QWidget *parent)
     // (Aaron Seigo says we don't need to worry about the
     //  "Toolbar group" stuff anymore.)
 
-    QIcon resetIcon = QIcon::fromTheme("dialog-close");
-    QIcon inAllIcon = QIcon::fromTheme("edit-find");
-
-    m_resetButton        = new QToolButton(this);
-    m_resetButton->setIcon(resetIcon);
+    m_resetButton = new QToolButton(this);
+    m_resetButton->setIcon(QIcon::fromTheme("dialog-close"));
     m_resetButton->setText(tr("Reset Filter"));//, /*groupText=*/"", this, SLOT(reset()), 0);
     m_resetButton->setAutoRaise(true);
     //new KToolBarButton("locationbar_erase", /*id=*/1230, this, /*name=*/0, tr("Reset Filter"));
@@ -62,7 +59,7 @@ FilterBar::FilterBar(QWidget *parent)
     label2->setText(tr("T&ag: "));
     label2->setBuddy(m_tagsBox);
     m_inAllBasketsButton = new QToolButton(this);
-    m_inAllBasketsButton->setIcon(inAllIcon);
+    m_inAllBasketsButton->setIcon(QIcon::fromTheme("edit-find"));
     m_inAllBasketsButton->setText(tr("Filter All Baskets"));//, /*groupText=*/"", this, SLOT(inAllBaskets()), 0);
     m_inAllBasketsButton->setAutoRaise(true);
 
@@ -74,19 +71,12 @@ FilterBar::FilterBar(QWidget *parent)
 //  m_inAllBasketsButton->setChecked(true);
 //  Global::bnpView->toggleFilterAllBaskets(true);
 
-//  m_lineEdit->setMaximumWidth(150);
-//    m_lineEdit->setClearButtonShown(true);
-
     // Layout all those widgets:
-//  hBox->addStretch();
     hBox->addWidget(m_resetButton);
-    hBox->addSpacing(sizeHint().width());
     hBox->addWidget(label);
     hBox->addWidget(m_lineEdit);
-    hBox->addSpacing(sizeHint().width());
     hBox->addWidget(label2);
     hBox->addWidget(m_tagsBox);
-    hBox->addSpacing(sizeHint().width());
     hBox->addWidget(m_inAllBasketsButton);
 
     m_data = new FilterData(); // TODO: Not a pointer! and return a const &  !!
@@ -149,42 +139,33 @@ void FilterBar::repopulateTagsCombo()
     int index = 3;
     Tag     *tag;
     State   *state;
-    QString  icon;
+    QIcon  icon;
     QString  text;
     QPixmap  emblem;
-    for (Tag::List::iterator it = Tag::all.begin(); it != Tag::all.end(); ++it) {
+    for (QList<Tag*>::iterator it = Global::tagManager->tagList().begin(); it != Global::tagManager->tagList().end(); ++it) {
         tag   = *it;
         state = tag->states().first();
         // Insert the tag in the combo-box:
-        if (tag->countStates() > 1) {
+        if (tag->countStates() > 1)
             text = tag->name();
-            icon = "";
-        } else {
+        else
             text = state->name();
-            icon = state->emblem();
-        }
-//        emblem = KIconLoader::global()->loadIcon(
-//                     icon, KIconLoader::Desktop, ICON_SIZE, KIconLoader::DefaultState,
-//                     QStringList(), 0L, /*canReturnNull=*/true
-//                 );
-        emblem = QIcon(icon).pixmap(ICON_SIZE, ICON_SIZE);
+
+        icon = QIcon("://tags/hi16-action-" + state->emblem() + ".png");
+        emblem = icon.pixmap(ICON_SIZE, ICON_SIZE);
+
         m_tagsBox->insertItem(index, emblem, text);
         // Update the mapping:
         m_tagsMap.insert(index, tag);
         ++index;
         // Insert sub-states, if needed:
         if (tag->countStates() > 1) {
-            for (State::List::iterator it2 = tag->states().begin(); it2 != tag->states().end(); ++it2) {
+            for (QList<State*>::iterator it2 = tag->states().begin(); it2 != tag->states().end(); ++it2) {
                 state = *it2;
                 // Insert the state:
                 text = state->name();
-                icon = state->emblem();
-//                emblem = KIconLoader::global()->loadIcon(
-//                             icon, KIconLoader::Desktop, ICON_SIZE,
-//                             KIconLoader::DefaultState, QStringList(), 0L,
-//                             /*canReturnNull=*/true
-//                         );
-                emblem = QIcon(icon).pixmap(ICON_SIZE, ICON_SIZE);
+                icon = QIcon("://tags/hi16-action-" + state->emblem() + ".png");
+                emblem = icon.pixmap(ICON_SIZE, ICON_SIZE);
                 // Indent the emblem to show the hierarchy relation:
                 if (!emblem.isNull())
                     emblem = Tools::indentPixmap(emblem, /*depth=*/1, /*deltaX=*/2 * ICON_SIZE / 3);

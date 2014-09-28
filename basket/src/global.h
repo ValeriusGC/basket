@@ -31,6 +31,7 @@ class DebugWindow;
 class BackgroundManager;
 class SystemTray;
 class BNPView;
+class TagManager;
 
 /** Handle all global variables of the application.
   * This file only declare classes : developer should include
@@ -49,6 +50,7 @@ public:
     static SystemTray        *systemTray;
     static BNPView           *bnpView;
     static MainWindow        *mainWin;
+    static TagManager        *tagManager;
 
     // Application Folders:
     static void setCustomSavesFolder(const QString &folder);

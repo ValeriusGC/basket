@@ -20,14 +20,15 @@
 
 #include "global.h"
 
-#include <QString>
-#include <QDir>
 #include <QApplication>
+#include <QDir>
 #include <QStandardPaths>
+#include <QString>
 
 #include "bnpview.h"
 #include "settings.h"
 #include "mainwindow.h"
+#include "tag.h"
 
 /** Define initial values for global variables : */
 
@@ -38,6 +39,7 @@ BackgroundManager *Global::backgroundManager   = 0L;
 SystemTray        *Global::systemTray          = 0L;
 BNPView           *Global::bnpView             = 0L;
 MainWindow        *Global::mainWin             = 0L;
+TagManager        *Global::tagManager          = 0L;
 
 void Global::setCustomSavesFolder(const QString &folder)
 {
@@ -61,7 +63,6 @@ QString Global::savesFolder()
             folder = new QString(QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation).at(0) + "/Basket/");
         }
     }
-
     return *folder;
 }
 

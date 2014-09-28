@@ -34,7 +34,6 @@
 #include <QHBoxLayout>
 #include <QGroupBox>
 #include <QMessageBox>
-#include <QSettings>
 #include <QDialogButtonBox>
 #include <QApplication>
 #include <quazip/JlCompress.h>

@@ -29,6 +29,7 @@
 #include <QMessageBox>
 #include <QMoveEvent>
 #include <QResizeEvent>
+#include <QSettings>
 #include <QSignalMapper>
 #include <QStatusBar>
 #include <QToolBar>
@@ -56,15 +57,17 @@ int const MainWindow::EXIT_CODE_REBOOT = -123456789;
 
 MainWindow::MainWindow(QWidget *parent)
         : QMainWindow(parent)
-        , m_quit(false)
         , m_regionGrabber(0)
 {
     Global::mainWin = this;
+    readSettings();
     Settings::loadConfig();
     if (QIcon::themeName() == "")
         QIcon::setThemeName("oxygen");
 
-    BasketStatusBar* bar = new BasketStatusBar(statusBar());
+    BasketStatusBar* bar = new BasketStatusBar(this);
+    setStatusBar(bar);
+    Global::tagManager = new TagManager();
 
     m_baskets = new BNPView(this, "BNPViewApp", this, bar);
     connect(m_baskets,      SIGNAL(setWindowCaption(const QString &)),  this,   SLOT(setWindowTitle(const QString &)));
@@ -82,15 +85,9 @@ MainWindow::MainWindow(QWidget *parent)
     if (Settings::useSystray())
         Global::systemTray->show();
 
-    m_mainToolBar = addToolBar("Main");
-    m_editToolBar = addToolBar("Edit");
-
     setupActions();
 
-    Tag::loadTags();
     connect(m_tagsMenu, SIGNAL(aboutToShow()), this, SLOT(populateTagsMenu()));
-
-    InlineEditors::instance()->initToolBars(m_editToolBar);
 
     bar->setupStatusBar();
 
@@ -98,12 +95,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     statusBar()->show();
     statusBar()->setSizeGripEnabled(true);
-
-//    m_actShowToolbar->setChecked(m_mainToolBar->isVisible());
-//    m_actShowStatusbar->setChecked(statusBar()->isVisible());
-
-    // Temp, settings
-    ensurePolished();
 }
 
 MainWindow::~MainWindow()
@@ -240,15 +231,14 @@ void MainWindow::setupActions()
     //////////////////////////////////////////////////////////////////////////
     QMenu *submenu = NULL;
 
-    m_basketMenu = menuBar()->addMenu("&Basket");
-    m_editMenu = menuBar()->addMenu("&Edit");
-    m_goMenu = menuBar()->addMenu("&Go");
-    m_noteMenu = menuBar()->addMenu("&Note");
-    m_tagsMenu = menuBar()->addMenu("&Tags");
-    m_insertMenu = menuBar()->addMenu("&Insert");
-    m_helpMenu = menuBar()->addMenu("&Help");
-    menuBar()->addAction("Settings", this, SLOT(showSettingsDialog()));
-    menuBar()->addAction("About", this, SLOT(showAboutDialog()));
+    m_basketMenu = menuBar()->addMenu(tr("&Basket"));
+    m_editMenu = menuBar()->addMenu(tr("&Edit"));
+    m_goMenu = menuBar()->addMenu(tr("&Go"));
+    m_noteMenu = menuBar()->addMenu(tr("&Note"));
+    m_tagsMenu = menuBar()->addMenu(tr("&Tags"));
+    m_insertMenu = menuBar()->addMenu(tr("&Insert"));
+    m_settingsMenu = menuBar()->addMenu(tr("&Settings"));
+    m_helpMenu = menuBar()->addMenu(tr("&Help"));
 
     /** Basket : **************************************************************/
     submenu = m_basketMenu->addMenu("&New");
@@ -312,10 +302,10 @@ void MainWindow::setupActions()
 
     m_basketMenu->addSeparator();
 
-    m_actHideWindow = m_basketMenu->addAction(Global::mainWin->isVisible() ? tr("&Minimize") : tr("&Restore"), this, SLOT(minimizeRestore()), QKeySequence::Close);
-    m_actHideWindow->setEnabled(Settings::useSystray());
+    m_actHideWindow = m_basketMenu->addAction(tr("&Minimize"), this, SLOT(hide()), QKeySequence::Close);
+    m_actHideWindow->setVisible(Settings::useSystray());
 
-//    m_actQuit         = KStandardAction::quit(this, SLOT(quit()), ac);
+    m_actQuit = m_basketMenu->addAction(QIcon::fromTheme("application-exit"), tr("&Quit"), this, SLOT(askForQuit()), QKeySequence::Quit);
 
     /** Edit : ****************************************************************/
     m_actCutNote  = m_editMenu->addAction(QIcon::fromTheme("edit-cut"), tr("C&ut"), m_baskets, SLOT(cutNote()), QKeySequence(QKeySequence::Cut));
@@ -365,6 +355,17 @@ void MainWindow::setupActions()
     m_actMoveNoteUp = m_noteMenu->addAction(QIcon::fromTheme("arrow-up"), tr("Move &Up"), m_baskets, SLOT(moveNoteUp()), QKeySequence("Ctrl+Shift+Up"));
     m_actMoveNoteDown = m_noteMenu->addAction(QIcon::fromTheme("arrow-down"), tr("Move &Down"), m_baskets, SLOT(moveNoteDown()), QKeySequence("Ctrl+Shift+Down"));
     m_actMoveOnBottom = m_noteMenu->addAction(QIcon::fromTheme("arrow-down-double"), tr("Move on &Bottom"), m_baskets, SLOT(moveOnBottom()), QKeySequence("Ctrl+Shift+End"));
+
+    /** Tags : ****************************************************************/
+    for (QList<Tag*>::iterator it = Global::tagManager->tagList().begin(); it != Global::tagManager->tagList().end(); ++it)
+    {
+        m_tagsMenu->addAction((*it));
+        connect((*it), SIGNAL(triggered()), this, SLOT(activatedTagShortcut()));
+    }
+    m_tagsMenu->addSeparator();
+    m_tagsMenu->addAction(tr("&Assign new Tag..."));
+    m_tagsMenu->addAction(QIcon::fromTheme("edit-delete"), tr("&Remove All"));
+    m_tagsMenu->addAction(QIcon::fromTheme("configure"), tr("&Customize..."));
 
     /** Insert : **************************************************************/
     m_actInsertHtml = m_insertMenu->addAction(QIcon::fromTheme("text-html"), tr("&Text"));
@@ -426,9 +427,22 @@ void MainWindow::setupActions()
     connect(m_actLoadFile,    SIGNAL(triggered()), insertWizardMapper, SLOT(map()));
     connect(insertWizardMapper, SIGNAL(mapped(int)), m_baskets, SLOT(insertWizard(int)));
 
-    /** Help : ****************************************************************/
-    m_helpMenu = Global::mainWin->m_helpMenu;
+    /** Settings : ************************************************************/
+    submenu = m_settingsMenu->addMenu(tr("&Toolbars Shown"));
+    m_actShowMainToolbar = submenu->addAction(tr("&Main Toolbar"));
+    m_actShowMainToolbar->setCheckable(true);
+    m_actShowEditToolbar = submenu->addAction(tr("&Text Formatting Toolbar"));
+    m_actShowEditToolbar->setCheckable(true);
 
+    m_actShowStatusbar = m_settingsMenu->addAction(tr("Show St&atusbar"));
+    m_actShowStatusbar->setCheckable(true);
+    connect(m_actShowStatusbar, SIGNAL(triggered(bool)), statusBar(), SLOT(setVisible(bool)));
+    m_actShowStatusbar->setChecked(m_actShowStatusbar->isVisible());
+
+    m_settingsMenu->addSeparator();
+    m_settingsMenu->addAction(QIcon::fromTheme("edit-configure"), tr("Configure"), this, SLOT(showSettingsDialog()));
+
+    /** Help : ****************************************************************/
     m_helpMenu->addAction(tr("&Welcome Baskets"), m_baskets, SLOT(addWelcomeBaskets()));
 
     /* LikeBack */
@@ -436,7 +450,16 @@ void MainWindow::setupActions()
     Global::likeBack->setServer("basket.linux62.org", "/likeback/send.php");
     Global::likeBack->sendACommentAction(m_helpMenu); // Just create it!
 
+    m_helpMenu->addSeparator();
+
+    m_helpMenu->addAction(tr("About"), this, SLOT(showAboutDialog()));
+
     /** Main toolbar : ********************************************************/
+    m_mainToolBar = addToolBar("Main");
+    m_mainToolBar->setObjectName("Main");
+    connect(m_actShowMainToolbar, SIGNAL(triggered(bool)), m_mainToolBar, SLOT(setVisible(bool)));
+    m_actShowMainToolbar->setChecked(m_mainToolBar->isVisible());
+
     m_mainToolBar->addAction(m_actNewBasket);
     m_mainToolBar->addAction(m_actPropBasket);
 
@@ -456,6 +479,14 @@ void MainWindow::setupActions()
     m_mainToolBar->addSeparator();
     m_mainToolBar->addAction(m_actShowFilter);
     m_mainToolBar->addAction(m_actFilterAllBaskets);
+
+    /** Edit toolbar : ********************************************************/
+    m_editToolBar = addToolBar("Edit");
+    m_editToolBar->setObjectName("Edit");
+    connect(m_actShowEditToolbar, SIGNAL(triggered(bool)), m_mainToolBar, SLOT(setVisible(bool)));
+    m_actShowEditToolbar->setChecked(m_editToolBar->isVisible());
+
+    InlineEditors::instance()->initToolBars(m_editToolBar);
 
     /** Settings : ************************************************************/
 //    m_actShowToolbar   = KStandardAction::showToolbar(   this, SLOT(toggleToolBar()),   ac);
@@ -486,9 +517,9 @@ void MainWindow::setupActions()
     m_sysTrayMenu->addAction(m_actGrabScreenshot);
     m_sysTrayMenu->addAction(m_actColorPicker);
     m_sysTrayMenu->addSeparator();
-//    m_sysTrayMenu->addAction("CONFIGURE")
     m_sysTrayMenu->addAction(m_actHideWindow);
-//    m_sysTrayMenu->addAction(m_actQuit);
+    m_sysTrayMenu->addAction(m_actQuit);
+    Global::systemTray->setContextMenu(m_sysTrayMenu);
 }
 
 void MainWindow::updateNotesActions()
@@ -585,6 +616,12 @@ void MainWindow::enableActions()
     basket->decoration()->filterBar()->setEnabled(!basket->isLocked());
 }
 
+void MainWindow::activatedTagShortcut()
+{
+    Tag *tag = Global::tagManager->tagForAction((QAction*)sender());
+    m_baskets->currentBasket()->activatedTagShortcut(tag);
+}
+
 void MainWindow::populateTagsMenu()
 {
     if (m_baskets->currentBasket() == 0)
@@ -597,47 +634,10 @@ void MainWindow::populateTagsMenu()
         referenceNote = m_baskets->currentBasket()->firstSelected();
 
     m_baskets->currentBasket()->m_tagPopupNote = referenceNote;
-    bool enable = m_baskets->currentBasket()->countSelecteds() > 0;
 
-    m_tagsMenu->clear();
-
-    QList<Tag*>::iterator it;
-    Tag *currentTag;
-    State *currentState;
-    int i = 10;
-    for (it = Tag::all.begin(); it != Tag::all.end(); ++it) {
-        // Current tag and first state of it:
-        currentTag = *it;
-        currentState = currentTag->states().first();
-
-        QKeySequence sequence;
-        if (!currentTag->shortcut().isEmpty())
-            sequence = currentTag->shortcut();
-
-        StateAction *mi = new StateAction(currentState, sequence, this, true);
-
-        // The previously set ID will be set in the actions themselves as data.
-        mi->setData(i);
-
-        if (referenceNote && referenceNote->hasTag(currentTag))
-            mi->setChecked(true);
-
-        if (!currentTag->shortcut().isEmpty())
-            mi->setShortcut(sequence);
-
-        m_tagsMenu->addAction(mi);
-
-        mi->setEnabled(enable);
-        ++i;
-    }
-
-    m_tagsMenu->addSeparator();
-
-    // I don't like how this is implemented; but I can't think of a better way
-    // to do this, so I will have to leave it for now
-    m_tagsMenu->addAction(tr("&Assign new Tag..."));
-    m_tagsMenu->addAction(QIcon::fromTheme("edit-delete"), tr("&Remove All"));
-    m_tagsMenu->addAction(QIcon::fromTheme("configure"), tr("&Customize..."));
+    for (QList<Tag*>::iterator it = Global::tagManager->tagList().begin(); it != Global::tagManager->tagList().end(); ++it)
+        if (referenceNote && referenceNote->hasTag(*it))
+            (*it)->setChecked(true);
 }
 
 void MainWindow::showFilterBar(bool show)
@@ -679,35 +679,6 @@ void MainWindow::canUndoRedoChanged()
     }
 }
 
-void MainWindow::toggleToolBar()
-{
-    if (m_mainToolBar->isVisible())
-        m_mainToolBar->hide();
-    else
-        m_mainToolBar->show();
-
-//    saveMainWindowSettings( KGlobal::config(), autoSaveGroup() );
-}
-
-void MainWindow::toggleStatusBar()
-{
-    if (statusBar()->isVisible())
-        statusBar()->hide();
-    else
-        statusBar()->show();
-}
-
-void MainWindow::configureToolbars()
-{
-}
-
-void MainWindow::configureNotifications()
-{
-    // TODO
-    // KNotifyDialog *dialog = new KNotifyDialog(this, "KNotifyDialog", false);
-    // dialog->show();
-}
-
 void MainWindow::showSettingsDialog()
 {
     SettingsDialog s;
@@ -720,110 +691,48 @@ void MainWindow::showAboutDialog()
     s.exec();
 }
 
-void MainWindow::ensurePolished()
+void MainWindow::readSettings()
 {
-    bool shouldSave = false;
-
-    // If position and size has never been set, set nice ones:
-    //  - Set size to sizeHint()
-    //  - Keep the window manager placing the window where it want and save this
-    if (Settings::mainWindowSize().isEmpty()) {
-        qDebug() << "Main Window Position: Initial Set in show()";
-        int defaultWidth  = qApp->desktop()->width()  * 5 / 6;
-        int defaultHeight = qApp->desktop()->height() * 5 / 6;
-        resize(defaultWidth, defaultHeight); // sizeHint() is bad (too small) and we want the user to have a good default area size
-        shouldSave = true;
-    } else {
-        qDebug() << "Main Window Position: Recall in show(x="
-                 << Settings::mainWindowPosition().x() << ", y=" << Settings::mainWindowPosition().y()
-                 << ", width=" << Settings::mainWindowSize().width() << ", height=" << Settings::mainWindowSize().height()
-                 << ")";
-        move(Settings::mainWindowPosition());
-        resize(Settings::mainWindowSize());
-    }
-
-    if (shouldSave) {
-        qDebug() << "Main Window Position: Save size and position in show(x="
-                 << pos().x() << ", y=" << pos().y()
-                 << ", width=" << size().width() << ", height=" << size().height()
-                 << ")";
-        Settings::setMainWindowPosition(pos());
-        Settings::setMainWindowSize(size());
-        Settings::saveConfig();
-    }
+    QSettings settings;
+    restoreGeometry(settings.value("mainwindow/geometry").toByteArray());
+    restoreState(settings.value("mainwindow/windowState").toByteArray());
 }
 
-void MainWindow::resizeEvent(QResizeEvent *event)
+void MainWindow::closeEvent(QCloseEvent *event)
 {
-    qDebug() << "Main Window Position: Save size in resizeEvent(width=" << size().width() << ", height=" << size().height() << ") ; isMaximized="
-             << (isMaximized() ? "true" : "false");
-    Settings::setMainWindowSize(size());
-    Settings::saveConfig();
-
-    QMainWindow::resizeEvent(event);
+    QSettings settings;
+    settings.setValue("mainwindow/geometry", saveGeometry());
+    settings.setValue("mainwindow/windowState", saveState());
+    QMainWindow::closeEvent(event);
 }
 
-void MainWindow::moveEvent(QMoveEvent *event)
+void MainWindow::hideEvent(QHideEvent *event)
 {
-    qDebug() << "Main Window Position: Save position in moveEvent(x=" << pos().x() << ", y=" << pos().y() << ")";
-    Settings::setMainWindowPosition(pos());
-    Settings::saveConfig();
-
-    QMainWindow::moveEvent(event);
+    m_actHideWindow->setText(tr("&Restore"));
+    disconnect(m_actHideWindow);
+    connect(m_actHideWindow, SIGNAL(triggered()), this, SLOT(show()));
+    QMainWindow::hideEvent(event);
 }
 
-bool MainWindow::queryExit()
+void MainWindow::showEvent(QShowEvent *event)
 {
-    hide();
-    return true;
+    m_actHideWindow->setText(tr("&Minimize"));
+    disconnect(m_actHideWindow);
+    connect(m_actHideWindow, SIGNAL(triggered()), this, SLOT(hide()));
+    QMainWindow::showEvent(event);
 }
 
-void MainWindow::quit()
-{
-    m_quit = true;
-    close();
-}
-
-bool MainWindow::queryClose()
-{
-    /*  if (m_shuttingDown) // Set in askForQuit(): we don't have to ask again
-        return true;*/
-
-    if (Settings::useSystray()
-            && !m_quit ) {
-        hide();
-        return false;
-    } else
-    {
-        Settings::saveConfig();
-        return askForQuit();
-    }
-}
-
-bool MainWindow::askForQuit()
+void MainWindow::askForQuit()
 {
     QString message = tr("<p>Do you really want to quit %1?</p>").arg(qApp->applicationName());
-    if (Settings::useSystray())
-        message += tr("<p>Notice that you do not have to quit the application before ending your KDE session. "
-                        "If you end your session while the application is still running, the application will be reloaded the next time you log in.</p>");
-
     int really = QMessageBox::warning(this, tr("Quit Confirm"), message,
                                       QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Cancel);
 
     if (really == QMessageBox::Cancel) {
-        m_quit = false;
-        return false;
+        return;
     }
 
-    return true;
-}
-
-void MainWindow::minimizeRestore()
-{
-    if (isVisible())
-        hide();
-    else
-        show();
+    qApp->exit();
 }
 
 void MainWindow::slotReboot()
