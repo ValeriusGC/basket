@@ -24,6 +24,7 @@
 #include <QApplication>
 #include <QDebug>
 #include <QDesktopWidget>
+#include <QDir>
 #include <QLocale>
 #include <QMenuBar>
 #include <QMessageBox>
@@ -62,8 +63,12 @@ MainWindow::MainWindow(QWidget *parent)
     Global::mainWin = this;
     readSettings();
     Settings::loadConfig();
-    if (QIcon::themeName() == "")
+    if (QIcon::themeName() == "") {
+        QStringList themePaths = QIcon::themeSearchPaths();
+        themePaths << QDir::currentPath() + "/oxygen/";
+        QIcon::setThemeSearchPaths(themePaths);
         QIcon::setThemeName("oxygen");
+    }
 
     BasketStatusBar* bar = new BasketStatusBar(this);
     setStatusBar(bar);
