@@ -22,10 +22,7 @@
 #define TAGEDIT_H
 
 #include <QDialog>
-
-#include <QList>
-#include <QItemDelegate>
-#include <QTreeWidgetItem>
+#include <QTreeView>
 
 #include "tag.h"
 
@@ -35,7 +32,7 @@ class QGroupBox;
 class QHBoxLayout;
 class QLabel;
 class QLineEdit;
-class QTreeWidget;
+class QTreeView;
 class QToolButton;
 class QPushButton;
 
@@ -45,80 +42,22 @@ class QMouseEvent;
 class FontSizeCombo;
 class KColorCombo2;
 
-class StateCopy
-{
-public:
-    typedef QList<StateCopy*> List;
-    StateCopy(State *old = 0);
-    ~StateCopy();
-    State *oldState;
-    State *newState;
-    void copyBack();
-};
-
-class TagCopy
-{
-public:
-    typedef QList<TagCopy*> List;
-    TagCopy(Tag *old = 0);
-    ~TagCopy();
-    Tag *oldTag;
-    Tag *newTag;
-    StateCopy::List stateCopies;
-    void copyBack();
-    bool isMultiState();
-};
-
-class TagListViewItem : public QTreeWidgetItem
-{
-    friend class TagListDelegate;
-public:
-    TagListViewItem(QTreeWidget *parent, TagCopy *tagCopy);
-    TagListViewItem(QTreeWidgetItem *parent, TagCopy *tagCopy);
-    TagListViewItem(QTreeWidget *parent, QTreeWidgetItem *after, TagCopy *tagCopy);
-    TagListViewItem(QTreeWidgetItem *parent, QTreeWidgetItem *after, TagCopy *tagCopy);
-    TagListViewItem(QTreeWidget *parent, StateCopy *stateCopy);
-    TagListViewItem(QTreeWidgetItem *parent, StateCopy *stateCopy);
-    TagListViewItem(QTreeWidget *parent, QTreeWidgetItem *after, StateCopy *stateCopy);
-    TagListViewItem(QTreeWidgetItem *parent, QTreeWidgetItem *after, StateCopy *stateCopy);
-    ~TagListViewItem();
-    TagCopy*   tagCopy()   {
-        return m_tagCopy;
-    }
-    StateCopy* stateCopy() {
-        return m_stateCopy;
-    }
-    bool isEmblemObligatory();
-    TagListViewItem* lastChild();
-    TagListViewItem* prevSibling();
-    TagListViewItem* nextSibling();
-    TagListViewItem* parent() const; // Reimplemented to cast the return value
-    int width(const QFontMetrics &fontMetrics, const QTreeWidget *listView, int column) const;
-    void setup();
-
-private:
-    TagCopy   *m_tagCopy;
-    StateCopy *m_stateCopy;
-};
-
-Q_DECLARE_METATYPE(TagListViewItem*);
-
-class TagListView : public QTreeWidget
+/** Tag view class
+ */
+class TagView : public QTreeView
 {
     Q_OBJECT
 public:
-    TagListView(QWidget *parent = 0);
-    ~TagListView();
-    void keyPressEvent(QKeyEvent *event);
-    void mouseDoubleClickEvent(QMouseEvent *event);
-    void mousePressEvent(QMouseEvent *event);
-    void mouseReleaseEvent(QMouseEvent *event);
-    TagListViewItem* currentItem() const; // Reimplemented to cast the return value
-    TagListViewItem* firstChild() const; // Reimplemented to cast the return value
-    TagListViewItem* lastItem() const; // Reimplemented to cast the return value
-signals:
-    void deletePressed();
-    void doubleClickedItem();
+    explicit TagView(QWidget *parent = 0);
+    ~TagView();
+
+    TagModel* model() const {
+        return m_tagModel;
+    }
+
+    void addTag();
+private:
+    TagModel    *m_tagModel;
 };
 
 /**
@@ -128,41 +67,23 @@ class TagsEditDialog : public QDialog
 {
     Q_OBJECT
 public:
-    explicit TagsEditDialog(QWidget *parent = 0, State *stateToEdit = 0, bool addNewTag = false);
+    explicit TagsEditDialog(QWidget *parent = 0, TagModelItem *stateToEdit = 0, bool addNewTag = false);
     ~TagsEditDialog();
-    QList<State*> deletedStates() {
-        return m_deletedStates;
-    }
-    QList<State*> addedStates()   {
-        return m_addedStates;
-    }
-    TagListViewItem* itemForState(State *state);
-
 private slots:
     void newTag();
     void newState();
     void moveUp();
     void moveDown();
     void deleteTag();
-    void renameIt();
     void removeEmblem();
     void modified();
-    void currentItemChanged(QTreeWidgetItem *item, QTreeWidgetItem* next = 0);
     void slotCancel();
     void slotOk();
-    void selectUp();
-    void selectDown();
-    void selectLeft();
-    void selectRight();
-    void resetTreeSizeHint();
+    void currentItemChanged(QModelIndex index);
 private:
-    void loadBlankState();
-    void loadStateFrom(State *state);
-    void loadTagFrom(Tag *tag);
-    void saveStateTo(State *state);
-    void saveTagTo(Tag *tag);
-    void ensureCurrentItemVisible();
-    TagListView   *m_tags;
+    bool          m_updating;
+    void loadBlank();
+    TagView       *m_tags;
     QPushButton   *m_moveUp;
     QPushButton   *m_moveDown;
     QPushButton   *m_deleteTag;
@@ -188,23 +109,7 @@ private:
     QCheckBox     *m_onEveryLines;
     QCheckBox     *m_allowCrossRefernce;
 
-    TagCopy::List m_tagCopies;
-    QList<State*>   m_deletedStates;
-    QList<State*>   m_addedStates;
-
     bool m_loading;
-};
-
-
-class TagListDelegate : public QItemDelegate
-{
-    Q_OBJECT
-
-public:
-    TagListDelegate(QWidget *parent = 0) : QItemDelegate(parent) {}
-    void paint(QPainter *painter, const QStyleOptionViewItem &option,
-               const QModelIndex &index) const;
-
 };
 
 #endif // TAGEDIT_H

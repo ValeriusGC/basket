@@ -55,7 +55,6 @@ class BasketListViewItem;
 class BasketTreeListView;
 class NoteSelection;
 class BasketStatusBar;
-class State;
 class Note;
 
 class BNPView : public QSplitter
@@ -71,7 +70,6 @@ public:
     void setTreePlacement(bool onLeft);
     void relayoutAllBaskets();
     void recomputeAllStyles();
-    void removedStates(const QList<State*> &deletedStates);
     void linkLookChanged();
     void filterPlacementChanged(bool onTop);
     /// MANAGE BASKETS:
@@ -204,7 +202,6 @@ public slots:
     void addWelcomeBaskets();
 private slots:
     void isLockedChanged();
-    void lateInit();
 
 private:
     DecoratedBasket* currentDecoratedBasket();

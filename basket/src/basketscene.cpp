@@ -552,13 +552,13 @@ void BasketScene::loadNotes(const QDomElement &notes, Note *parent)
                 QString tagsString = XMLWork::getElementText(e, "tags", "");
                 QStringList tagsId = tagsString.split(";");
                 for (QStringList::iterator it = tagsId.begin(); it != tagsId.end(); ++it) {
-                    State *state = Global::tagManager->stateForId(*it);
+                    TagModelItem *state = Global::tagModel->stateForId(*it);
                     if (state)
-                        note->addState(state, /*orReplace=*/true);
+                        note->addState(state);
                 }
             }
         }
-//      kapp->processEvents();
+        qApp->processEvents();
     }
 }
 
@@ -593,7 +593,7 @@ void BasketScene::saveNotes(QDomDocument &document, QDomElement &element, Note *
             // Save Tags:
             if (note->states().count() > 0) {
                 QString tags;
-                for (QList<State*>::iterator it = note->states().begin(); it != note->states().end(); ++it)
+                for (QList<TagModelItem*>::iterator it = note->states().begin(); it != note->states().end(); ++it)
                     tags += (tags.isEmpty() ? "" : ";") + (*it)->id();
                 XMLWork::addElement(document, noteElement, "tags", tags);
             }
@@ -1048,8 +1048,6 @@ bool BasketScene::isFiltering()
     return decoration()->filterBar()->filterData().isFiltering;
 }
 
-
-
 QString BasketScene::fullPath()
 {
     return Global::basketsFolder() + folderName();
@@ -1219,7 +1217,6 @@ void BasketScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
     // the interface flicker by showing the focused rectangle (as the basket gets focus)
     // and immediatly removing it (because the popup menu now have focus).
     if (!isDuringEdit())
-//        QTimer::singleShot(0, this, SLOT(setFocusIfNotInPopupMenu()));
         setFocusIfNotInPopupMenu();
 
     // Convenient variables:
@@ -1554,18 +1551,6 @@ void BasketScene::recomputeAllStyles()
 {
     FOR_EACH_NOTE(note)
     note->recomputeAllStyles();
-}
-
-void BasketScene::removedStates(const QList<State*> &deletedStates)
-{
-    bool modifiedBasket = false;
-
-    FOR_EACH_NOTE(note)
-    if (note->removedStates(deletedStates))
-        modifiedBasket = true;
-
-    if (modifiedBasket)
-        save();
 }
 
 void BasketScene::insertNote(Note *note, Note *clicked, int zone, const QPointF &pos, bool animateNewPosition)
@@ -2123,11 +2108,11 @@ void BasketScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
     if (zone >= Note::Emblem0) {
         if (event->button() == Qt::LeftButton) {
             int icons = -1;
-            for (QList<State*>::iterator it = clicked->states().begin(); it != clicked->states().end(); ++it) {
+            for (QList<TagModelItem*>::iterator it = clicked->states().begin(); it != clicked->states().end(); ++it) {
                 if (!(*it)->emblem().isEmpty())
                     icons++;
                 if (icons == zone - Note::Emblem0) {
-                    State *state = (*it)->nextState();
+                    TagModelItem *state = (*it)->nextState(/*Cycle*/true);
                     if (!state)
                         return;
                     it = clicked->states().insert(it, state);
@@ -2716,7 +2701,7 @@ void BasketScene::tooltipEvent(QHelpEvent *event)
             if (note->states().count() > 0) {
                 message = "<qt><nobr>" + message + "</nobr><br>" + tr("<b>Assigned Tags</b>: %1");
                 QString tagsString = "";
-                for (QList<State*>::iterator it = note->states().begin(); it != note->states().end(); ++it) {
+                for (QList<TagModelItem*>::iterator it = note->states().begin(); it != note->states().end(); ++it) {
                     QString tagName = "<nobr>" + Tools::textToHTMLWithoutP((*it)->fullName()) + "</nobr>";
                     if (tagsString.isEmpty())
                         tagsString = tagName;
@@ -3191,91 +3176,29 @@ void BasketScene::relayoutNotes(bool animate)
 void BasketScene::popupEmblemMenu(Note *note, int emblemNumber)
 {
     m_tagPopupNote = note;
-    State *state = note->stateForEmblemNumber(emblemNumber);
-    State *nextState = state->nextState(/*cycle=*/false);
-    Tag *tag = state->parentTag();
-    m_tagPopup = tag;
+    TagModelItem *state = note->stateForEmblemNumber(emblemNumber);
+    TagModelItem *nextState = state->nextState();
+    TagModelItem *tag = state->parent();
+    m_statePopup = state;
 
-    QKeySequence sequence = tag->shortcut();
-    bool sequenceOnDelete = (nextState == 0 && !tag->shortcut().isEmpty());
+    QKeySequence sequence = tag->action()->shortcut();
+    bool sequenceOnDelete = (nextState == 0 && !tag->action()->shortcut().isEmpty());
 
     QMenu menu(m_view);
-    if (tag->countStates() == 1) {
-        menu.setTitle(/*SmallIcon(state->icon()), */tag->name());
-        QAction* act;
-        act = new QAction(QIcon::fromTheme("edit-delete"), tr("&Remove"), &menu);
-        act->setData(1);
-        menu.addAction(act);
-        act = new QAction(QIcon::fromTheme("configure"),  tr("&Customize..."), &menu);
-        act->setData(2);
-        menu.addAction(act);
+    menu.setTitle(/*SmallIcon(state->icon()), */tag->data());
+    QAction* act;
+    act = new QAction(QIcon::fromTheme("edit-delete"), tr("&Remove"), &menu);
+    act->setData(1);
+    menu.addAction(act);
+    act = new QAction(QIcon::fromTheme("configure"),  tr("&Customize..."), &menu);
+    act->setData(2);
+    menu.addAction(act);
 
-        menu.addSeparator();
+    menu.addSeparator();
 
-        act = new QAction(QIcon::fromTheme("search-filter"),     tr("&Filter by this Tag"), &menu);
-        act->setData(3);
-        menu.addAction(act);
-    } else {
-        menu.setTitle(tag->name());
-        QList<State*>::iterator it;
-        State *currentState;
-
-        int i = 10;
-        // QActionGroup makes the actions exclusive; turns checkboxes into radio
-        // buttons on some styles.
-        QActionGroup *emblemGroup = new QActionGroup(&menu);
-        for (it = tag->states().begin(); it != tag->states().end(); ++it) {
-//            currentState = *it; // TODO
-//            QKeySequence sequence;
-//            if (currentState == nextState && !tag->shortcut().isEmpty())
-//                sequence = tag->shortcut();
-
-//            StateAction *sa = new StateAction(currentState, sequence, 0, false);
-//            sa->setChecked(state == currentState);
-//            sa->setActionGroup(emblemGroup);
-//            sa->setData(i);
-
-//            menu.addAction(sa);
-//            if (currentState == nextState && !tag->shortcut().isEmpty())
-//                sa->setShortcut(sequence);
-//            ++i;
-        }
-
-        menu.addSeparator();
-
-        QAction *act = new QAction(&menu);
-        act->setIcon(QIcon::fromTheme("edit-delete"));
-        act->setText(tr("&Remove"));
-        act->setShortcut(sequenceOnDelete ? sequence : QKeySequence());
-        act->setData(1);
-        menu.addAction(act);
-        act = new QAction(
-            QIcon::fromTheme("configure"),
-            tr("&Customize..."),
-            &menu
-        );
-        act->setData(2);
-        menu.addAction(act);
-
-        menu.addSeparator();
-
-        act = new QAction(QIcon::fromTheme("search-filter"),
-                          tr("&Filter by this Tag"),
-                          &menu);
-        act->setData(3);
-        menu.addAction(act);
-        act = new QAction(
-            QIcon::fromTheme("search-filter"),
-            tr("Filter by this &State"),
-            &menu);
-        act->setData(4);
-        menu.addAction(act);
-    }
-    if (sequenceOnDelete && tag->countStates() != 1) {
-        // Not sure if this is equivalent to menu.setAccel(sequence, 1);
-        if(menu.actionAt(QPoint(0, 1)))
-            menu.actionAt(QPoint(0,1))->setShortcut(sequence);
-    }
+    act = new QAction(QIcon::fromTheme("search-filter"),     tr("&Filter by this Tag"), &menu);
+    act->setData(3);
+    menu.addAction(act);
 
     connect(&menu, SIGNAL(triggered(QAction *)), this, SLOT(toggledStateInMenu(QAction *)));
     connect(&menu, SIGNAL(aboutToHide()),  this, SLOT(unlockHovering()));
@@ -3289,60 +3212,31 @@ void BasketScene::toggledStateInMenu(QAction* action)
 {
     int id = action->data().toInt();
     if (id == 1) {
-        removeTagFromSelectedNotes(m_tagPopup);
-        //m_tagPopupNote->removeTag(m_tagPopup);
-        //m_tagPopupNote->setWidth(0); // To force a new layout computation
-        updateEditorAppearance();
+        removeStateFromSelectedNotes(m_statePopup);
         filterAgain();
         save();
         return;
     }
     if (id == 2) { // Customize this State:
-        TagsEditDialog dialog(m_view, m_tagPopupNote->stateOfTag(m_tagPopup));
+        TagsEditDialog dialog(m_view, m_tagPopupNote->stateOfTag(m_statePopup->parent()));
         dialog.exec();
         return;
     }
     if (id == 3) { // Filter by this Tag
-        decoration()->filterBar()->filterTag(m_tagPopup);
-        return;
-    }
-    if (id == 4) { // Filter by this State
-        decoration()->filterBar()->filterState(m_tagPopupNote->stateOfTag(m_tagPopup));
+        decoration()->filterBar()->filterTag(m_statePopup->parent());
         return;
     }
 
-    /*addStateToSelectedNotes*/changeStateOfSelectedNotes(m_tagPopup->states()[id - 10] /*, orReplace=true*/);
-    //m_tagPopupNote->addState(m_tagPopup->states()[id - 10], true);
     filterAgain();
     save();
 }
 
-State* BasketScene::stateForTagFromSelectedNotes(Tag *tag)
+void BasketScene::activatedTagShortcut(TagModelItem *tag, bool isActive)
 {
-    State *state = 0;
-
     FOR_EACH_NOTE(note)
-    if (note->stateForTagFromSelectedNotes(tag, &state) && state == 0)
-        return 0;
-    return state;
-}
+        note->activatedTagShortcut(tag, isActive);
 
-void BasketScene::activatedTagShortcut(Tag *tag)
-{
-    // Compute the next state to set:
-    State *state = stateForTagFromSelectedNotes(tag);
-    if (state)
-        state = state->nextState(/*cycle=*/false);
-    else
-        state = tag->states().first();
-
-    // Set or unset it:
-    if (state) {
-        FOR_EACH_NOTE(note)
-        note->addStateToSelectedNotes(state, /*orReplace=*/true);
-        updateEditorAppearance();
-    } else
-        removeTagFromSelectedNotes(tag);
+    updateEditorAppearance();
 
     filterAgain();
     save();
@@ -3369,12 +3263,7 @@ void BasketScene::toggledTagInMenu(QAction *act)
     int id = act->data().toInt();
     if (id == 1) { // Assign new Tag...
         TagsEditDialog dialog(m_view, /*stateToEdit=*/0, /*addNewTag=*/true);
-        dialog.exec();
-        if (!dialog.addedStates().isEmpty()) {
-            QList<State*> states = dialog.addedStates();
-            for (QList<State*>::iterator itState = states.begin(); itState != states.end(); ++itState)
-                FOR_EACH_NOTE(note)
-                note->addStateToSelectedNotes(*itState);
+        if (dialog.exec()) {// Dialog accepted
             updateEditorAppearance();
             filterAgain();
             save();
@@ -3382,7 +3271,7 @@ void BasketScene::toggledTagInMenu(QAction *act)
         return;
     }
     if (id == 2) { // Remove All
-        removeAllTagsFromSelectedNotes();
+        removeAllStatesFromSelectedNotes();
         filterAgain();
         save();
         return;
@@ -3393,37 +3282,31 @@ void BasketScene::toggledTagInMenu(QAction *act)
         return;
     }
 
-    Tag *tag = Global::tagManager->tagList()[id - 10];
+    QModelIndex idx = Global::tagModel->index(id - 10, 0);
+    TagModelItem *tag = Global::tagModel->getItem(idx);
     if (!tag)
         return;
-
-    if (m_tagPopupNote->hasTag(tag))
-        removeTagFromSelectedNotes(tag);
-    else
-        addTagToSelectedNotes(tag);
-    m_tagPopupNote->setWidth(0); // To force a new layout computation
+// TODO
+//    if (m_tagPopupNote->hasState(tag))
+//        removeTagFromSelectedNotes(tag);
+//    else
+//        addTagToSelectedNotes(tag);
+//    m_tagPopupNote->setWidth(0); // To force a new layout computation
     filterAgain();
     save();
 }
 
-void BasketScene::addTagToSelectedNotes(Tag *tag)
+void BasketScene::addStateToSelectedNotes(TagModelItem *state)
 {
     FOR_EACH_NOTE(note)
-    note->addTagToSelectedNotes(tag);
+        note->addStateToSelectedNotes(state);
     updateEditorAppearance();
 }
 
-void BasketScene::removeTagFromSelectedNotes(Tag *tag)
+void BasketScene::removeStateFromSelectedNotes(TagModelItem *state)
 {
     FOR_EACH_NOTE(note)
-    note->removeTagFromSelectedNotes(tag);
-    updateEditorAppearance();
-}
-
-void BasketScene::addStateToSelectedNotes(State *state)
-{
-    FOR_EACH_NOTE(note)
-    note->addStateToSelectedNotes(state);
+        note->removeStateFromSelectedNotes(state);
     updateEditorAppearance();
 }
 
@@ -3463,24 +3346,17 @@ void BasketScene::editorPropertiesChanged()
     }
 }
 
-void BasketScene::changeStateOfSelectedNotes(State *state)
+void BasketScene::removeAllStatesFromSelectedNotes()
 {
     FOR_EACH_NOTE(note)
-    note->changeStateOfSelectedNotes(state);
+    note->removeAllStatesFromSelectedNotes();
     updateEditorAppearance();
 }
 
-void BasketScene::removeAllTagsFromSelectedNotes()
+bool BasketScene::selectedNotesHaveStates()
 {
     FOR_EACH_NOTE(note)
-    note->removeAllTagsFromSelectedNotes();
-    updateEditorAppearance();
-}
-
-bool BasketScene::selectedNotesHaveTags()
-{
-    FOR_EACH_NOTE(note)
-    if (note->selectedNotesHaveTags())
+    if (note->selectedNotesHaveStates())
         return true;
     return false;
 }
@@ -4446,9 +4322,9 @@ void BasketScene::deleteFiles()
     Tools::deleteRecursively(fullPath());
 }
 
-QList<State*> BasketScene::usedStates()
+QList<TagModelItem*> BasketScene::usedStates()
 {
-    QList<State*> states;
+    QList<TagModelItem*> states;
     FOR_EACH_NOTE(note)
     note->usedStates(states);
     return states;
@@ -4481,7 +4357,7 @@ QString BasketScene::saveGradientBackground(const QColor &color, const QFont &fo
     return fileName;
 }
 
-void BasketScene::listUsedTags(QList<Tag*> &list)
+void BasketScene::listUsedTags(QList<TagModelItem*> &list)
 {
     if (!isLoaded()) {
         load();

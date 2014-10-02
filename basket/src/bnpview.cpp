@@ -109,7 +109,6 @@ BNPView::BNPView(QWidget *parent, const char *name, MainWindow *aGUIClient,
 
     m_history = new QUndoStack(this);
     initialize();
-    QTimer::singleShot(0, this, SLOT(lateInit()));
 
     int treeWidth = Settings::basketTreeWidth();
     if (treeWidth < 0)
@@ -137,84 +136,6 @@ BNPView::~BNPView()
     m_history = 0;
 
     NoteDrag::createAndEmptyCuttingTmpFolder(); // Clean the temporary folder we used
-}
-
-void BNPView::lateInit()
-{
-    /*
-        InlineEditors* instance = InlineEditors::instance();
-
-        if(instance)
-        {
-            KToolBar* toolbar = instance->richTextToolBar();
-
-            if(toolbar)
-                toolbar->hide();
-        }
-    */
-
-#if 0
-    // This is the logic to show or hide Basket when it is started up; ideally,
-    // it will take on its last state when KDE's session restore kicks in.
-    if (!isPart()) {
-        if (Settings::useSystray() && KCmdLineArgs::parsedArgs() && KCmdLineArgs::parsedArgs()->isSet("start-hidden")) {
-            if (Global::mainWindow()) Global::mainWindow()->hide();
-        } else if (Settings::useSystray() && kapp->isSessionRestored()) {
-            if (Global::mainWindow()) Global::mainWindow()->setShown(!Settings::startDocked());
-        }
-    }
-#else
-    #warning Proper fix for the systray problem
-#endif
-
-
-    // If the main window is hidden when session is saved, Container::queryClose()
-    //  isn't called and the last value would be kept
-    Settings::setStartDocked(true);
-    Settings::saveConfig();
-
-    // Load baskets
-    DEBUG_WIN << "Baskets are loaded from " + Global::basketsFolder();
-
-    NoteDrag::createAndEmptyCuttingTmpFolder(); // If last exec hasn't done it: clean the temporary folder we will use
-    load();
-
-    // If no basket has been found, try to import from an older version,
-    if (topLevelItemCount() <= 0) {
-        QDir dir;
-        dir.mkdir(Global::basketsFolder());
-        if (FormatImporter::shouldImportBaskets()) {
-            FormatImporter::importBaskets();
-            load();
-        }
-        if (topLevelItemCount() <= 0) {
-            // Create first basket:
-            BasketFactory::newBasket(/*icon=*/"", /*name=*/tr("General"), /*backgroundImage=*/"", /*backgroundColor=*/QColor(), /*textColor=*/QColor(), /*templateName=*/"1column", /*createIn=*/0);
-        }
-    }
-
-    // Load the Welcome Baskets if it is the First Time:
-    if (!Settings::welcomeBasketsAdded()) {
-        addWelcomeBaskets();
-        Settings::setWelcomeBasketsAdded(true);
-        Settings::saveConfig();
-    }
-
-    m_tryHideTimer = new QTimer(this);
-    m_hideTimer    = new QTimer(this);
-    connect(m_tryHideTimer, SIGNAL(timeout()), this, SLOT(timeoutTryHide()));
-    connect(m_hideTimer,    SIGNAL(timeout()), this, SLOT(timeoutHide()));
-
-    // Preload every baskets for instant filtering:
-    /*StopWatch::start(100);
-        QListViewItemIterator it(m_tree);
-        while (it.current()) {
-            BasketListViewItem *item = ((BasketListViewItem*)it.current());
-            item->basket()->load();
-            kapp->processEvents();
-            ++it;
-        }
-    StopWatch::check(100);*/
 }
 
 void BNPView::addWelcomeBaskets()
@@ -292,6 +213,81 @@ void BNPView::initialize()
                              "You can browse between them by clicking a basket to open it, or reorganize them using drag and drop."));
 
     setTreePlacement(Settings::treeOnLeft());
+
+    /*
+        InlineEditors* instance = InlineEditors::instance();
+
+        if(instance)
+        {
+            KToolBar* toolbar = instance->richTextToolBar();
+
+            if(toolbar)
+                toolbar->hide();
+        }
+    */
+
+#if 0
+    // This is the logic to show or hide Basket when it is started up; ideally,
+    // it will take on its last state when KDE's session restore kicks in.
+    if (!isPart()) {
+        if (Settings::useSystray() && KCmdLineArgs::parsedArgs() && KCmdLineArgs::parsedArgs()->isSet("start-hidden")) {
+            if (Global::mainWindow()) Global::mainWindow()->hide();
+        } else if (Settings::useSystray() && kapp->isSessionRestored()) {
+            if (Global::mainWindow()) Global::mainWindow()->setShown(!Settings::startDocked());
+        }
+    }
+#else
+    #warning Proper fix for the systray problem
+#endif
+
+
+    // If the main window is hidden when session is saved, Container::queryClose()
+    //  isn't called and the last value would be kept
+    Settings::setStartDocked(true);
+    Settings::saveConfig();
+
+    // Load baskets
+    DEBUG_WIN << "Baskets are loaded from " + Global::basketsFolder();
+
+    NoteDrag::createAndEmptyCuttingTmpFolder(); // If last exec hasn't done it: clean the temporary folder we will use
+    load();
+
+    // If no basket has been found, try to import from an older version,
+    if (topLevelItemCount() <= 0) {
+        QDir dir;
+        dir.mkdir(Global::basketsFolder());
+        if (FormatImporter::shouldImportBaskets()) {
+            FormatImporter::importBaskets();
+            load();
+        }
+        if (topLevelItemCount() <= 0) {
+            // Create first basket:
+            BasketFactory::newBasket(/*icon=*/"", /*name=*/tr("General"), /*backgroundImage=*/"", /*backgroundColor=*/QColor(), /*textColor=*/QColor(), /*templateName=*/"1column", /*createIn=*/0);
+        }
+    }
+
+    // Load the Welcome Baskets if it is the First Time:
+    if (!Settings::welcomeBasketsAdded()) {
+        addWelcomeBaskets();
+        Settings::setWelcomeBasketsAdded(true);
+        Settings::saveConfig();
+    }
+
+    m_tryHideTimer = new QTimer(this);
+    m_hideTimer    = new QTimer(this);
+    connect(m_tryHideTimer, SIGNAL(timeout()), this, SLOT(timeoutTryHide()));
+    connect(m_hideTimer,    SIGNAL(timeout()), this, SLOT(timeoutHide()));
+
+    // Preload every baskets for instant filtering:
+    /*StopWatch::start(100);
+        QListViewItemIterator it(m_tree);
+        while (it.current()) {
+            BasketListViewItem *item = ((BasketListViewItem*)it.current());
+            item->basket()->load();
+            kapp->processEvents();
+            ++it;
+        }
+    StopWatch::check(100);*/
 }
 
 BasketListViewItem* BNPView::topLevelItem(int i)
@@ -843,16 +839,6 @@ void BNPView::recomputeAllStyles()
         item->basket()->recomputeAllStyles();
         item->basket()->unsetNotesWidth();
         item->basket()->relayoutNotes(true);
-        ++it;
-    }
-}
-
-void BNPView::removedStates(const QList<State*> &deletedStates)
-{
-    QTreeWidgetItemIterator it(m_tree);
-    while (*it) {
-        BasketListViewItem *item = ((BasketListViewItem*) * it);
-        item->basket()->removedStates(deletedStates);
         ++it;
     }
 }

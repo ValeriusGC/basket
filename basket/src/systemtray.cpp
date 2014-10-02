@@ -26,6 +26,7 @@
 #include <QPixmap>
 #include <QPainter>
 #include <QMenu>
+#include <QTimer>
 
 // Local
 #include "basketscene.h"
@@ -49,8 +50,6 @@ SystemTray::SystemTray(QWidget *parent)
         painter.drawPixmap(0, 0, lockOverlay);
     }
     m_lockedIcon = QIcon(lockedIconImage);
-
-    updateDisplay();
 }
 
 /** Destructor */
@@ -68,8 +67,9 @@ void SystemTray::updateDisplay()
     // Update the icon
     if (basket->icon().isNull()
             || basket->iconName() == "basket"
-            || !Settings::showIconInSystray())
-        setIcon(basket->isLocked() ? m_lockedIcon : m_icon);
+            || !Settings::showIconInSystray()) {
+        setIcon(basket->isLocked() ? m_lockedIcon : m_icon); // WHY WONT YOU WORK? .. TODO
+    }
     else {
         // Code that comes from JuK:
         QPixmap bgPix = QIcon("://images/hi32-status-object-locked.png").pixmap(22);

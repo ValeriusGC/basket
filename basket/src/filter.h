@@ -28,8 +28,7 @@ class QToolButton;
 class QLineEdit;
 class QComboBox;
 
-class Tag;
-class State;
+class TagModelItem;
 
 /** The structure that contain all filter terms
   * @author Sébastien Laoût
@@ -47,8 +46,8 @@ public:
     // Filter data:
     QString  string;
     int      tagFilterType;
-    Tag     *tag;
-    State   *state;
+    TagModelItem     *tag;
+    TagModelItem     *state;
     bool     isFiltering;
 };
 
@@ -69,8 +68,8 @@ public slots:
     void reset();
     void inAllBaskets();
     void setEditFocus();
-    void filterTag(Tag *tag);
-    void filterState(State *state);
+    void filterTag(TagModelItem *tag);
+    void filterState(TagModelItem *state);
     void setFilterAll(bool filterAll);
     void setFilterData(const FilterData &data);
 public:
@@ -83,13 +82,13 @@ private slots:
     void tagChanged(int index);
 private:
     FilterData      *m_data;
-    QLineEdit *m_lineEdit;
+    QLineEdit       *m_lineEdit;
     QToolButton     *m_resetButton;
-    QComboBox *m_tagsBox;
+    QComboBox       *m_tagsBox;
     QToolButton     *m_inAllBasketsButton;
 
-    QMap<int, Tag*>   m_tagsMap;
-    QMap<int, State*> m_statesMap;
+    QMap<int, TagModelItem*>   m_tagsMap;
+    QMap<int, TagModelItem*>   m_statesMap;
 };
 
 #endif // FILTER_H

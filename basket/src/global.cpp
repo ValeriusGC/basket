@@ -39,7 +39,7 @@ BackgroundManager *Global::backgroundManager   = 0L;
 SystemTray        *Global::systemTray          = 0L;
 BNPView           *Global::bnpView             = 0L;
 MainWindow        *Global::mainWin             = 0L;
-TagManager        *Global::tagManager          = 0L;
+TagModel          *Global::tagModel            = 0L;
 
 void Global::setCustomSavesFolder(const QString &folder)
 {

@@ -137,19 +137,20 @@ void FilterBar::repopulateTagsCombo()
     m_tagsBox->addItem(tr("(Tagged)"));
 
     int index = 3;
-    Tag     *tag;
-    State   *state;
+    TagModelItem     *tag;
+    TagModelItem     *state;
     QIcon  icon;
     QString  text;
     QPixmap  emblem;
-    for (QList<Tag*>::iterator it = Global::tagManager->tagList().begin(); it != Global::tagManager->tagList().end(); ++it) {
-        tag   = *it;
-        state = tag->states().first();
+    for (int row = 0; row < Global::tagModel->rowCount(); ++row) {
+        QModelIndex tagIndex = Global::tagModel->index(row, 0);
+        tag   = Global::tagModel->getItem(tagIndex);
+        state = tag->child(0);
         // Insert the tag in the combo-box:
-        if (tag->countStates() > 1)
-            text = tag->name();
+        if (tag->childCount() > 1)
+            text = tag->data();
         else
-            text = state->name();
+            text = state->data();
 
         icon = QIcon("://tags/hi16-action-" + state->emblem() + ".png");
         emblem = icon.pixmap(ICON_SIZE, ICON_SIZE);
@@ -158,12 +159,14 @@ void FilterBar::repopulateTagsCombo()
         // Update the mapping:
         m_tagsMap.insert(index, tag);
         ++index;
-        // Insert sub-states, if needed:
-        if (tag->countStates() > 1) {
-            for (QList<State*>::iterator it2 = tag->states().begin(); it2 != tag->states().end(); ++it2) {
-                state = *it2;
+
+        if (tag->childCount() > 1) {
+            for (int subrow = 0; subrow < Global::tagModel->rowCount(tagIndex); ++subrow) {
+                QModelIndex stateIndex;
+                stateIndex = Global::tagModel->index(subrow, 0, tagIndex);
+                state = Global::tagModel->getItem(stateIndex);
                 // Insert the state:
-                text = state->name();
+                text = state->data();
                 icon = QIcon("://tags/hi16-action-" + state->emblem() + ".png");
                 emblem = icon.pixmap(ICON_SIZE, ICON_SIZE);
                 // Indent the emblem to show the hierarchy relation:
@@ -191,11 +194,11 @@ void FilterBar::reset()
     emit newFilter(*m_data);
 }
 
-void FilterBar::filterTag(Tag *tag)
+void FilterBar::filterTag(TagModelItem *tag)
 {
     int index = 0;
 
-    for (QMap<int, Tag*>::Iterator it = m_tagsMap.begin(); it != m_tagsMap.end(); ++it)
+    for (QMap<int, TagModelItem*>::Iterator it = m_tagsMap.begin(); it != m_tagsMap.end(); ++it)
         if (it.value() == tag) {
             index = it.key();
             break;
@@ -209,11 +212,11 @@ void FilterBar::filterTag(Tag *tag)
     }
 }
 
-void FilterBar::filterState(State *state)
+void FilterBar::filterState(TagModelItem *state)
 {
     int index = 0;
 
-    for (QMap<int, State*>::Iterator it = m_statesMap.begin(); it != m_statesMap.end(); ++it)
+    for (QMap<int, TagModelItem*>::Iterator it = m_statesMap.begin(); it != m_statesMap.end(); ++it)
         if (it.value() == state) {
             index = it.key();
             break;
@@ -272,13 +275,13 @@ void FilterBar::tagChanged(int index)
         break;
     default:
         // Try to find if we are filtering a tag:
-        QMap<int, Tag*>::iterator it = m_tagsMap.find(index);
+        QMap<int, TagModelItem*>::iterator it = m_tagsMap.find(index);
         if (it != m_tagsMap.end()) {
             m_data->tagFilterType = FilterData::TagFilter;
             m_data->tag           = *it;
         } else {
             // If not, try to find if we are filtering a state:
-            QMap<int, State*>::iterator it2 = m_statesMap.find(index);
+            QMap<int, TagModelItem*>::iterator it2 = m_statesMap.find(index);
             if (it2 != m_statesMap.end()) {
                 m_data->tagFilterType = FilterData::StateFilter;
                 m_data->state         = *it2;

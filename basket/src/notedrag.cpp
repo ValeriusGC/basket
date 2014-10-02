@@ -123,8 +123,8 @@ void NoteDrag::serializeNotes(NoteSelection *noteList, QDataStream &stream, bool
                 stream << QString("");
             stream << content->note()->addedDate() << content->note()->lastModificationDate();
             content->serialize(stream);
-            QList<State*> states = node->note->states();
-            for (QList<State*>::Iterator it = states.begin(); it != states.end(); ++it)
+            QList<TagModelItem*> states = node->note->states();
+            for (QList<TagModelItem*>::Iterator it = states.begin(); it != states.end(); ++it)
                 stream << (quint64)(*it);
             stream << (quint64)0;
         }
@@ -519,7 +519,7 @@ Note* NoteDrag::decodeHierarchy(QDataStream &stream, BasketScene *parent, bool m
             do {
                 stream >> statePointer;
                 if (statePointer)
-                    note->addState((State*)statePointer);
+                    note->addState((TagModelItem*)statePointer);
             } while (statePointer);
         }
         // Now that we have created the note, insert it:

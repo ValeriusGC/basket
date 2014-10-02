@@ -94,7 +94,7 @@ Note::Note(BasketScene *parent)
         m_haveInvisibleTags(false),
         m_matching(true)
 {
-	setHeight(MIN_HEIGHT);
+    setHeight(MIN_HEIGHT);
         if(m_basket)
         {
             m_basket->addItem(this);
@@ -105,12 +105,12 @@ Note::~Note()
 {
     if(m_basket)
     {
-        if(m_content && m_content->graphicsItem()) 
+        if(m_content && m_content->graphicsItem())
         {
             m_basket->removeItem(m_content->graphicsItem());
         }
         m_basket->removeItem(this);
-    }    
+    }
     delete m_content;
     delete m_animation;
     deleteChilds();
@@ -141,13 +141,13 @@ qreal Note::bottom() const
     return y() + height() - 1;
 }
 
-void Note::setParentBasket(BasketScene *basket) 
+void Note::setParentBasket(BasketScene *basket)
 {
     if(m_basket) m_basket->removeItem(this);
     m_basket = basket;
     if(m_basket) m_basket->addItem(this);
 }
-    
+
 QString Note::addedStringDate()
 {
     QLocale l;
@@ -171,7 +171,7 @@ QString Note::toText(const QString &cuttedFullPath)
         // Compute the text equivalent of the tag states:
         QString firstLine;
         QString otherLines;
-        for (QList<State*>::Iterator it = m_states.begin(); it != m_states.end(); ++it) {
+        for (QList<TagModelItem*>::Iterator it = m_states.begin(); it != m_states.end(); ++it) {
             if (!(*it)->textEquivalent().isEmpty()) {
                 firstLine += (*it)->textEquivalent() + " ";
                 if ((*it)->onAllTextLines())
@@ -186,11 +186,11 @@ QString Note::toText(const QString &cuttedFullPath)
         QStringList lines = text.split('\n');
         QString result = firstLine + lines[0] + (lines.count() > 1 ? "\n" : "");
         for (int i = 1/*Skip the first line*/; i < lines.count(); ++i)
-            result += otherLines + lines[i] + (i < lines.count() - 1 ? "\n" : "");	
+            result += otherLines + lines[i] + (i < lines.count() - 1 ? "\n" : "");
 
         return result;
     } else
-	return "";
+    return "";
 }
 
 bool Note::computeMatching(const FilterData &data)
@@ -210,7 +210,7 @@ bool Note::computeMatching(const FilterData &data)
     case FilterData::DontCareTagsFilter: matching = true;                   break;
     case FilterData::NotTaggedFilter:    matching = m_states.count() <= 0;  break;
     case FilterData::TaggedFilter:       matching = m_states.count() > 0;   break;
-    case FilterData::TagFilter:          matching = hasTag(data.tag);       break;
+    case FilterData::TagFilter:          matching = stateOfTag(data.tag);   break;
     case FilterData::StateFilter:        matching = hasState(data.state);   break;
     }
 
@@ -233,7 +233,7 @@ int Note::newFilter(const FilterData &data)
     }
     else if(!wasMatching)
     {
-      show();  
+      show();
     }
 
     int countMatches = (content() && matching() ? 1 : 0);
@@ -263,7 +263,7 @@ void Note::deleteSelectedNotes(bool deleteFilesToo, QSet<Note *> *notesToBeDelet
         return;
     }
 
-    bool isColumn = this->isColumn();      
+    bool isColumn = this->isColumn();
     Note *child = firstChild();
     Note *next;
     while (child) {
@@ -271,7 +271,7 @@ void Note::deleteSelectedNotes(bool deleteFilesToo, QSet<Note *> *notesToBeDelet
         child->deleteSelectedNotes(deleteFilesToo, notesToBeDeleted);
         child = next;
     }
-    
+
     // if it remains at least two notes, the group must not be deleted
     if(!isColumn && !(firstChild() && firstChild()->next()))
     {
@@ -338,7 +338,7 @@ void Note::setSelected(bool selected)
 
     if (!selected && basket()->editedNote() == this) {
         basket()->closeEditor();
-	return; // To avoid a bug that would count 2 less selected notes instead of 1 less! Because m_selected is modified only below.
+    return; // To avoid a bug that would count 2 less selected notes instead of 1 less! Because m_selected is modified only below.
     }
 
     if (selected)
@@ -874,7 +874,7 @@ Qt::CursorShape Note::cursorFromZone(Zone zone) const
         return Qt::PointingHandCursor;
         break;
 
-    case Note::Content: 
+    case Note::Content:
             return Qt::IBeamCursor;
         break;
 
@@ -882,15 +882,15 @@ Qt::CursorShape Note::cursorFromZone(Zone zone) const
     case Note::TopGroup:
     case Note::BottomInsert:
     case Note::BottomGroup:
-    case Note::BottomColumn:  
+    case Note::BottomColumn:
         return Qt::CrossCursor;
         break;
     case Note::None:
         return Qt::ArrowCursor;
         break;
     default:
-        State *state = stateForEmblemNumber(zone - Emblem0);
-        if (state && state->parentTag()->states().count() > 1)
+        TagModelItem *state = stateForEmblemNumber(zone - Emblem0);
+        if (state && state->parent()->childCount() > 1)
             return Qt::PointingHandCursor;
         else
             return Qt::ArrowCursor;
@@ -900,7 +900,7 @@ Qt::CursorShape Note::cursorFromZone(Zone zone) const
 bool Note::initAnimationLoad(QTimeLine *timeLine)
 {
     bool needAnimation = false;
-    
+
     if( ! isColumn() )
     {
         qreal x, y;
@@ -923,7 +923,7 @@ bool Note::initAnimationLoad(QTimeLine *timeLine)
             y = basket()->sceneRect().y() + rand() % basket()->graphicsView()->viewport()->height();
             break;
         }
-    
+
         m_animation = new QGraphicsItemAnimation;
         m_animation->setItem(this);
         m_animation->setTimeLine(timeLine);
@@ -932,10 +932,10 @@ bool Note::initAnimationLoad(QTimeLine *timeLine)
         {
             m_animation->setPosAt(i/100.0, QPointF(this->x()-x*(100-i)/100,this->y()-y*(100-i)/100));
         }
-        
+
         needAnimation = true;
     }
-    
+
     if (isGroup()) {
         const qreal viewHeight = basket()->sceneRect().y() + basket()->graphicsView()->viewport()->height();
         Note *child = firstChild();
@@ -950,7 +950,7 @@ bool Note::initAnimationLoad(QTimeLine *timeLine)
             first = false;
         }
     }
-    
+
     return needAnimation;
 }
 
@@ -985,7 +985,7 @@ void Note::setInitialHeight(qreal height)
 void Note::unsetWidth()
 {
     prepareGeometryChange();
-    
+
     d->width = 0;
     unbufferize();
 
@@ -1001,7 +1001,7 @@ qreal Note::width() const
 void Note::requestRelayout()
 {
     prepareGeometryChange();
-    
+
     d->width = 0;
     unbufferize();
     basket()->relayoutNotes(true); // TODO: A signal that will relayout ONCE and DELAYED if called several times
@@ -1070,7 +1070,7 @@ bool Note::toggleFolded()
 
     // Important to close the editor FIRST, because else, the last edited note would not show during folding animation (don't ask me why ;-) ):
     m_isFolded = ! m_isFolded;
-    
+
     unbufferize();
 
     return true;
@@ -1207,7 +1207,7 @@ void Note::relayoutAt(qreal ax, qreal ay, bool animate)
     } else {
         // If rightLimit is excedded, set the top-level right limit!!!
         // and NEED RELAYOUT
-        setWidth(finalRightLimit() - x());            
+        setWidth(finalRightLimit() - x());
     }
 
     // Set the basket area limits (but not for child notes: no need, because they will look for theire parent note):
@@ -1355,12 +1355,12 @@ void Note::drawExpander(QPainter *painter, qreal x, qreal y,
 
     QStyle *style = basket->style();
     if (!expand){
-    	style->drawPrimitive(QStyle::PE_IndicatorArrowDown, &opt, painter,
-        	                 basket->graphicsView()->viewport());
+        style->drawPrimitive(QStyle::PE_IndicatorArrowDown, &opt, painter,
+                             basket->graphicsView()->viewport());
     }
     else{
-    	style->drawPrimitive(QStyle::PE_IndicatorArrowRight, &opt, painter,
-        	                 basket->graphicsView()->viewport());
+        style->drawPrimitive(QStyle::PE_IndicatorArrowRight, &opt, painter,
+                             basket->graphicsView()->viewport());
     }
 }
 
@@ -1794,7 +1794,7 @@ void Note::draw(QPainter *painter, const QRectF &/*clipRect*/)
     if (! m_computedAreas)
         recomputeAreas();
     if (m_areas.isEmpty())
-	return;
+    return;
 
     /** Directly draw pixmap on screen if it is already buffered: */
     if (isBufferized()) {
@@ -1860,7 +1860,7 @@ void Note::draw(QPainter *painter, const QRectF &/*clipRect*/)
         return;
     }
 
-    
+
     /** Or draw the note: */
     // What are the background colors:
     QColor background = basket()->backgroundColor();
@@ -1879,7 +1879,7 @@ void Note::draw(QPainter *painter, const QRectF &/*clipRect*/)
     {
         background = m_computedState.backgroundColor();
     }
-    
+
     QColor bgColor;
     QColor darkBgColor;
     getGradientColors(background, &darkBgColor, &bgColor);
@@ -1887,12 +1887,12 @@ void Note::draw(QPainter *painter, const QRectF &/*clipRect*/)
     drawGradient(&painter2, bgColor, darkBgColor, 0, 0, width(), height(), /*sunken=*/!hovered, /*horz=*/true, /*flat=*/false);
     basket()->blendBackground(painter2, boundingRect().translated(x(),y()));
 
-    if (!hovered) 
+    if (!hovered)
     {
         painter2.setPen(Tools::mixColor(bgColor, darkBgColor));
         painter2.drawLine(0, height() - 1, width(), height() - 1);
     }
-    else 
+    else
     {
         // Top/Bottom lines:
         painter2.setPen(highPen);
@@ -1938,7 +1938,7 @@ void Note::draw(QPainter *painter, const QRectF &/*clipRect*/)
     // Draw the Emblems:
     qreal yIcon = (height() - EMBLEM_SIZE) / 2;
     qreal xIcon = HANDLE_WIDTH + NOTE_MARGIN;
-    for (QList<State*>::Iterator it = m_states.begin(); it != m_states.end(); ++it) {
+    for (QList<TagModelItem*>::Iterator it = m_states.begin(); it != m_states.end(); ++it) {
         if (!(*it)->emblem().isEmpty()) {
             QPixmap stateEmblem = QIcon("://tags/hi16-action-" + (*it)->emblem() + ".png").pixmap(16,16);
             painter2.drawPixmap(xIcon, yIcon, stateEmblem);
@@ -1979,7 +1979,7 @@ void Note::draw(QPainter *painter, const QRectF &/*clipRect*/)
         QStyleOptionFocusRect opt;
         opt.initFrom(m_basket->graphicsView());
         opt.rect = focusRect;
-        //Temporary change to see the focus rectangle 
+        //Temporary change to see the focus rectangle
         painter2.setPen(Qt::red);
         painter2.drawRect(focusRect);
         //kapp->style()->drawPrimitive(QStyle::PE_FrameFocusRect, &opt,
@@ -2000,10 +2000,10 @@ void Note::paint(QPainter *painter,
 
     if(boundingRect().width()<=0.1 || boundingRect().height()<=0.1)
         return;
-    
+
     draw(painter,boundingRect());
 
-    if (hasResizer()) 
+    if (hasResizer())
     {
        qreal right = rightLimit()-x();
        QRectF resizerRect(0, 0, RESIZER_WIDTH, resizerHeight());
@@ -2011,7 +2011,7 @@ void Note::paint(QPainter *painter,
        QPixmap pixmap(RESIZER_WIDTH, resizerHeight());
        QPainter painter2(&pixmap);
        // Draw gradient or resizer:
-       if (m_hovered && m_hoveredZone == Resizer) 
+       if (m_hovered && m_hoveredZone == Resizer)
        {
            QColor baseColor(basket()->backgroundColor());
            QColor highColor(palette().color(QPalette::Highlight));
@@ -2020,8 +2020,8 @@ void Note::paint(QPainter *painter,
                drawRoundings(&painter2, RESIZER_WIDTH - 3, 0,                   /*type=*/3);
                drawRoundings(&painter2, RESIZER_WIDTH - 3, resizerHeight() - 3, /*type=*/4);
            }
-       } 
-       else 
+       }
+       else
        {
            drawInactiveResizer(&painter2, /*x=*/0, /*y=*/0, /*height=*/resizerHeight(), basket()->backgroundColor(), isColumn());
            resizerRect.translate(rightLimit(),y());
@@ -2037,7 +2037,7 @@ void Note::drawBufferOnScreen(QPainter *painter, const QPixmap &contentPixmap)
 {
     for (QList<QRectF>::iterator it = m_areas.begin(); it != m_areas.end(); ++it) {
         QRectF rect = (*it).translated(-x(),-y());
-        
+
         if (rect.x() >= width()) // It's a rect of the resizer, don't draw it!
             continue;
 
@@ -2050,50 +2050,14 @@ void Note::setContent(NoteContent *content)
     m_content = content;
 }
 
-/*const */QList<State*>& Note::states() const
+/*const */QList<TagModelItem*>& Note::states() const
 {
-    return (QList<State*>&)m_states;
-}
-
-void Note::addState(State *state, bool orReplace)
-{
-    if (!content())
-        return;
-
-    Tag *tag = state->parentTag();
-    QList<State*>::iterator itStates = m_states.begin();
-    // Browse all tags, see if the note has it, increment itSates if yes, and then insert the state at this position...
-    // For each existing tags:
-    for (QList<Tag*>::iterator it = Global::tagManager->tagList().begin(); it != Global::tagManager->tagList().end(); ++it) {
-        // If the current tag isn't the one to assign or the current one on the note, go to the next tag:
-        if (*it != tag && itStates != m_states.end() && *it != (*itStates)->parentTag())
-            continue;
-        // We found the tag to insert:
-        if (*it == tag) {
-            // And the note already have the tag:
-            if (itStates != m_states.end() && *it == (*itStates)->parentTag()) {
-                // We replace the state if wanted:
-                if (orReplace) {
-                    itStates = m_states.insert(itStates, state);
-                    ++itStates;
-                    m_states.erase(itStates);
-                    recomputeStyle();
-                }
-            } else {
-                m_states.insert(itStates, state);
-                recomputeStyle();
-            }
-            return;
-        }
-        // The note has this tag:
-        if (itStates != m_states.end() && *it == (*itStates)->parentTag())
-            ++itStates;
-    }
+    return (QList<TagModelItem*>&)m_states;
 }
 
 QFont Note::font()
 {
-    return m_computedState.font(basket()->QGraphicsScene::font());
+    return QFont(m_computedState.fontName());//.font(basket()->QGraphicsScene::font());
 }
 
 QColor Note::backgroundColor()
@@ -2114,7 +2078,7 @@ QColor Note::textColor()
 
 void Note::recomputeStyle()
 {
-    State::merge(m_states, &m_computedState, &m_emblemsCount, &m_haveInvisibleTags, basket()->backgroundColor());
+    m_emblemsCount = m_computedState.merge(m_states, basket()->backgroundColor());
 //  unsetWidth();
     if (content())
     {
@@ -2135,155 +2099,126 @@ void Note::recomputeAllStyles()
         child->recomputeAllStyles();
 }
 
-bool Note::removedStates(const QList<State*> &deletedStates)
+void Note::activatedTagShortcut(TagModelItem *tag, bool isActive)
 {
-    bool modifiedBasket = false;
-
-    if (!states().isEmpty()) {
-        for (QList<State*>::const_iterator it = deletedStates.begin(); it != deletedStates.end(); ++it)
-            if (hasState(*it)) {
-                removeState(*it);
-                modifiedBasket = true;
-            }
+    if (content() && isSelected()) {
+        TagModelItem *state = stateOfTag(tag);
+        if (!state && isActive)
+            addState(tag->child(0));
+        else if (state && !isActive)
+            removeState(state);
     }
 
     FOR_EACH_CHILD(child)
-    if (child->removedStates(deletedStates))
-        modifiedBasket = true;
-
-    return modifiedBasket;
+        child->activatedTagShortcut(tag, isActive);
 }
 
-
-void Note::addTag(Tag *tag)
+void Note::addState(TagModelItem *state)
 {
-    addState(tag->states().first(), /*but do not replace:*/false);
+    if (!content() || !state)
+        return;
+
+    // Add a completely new state
+    TagModelItem *curState = stateOfTag(state->parent());
+    if (!curState) {
+        m_states.append(state);
+    }
+
+    // Increment a tag's state
+    if (curState && curState != state) {
+        int curIndex = m_states.indexOf(curState);
+        m_states.removeAt(curIndex);
+        m_states.insert(curIndex, curState);
+    }
+
+    recomputeStyle();
 }
 
-void Note::removeState(State *state)
+void Note::removeState(TagModelItem *state)
 {
-    for (QList<State*>::iterator it = m_states.begin(); it != m_states.end(); ++it)
-        if (*it == state) {
-            m_states.erase(it);
-            recomputeStyle();
-            return;
-        }
+    m_states.removeAll(state);
+
+    recomputeStyle();
 }
 
-void Note::removeTag(Tag *tag)
-{
-    for (QList<State*>::iterator it = m_states.begin(); it != m_states.end(); ++it)
-        if ((*it)->parentTag() == tag) {
-            m_states.erase(it);
-            recomputeStyle();
-            return;
-        }
-}
-
-void Note::removeAllTags()
+void Note::removeAllStates()
 {
     m_states.clear();
     recomputeStyle();
 }
 
-void Note::addTagToSelectedNotes(Tag *tag)
+void Note::addStateToSelectedNotes(TagModelItem *state)
 {
     if (content() && isSelected())
-        addTag(tag);
+        addState(state);
 
     FOR_EACH_CHILD(child)
-    child->addTagToSelectedNotes(tag);
+        child->addStateToSelectedNotes(state);
 }
 
-void Note::removeTagFromSelectedNotes(Tag *tag)
+void Note::removeStateFromSelectedNotes(TagModelItem *state)
 {
     if (content() && isSelected()) {
-        if (hasTag(tag))
+        if (stateOfTag(state->parent()))
             setWidth(0);
-        removeTag(tag);
+        removeState(state);
     }
 
     FOR_EACH_CHILD(child)
-    child->removeTagFromSelectedNotes(tag);
+    child->removeStateFromSelectedNotes(state);
 }
 
-void Note::removeAllTagsFromSelectedNotes()
+void Note::removeAllStatesFromSelectedNotes()
 {
     if (content() && isSelected()) {
         if (m_states.count() > 0)
             setWidth(0);
-        removeAllTags();
+        removeAllStates();
     }
 
     FOR_EACH_CHILD(child)
-    child->removeAllTagsFromSelectedNotes();
+    child->removeAllStatesFromSelectedNotes();
 }
 
-void Note::addStateToSelectedNotes(State *state, bool orReplace)
-{
-    if (content() && isSelected())
-        addState(state, orReplace);
-
-    FOR_EACH_CHILD(child)
-    child->addStateToSelectedNotes(state, orReplace); // TODO: BasketScene::addStateToSelectedNotes() does not have orReplace
-}
-
-void Note::changeStateOfSelectedNotes(State *state)
-{
-    if (content() && isSelected() && hasTag(state->parentTag()))
-        addState(state);
-
-    FOR_EACH_CHILD(child)
-    child->changeStateOfSelectedNotes(state);
-}
-
-bool Note::selectedNotesHaveTags()
+bool Note::selectedNotesHaveStates()
 {
     if (content() && isSelected() && m_states.count() > 0)
         return true;
 
     FOR_EACH_CHILD(child)
-    if (child->selectedNotesHaveTags())
-        return true;
-    return false;
-}
-
-bool Note::hasState(State *state)
-{
-    for (QList<State*>::iterator it = m_states.begin(); it != m_states.end(); ++it)
-        if (*it == state)
+        if (child->selectedNotesHaveStates())
             return true;
     return false;
 }
 
-bool Note::hasTag(Tag *tag)
+bool Note::hasState(TagModelItem *state)
 {
-    for (QList<State*>::iterator it = m_states.begin(); it != m_states.end(); ++it)
-        if ((*it)->parentTag() == tag)
+    for (QList<TagModelItem*>::iterator it = m_states.begin(); it != m_states.end(); ++it)
+        if ((*it) == state)
             return true;
     return false;
 }
 
-State* Note::stateOfTag(Tag *tag)
+TagModelItem* Note::stateOfTag(TagModelItem *tag)
 {
-    for (QList<State*>::iterator it = m_states.begin(); it != m_states.end(); ++it)
-        if ((*it)->parentTag() == tag)
+    for (QList<TagModelItem*>::iterator it = m_states.begin(); it != m_states.end(); ++it)
+        if ((*it)->parent() == tag)
             return *it;
     return 0;
 }
 
 bool Note::allowCrossReferences()
 {
-    for (QList<State*>::iterator it = m_states.begin(); it != m_states.end(); ++it)
+    for (QList<TagModelItem*>::iterator it = m_states.begin(); it != m_states.end(); ++it)
         if (!(*it)->allowCrossReferences())
             return false;
     return true;
 }
 
-State* Note::stateForEmblemNumber(int number) const
+TagModelItem* Note::stateForEmblemNumber(int number) const
 {
     int i = -1;
-    for (QList<State*>::const_iterator it = m_states.begin(); it != m_states.end(); ++it)
+    for (QList<TagModelItem*>::const_iterator it = m_states.begin(); it != m_states.end(); ++it)
         if (!(*it)->emblem().isEmpty()) {
             ++i;
             if (i == number)
@@ -2292,54 +2227,14 @@ State* Note::stateForEmblemNumber(int number) const
     return 0;
 }
 
-bool Note::stateForTagFromSelectedNotes(Tag *tag, State **state)
-{
-    if (content() && isSelected()) {
-        // What state is the tag on this note?
-        State* stateOfTag = this->stateOfTag(tag);
-        // This tag is not assigned to this note, the action will assign it, then:
-        if (stateOfTag == 0)
-            *state = 0;
-        else {
-            // Take the LOWEST state of all the selected notes:
-            // Say the two selected notes have the state "Done" and "To Do".
-            // The first note set *state to "Done".
-            // When reaching the second note, we should recognize "To Do" is first in the tag states, then take it
-            // Because pressing the tag shortcut key should first change state before removing the tag!
-            if (*state == 0)
-                *state = stateOfTag;
-            else {
-                bool stateIsFirst = true;
-                for (State *nextState = stateOfTag->nextState(); nextState; nextState = nextState->nextState(/*cycle=*/false))
-                    if (nextState == *state)
-                        stateIsFirst = false;
-                if (!stateIsFirst)
-                    *state = stateOfTag;
-            }
-        }
-        return true; // We encountered a selected note
-    }
-
-    bool encounteredSelectedNote = false;
-    FOR_EACH_CHILD(child) {
-        bool encountered = child->stateForTagFromSelectedNotes(tag, state);
-        if (encountered && *state == 0)
-            return true;
-        if (encountered)
-            encounteredSelectedNote = true;
-    }
-    return encounteredSelectedNote;
-}
-
-
 void Note::inheritTagsOf(Note *note)
 {
     if (!note || !content())
         return;
 
-    for (QList<State*>::iterator it = note->states().begin(); it != note->states().end(); ++it)
-        if ((*it)->parentTag() && (*it)->parentTag()->inheritedBySiblings())
-            addTag((*it)->parentTag());
+    for (QList<TagModelItem*>::iterator it = note->states().begin(); it != note->states().end(); ++it)
+        if ((*it)->parent() && (*it)->parent()->inheritedBySiblings())
+            addState((*it)->parent());
 }
 
 void Note::unbufferizeAll()
@@ -2439,12 +2334,15 @@ Note* Note::noteForFullPath(const QString &path)
     return 0;
 }
 
-void Note::listUsedTags(QList<Tag*> &list)
+void Note::listUsedTags(QList<TagModelItem*> &list)
 {
-    for (QList<State*>::Iterator it = m_states.begin(); it != m_states.end(); ++it) {
-        Tag *tag = (*it)->parentTag();
-        if (!list.contains(tag))
-            list.append(tag);
+    for (QList<TagModelItem*>::Iterator it = m_states.begin(); it != m_states.end(); ++it) {
+        TagModelItem *tag = (*it)->parent();
+        for (QList<TagModelItem*>::Iterator it2 = list.begin(); it2 != list.end(); ++it2) {
+        if ((*it2) == tag)
+            continue;
+        }
+        list.append(tag);
     }
 
     FOR_EACH_CHILD(child)
@@ -2452,10 +2350,10 @@ void Note::listUsedTags(QList<Tag*> &list)
 }
 
 
-void Note::usedStates(QList<State*> &states)
+void Note::usedStates(QList<TagModelItem*> &states)
 {
     if (content())
-        for (QList<State*>::Iterator it = m_states.begin(); it != m_states.end(); ++it)
+        for (QList<TagModelItem*>::Iterator it = m_states.begin(); it != m_states.end(); ++it)
             if (!states.contains(*it))
                 states.append(*it);
 

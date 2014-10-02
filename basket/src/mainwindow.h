@@ -62,8 +62,9 @@ public slots:
     void enableActions();
     void slotBasketChanged();
     void canUndoRedoChanged();
-    void activatedTagShortcut();
+    void activatedTagShortcut(bool isActive);
     void populateTagsMenu();
+    void customiseTags();
 
     /** Settings */
     void showSettingsDialog();

@@ -55,7 +55,6 @@ class QFileSystemWatcher;
 class DecoratedBasket;
 class Note;
 class NoteEditor;
-class Tag;
 class TransparentWidget;
 
 #ifdef HAVE_LIBGPGME
@@ -337,12 +336,9 @@ public slots:
 public:
     void popupTagsMenu(Note *note);
     void popupEmblemMenu(Note *note, int emblemNumber);
-    void addTagToSelectedNotes(Tag *tag);
-    void removeTagFromSelectedNotes(Tag *tag);
-    void removeAllTagsFromSelectedNotes();
-    void addStateToSelectedNotes(State *state);
-    void changeStateOfSelectedNotes(State *state);
-    bool selectedNotesHaveTags();
+    void addStateToSelectedNotes(TagModelItem *state);
+    void removeAllStatesFromSelectedNotes();
+    bool selectedNotesHaveStates();
     const QRectF& inserterRect()  {
         return m_inserterRect;
     }
@@ -351,11 +347,10 @@ public:
     }
     void drawInserter(QPainter &painter, qreal xPainter, qreal yPainter);
     DecoratedBasket* decoration();
-    State *stateForTagFromSelectedNotes(Tag *tag);
 public slots:
-    void activatedTagShortcut(Tag *tag);
+    void activatedTagShortcut(TagModelItem *tag, bool isActive);
+    void removeStateFromSelectedNotes(TagModelItem *state);
     void recomputeAllStyles();
-    void removedStates(const QList<State*> &deletedStates);
 private slots:
     void toggledTagInMenu(QAction *act);
     void toggledStateInMenu(QAction *act);
@@ -364,7 +359,7 @@ private slots:
 public:
     Note  *m_tagPopupNote;
 private:
-    Tag   *m_tagPopup;
+    TagModelItem   *m_statePopup;
     QTime  m_lastDisableClick;
 
 /// SELECTION:
@@ -568,11 +563,11 @@ public:
 
 /// EXPORTATION:
 public:
-    QList<State*> usedStates();
+    QList<TagModelItem*> usedStates();
     static QString saveGradientBackground(const QColor &color, const QFont &font, const QString &folder);
 
 public:
-    void listUsedTags(QList<Tag*> &list);
+    void listUsedTags(QList<TagModelItem*> &list);
 
 /// MANAGE FOCUS:
 private:

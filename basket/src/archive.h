@@ -26,7 +26,7 @@
 #include <QMap>
 
 class BasketScene;
-class Tag;
+class TagModelItem;
 
 class QString;
 class QStringList;
@@ -46,7 +46,7 @@ public:
 private:
     // Convenient Methods for Saving:
     static void saveBasketToArchive(BasketScene *basket, bool recursive, QStringList &backgrounds, const QString &tempFolder, QProgressDialog *dialog);
-    static void listUsedTags(BasketScene *basket, bool recursive, QList<Tag*> &list);
+    static void listUsedTags(BasketScene *basket, bool recursive, QList<TagModelItem*> &list);
     // Convenient Methods for Loading:
     static void renameBasketFolders(const QString &extractionFolder, QMap<QString, QString> &mergedStates);
     static void renameBasketFolder(const QString &extractionFolder, QDomNode &basketNode, QMap<QString, QString> &folderMap, QMap<QString, QString> &mergedStates);

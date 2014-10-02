@@ -21,39 +21,50 @@
 #ifndef TAG_H
 #define TAG_H
 
+#include <QAbstractItemModel>
 #include <QAction>
 #include <QCoreApplication>
 #include <QList>
 #include <QIcon>
 #include <QString>
 
-class QActionGroup;
 class QColor;
 class QFont;
+class QModelIndex;
 class QPainter;
 class QString;
 
-class Tag;
-
-/**
+/** A Tag is a category of Notes.
+  * A Note can have 0, 1 or more Tags.
+  * A Tag can have a unique State or several States.
   * @author Sébastien Laoût
   */
-class State
+class TagItem
 {
-    Q_DECLARE_TR_FUNCTIONS(State)
 public:
-    /// CONSTRUCTOR AND DESTRUCTOR:
-    explicit State(const QString &id = QString(), Tag *tag = 0);
-    ~State();
+    TagItem() {
+        m_id = "";
+        m_emblem = "";
+        m_bold = false;
+        m_italic = false;
+        m_underline = false;
+        m_strikeOut = false;
+        m_textColor = QColor();
+        m_fontName = "";
+        m_fontSize = 8;
+        m_backgroundColor = QColor();
+        m_textEquivalent = "";
+        m_onAllTextLines = false;
+        m_allowCrossReferences = false;
+        m_inheritedBySiblings = false;
+    }
+
     /// SET PROPERTIES:
     void setId(const QString &id)                {
         m_id              = id;
     }
-    void setName(const QString &name)            {
-        m_name            = name;
-    }
-    void setEmblem(const QString &emblem)        {
-        m_emblem          = emblem;
+    void setEmblem(QString emblem) {
+        m_emblem = emblem;
     }
     void setBold(bool bold)                      {
         m_bold            = bold;
@@ -88,15 +99,12 @@ public:
     void setAllowCrossReferences(bool yes)        {
         m_allowCrossReferences = yes;
     }
-    void setParentTag(Tag *tag)                  {
-        m_parentTag       = tag;
+    void setInheritedBySiblings(bool inherited) {
+        m_inheritedBySiblings = inherited;
     }
     /// GET PROPERTIES:
     QString id()              const {
         return m_id;
-    }
-    QString name()            const {
-        return m_name;
     }
     QString emblem()          const {
         return m_emblem;
@@ -134,112 +142,131 @@ public:
     bool allowCrossReferences() const {
         return m_allowCrossReferences;
     }
-    Tag*    parentTag()       const {
-        return m_parentTag;
+    bool inheritedBySiblings() const {
+        return m_inheritedBySiblings;
     }
-    /// HELPING FUNCTIONS:
-    State *nextState(bool cycle = true);
-    QString fullName();
-    QFont font(QFont base);
-    QString toCSS(const QString &gradientFolderPath, const QString &gradientFolderName, const QFont &baseFont);
-    static void merge(const QList<State*> &states, State *result, int *emblemsCount, bool *haveInvisibleTags, const QColor &backgroundColor);
-    void copyTo(State *other);
-private:
-    /// PROPERTIES:
-    QString  m_id;
-    QString  m_name;
-    QString  m_emblem;
-    bool     m_bold;
-    bool     m_italic;
-    bool     m_underline;
-    bool     m_strikeOut;
-    QColor   m_textColor;
-    QString  m_fontName;
-    int      m_fontSize;
-    QColor   m_backgroundColor;
-    QString  m_textEquivalent;
-    bool     m_onAllTextLines;
-    bool     m_allowCrossReferences;
-    Tag     *m_parentTag;
+protected:
+    /// ITEM PROPERTIES
+    QString         m_id;
+    QString         m_emblem;
+    bool            m_bold;
+    bool            m_italic;
+    bool            m_underline;
+    bool            m_strikeOut;
+    QColor          m_textColor;
+    QString         m_fontName;
+    int             m_fontSize;
+    QColor          m_backgroundColor;
+    QString         m_textEquivalent;
+    bool            m_onAllTextLines;
+    bool            m_allowCrossReferences;
+    bool            m_inheritedBySiblings;
 };
 
-/** A Tag is a category of Notes.
-  * A Note can have 0, 1 or more Tags.
-  * A Tag can have a unique State or several States.
-  * @author Sébastien Laoût
-  */
-class Tag : public QAction
+/** TagModelItem class
+ *  Holds the tag items in model accessible form
+ */
+class TagModelItem : public TagItem
+{
+    Q_DECLARE_TR_FUNCTIONS(TagModelItem)
+public:
+    /// CONSTRUCTOR AND DESTRUCTOR:
+    explicit TagModelItem(TagModelItem *parent = 0);
+    ~TagModelItem();
+    /// ITEM ACCESS FUNCTIONS
+    TagModelItem        *child(int row);
+    int                 childCount()        const;
+    QString             data()              const;
+    TagModelItem        *parent();
+    int                 row()               const;
+    /// ITEM SET FUNCTIONS
+    bool                insertChildren(int position, int count);
+    bool                removeChildren(int position, int count);
+    bool                setData(const QString &text);
+    TagModelItem        *takeChild(int row);
+    void                insertChild(int row, TagModelItem *child);
+    /// HELPING FUNCTIONS:
+    void                updateAction(const QString &shortcut);
+    TagModelItem        *nextState(bool cycle = false);
+    QString             fullName();
+    QFont               font(QFont base);
+    QString             toCSS(const QString &gradientFolderPath, const QString &gradientFolderName, const QFont &baseFont);
+
+    QAction *action()          const {
+        return m_action;
+    }
+private:
+    /// ITEM DATA
+    QList<TagModelItem*>    childItems;
+    QString                 itemName;
+    TagModelItem            *parentItem;
+    QIcon                   icon;
+    QAction                 *m_action;
+};
+
+/** TagDisplay class
+ * Tells the notes how display properties after merging tags
+ */
+class TagDisplay : public TagItem
+{
+public:
+    TagDisplay();
+    ~TagDisplay();
+    int merge(const QList<TagModelItem*> &states, const QColor &backgroundColor);
+private:
+    bool m_haveInvisibleTags;
+};
+
+/** TagModel class
+ *  Loads and saves all tags, and allows views
+ */
+class TagModel : public QAbstractItemModel
 {
     Q_OBJECT
 public:
-    /// CONSTRUCTOR AND DESTRUCTOR:
-    Tag(int tagNumber, QWidget *parent);
-    ~Tag();
-    /// SET PROPERTIES:
-    void setName(const QString &name);
-    void setInheritedBySiblings(bool inherited) {
-        m_inheritedBySiblings = inherited;
-    }
-    void appendState(State *state);
-    /// GET PROPERTIES:
-    QString      name()                const {
-        return m_name;
-    }
-    bool         inheritedBySiblings() const {
-        return m_inheritedBySiblings;
-    }
-    QList<State*>& states()              const {
-        return (QList<State*>&)m_states;
-    }
-    int          countStates()         const {
-        return m_states.count();
-    }
-    void copyTo(Tag *other);
-//public slots:
-//    void activatedTagShortcut();
+    explicit TagModel(QObject *parent = 0);
+    ~TagModel();
+
+    QVariant        data(const QModelIndex &index, int role) const;
+    QVariant        headerData(int section, Qt::Orientation orientation,
+                            int role = Qt::DisplayRole) const;
+
+    QModelIndex     index(int row, int column,
+                            const QModelIndex &parent = QModelIndex()) const;
+    QModelIndex     parent(const QModelIndex &index) const;
+
+    int             rowCount(const QModelIndex &parent = QModelIndex()) const;
+    int             columnCount(const QModelIndex &parent = QModelIndex()) const;
+
+    Qt::ItemFlags   flags(const QModelIndex &index) const;
+    bool            setData(const QModelIndex &index, const QVariant &value,
+                            int role = Qt::EditRole);
+    bool            setHeaderData(int section, Qt::Orientation orientation,
+                            const QVariant &value, int role = Qt::EditRole);
+
+    bool            insertRows(int position, int rows,
+                            const QModelIndex &parent = QModelIndex());
+    bool            removeRows(int position, int rows,
+                            const QModelIndex &parent = QModelIndex());
+    bool            moveRows(const QModelIndex & sourceParent, int sourceRow,
+                             int count, const QModelIndex & destinationParent, int destinationChild);
+
+    TagModelItem   *getItem(const QModelIndex &index) const;
+    TagModelItem   *stateForId(const QString &id)     const;
+    TagModelItem   *tagForAction(QAction *action)     const;
+
+    void saveTags();
+    void saveTagsTo(const QString &fullPath);
 private:
-    /// PROPERTIES:
-    QString         m_name;
-    bool            m_inheritedBySiblings;
-    QList<State*>   m_states;
-    int             m_tagNumber;
-};
-
-/** Tag manager class, contains all tags
- * and management functions
- */
-class TagManager
-{
-    Q_DECLARE_TR_FUNCTIONS(TagManager)
-public:
-    TagManager();
-
-    Tag* tagForAction(QAction *action);
-    Tag* tagSimilarTo(Tag *tagToTest);
-    State* stateForId(const QString &id);
-
+    void loadTags();
+    void createDefaultTagsSet(const QString &fullPath);
     long getNextStateUid()
     {
         return m_nextStateUid++; // Return the next Uid and THEN increment the Uid
     }
-    int  getNextTagNumber()
-    {
-        return m_nextTagNumber++;
-    }
 
-    QMap<QString, QString> importTags(const QString &path);
-    void loadTags();
-    void saveTags();
-    void saveTagsTo(QList<Tag*> &list, const QString &fullPath);
-    void createDefaultTagsSet(const QString &file);
-
-    QList<Tag*> &tagList() const {
-        return (QList<Tag*>&)m_tags;
-    }
-private:
-    QList<Tag*>     m_tags;
+    TagModelItem   *rootItem;
     long            m_nextStateUid;
-    int             m_nextTagNumber;
 };
 
 #endif // TAG_H

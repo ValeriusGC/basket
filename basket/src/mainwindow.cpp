@@ -51,6 +51,7 @@
 #include "notefactory.h"
 #include "regiongrabber.h"
 #include "settings.h"
+#include "tagsedit.h"
 
 int const MainWindow::EXIT_CODE_REBOOT = -123456789;
 
@@ -70,10 +71,17 @@ MainWindow::MainWindow(QWidget *parent)
         QIcon::setThemeName("oxygen");
     }
 
+    /* System tray icon */
+    Global::systemTray = new SystemTray(this);
+    if (Settings::useSystray())
+        Global::systemTray->show();
+
+    /* Status bar */
     BasketStatusBar* bar = new BasketStatusBar(this);
     setStatusBar(bar);
-    Global::tagManager = new TagManager();
+    Global::tagModel = new TagModel();
 
+    /* Main widget */
     m_baskets = new BNPView(this, "BNPViewApp", this, bar);
     connect(m_baskets,      SIGNAL(setWindowCaption(const QString &)),  this,   SLOT(setWindowTitle(const QString &)));
     connect(m_baskets,      SIGNAL(updateNotesActions()),               this,   SLOT(updateNotesActions()));
@@ -84,14 +92,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_baskets->undoStack(), SIGNAL(canRedoChanged(bool)),       this,   SLOT(canUndoRedoChanged()));
     connect(m_baskets->undoStack(), SIGNAL(canUndoChanged(bool)),       this,   SLOT(canUndoRedoChanged()));
 
-    /* System tray icon */
-    Global::systemTray = new SystemTray(Global::mainWin);
-    Global::systemTray->setIcon(QIcon::fromTheme("basket"));
-    if (Settings::useSystray())
-        Global::systemTray->show();
-
     setupActions();
-
     connect(m_tagsMenu, SIGNAL(aboutToShow()), this, SLOT(populateTagsMenu()));
 
     bar->setupStatusBar();
@@ -104,16 +105,15 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-//    KConfigGroup group = KGlobal::config()->group(autoSaveGroup());
-//    saveMainWindowSettings(group);
     delete Global::systemTray;
     delete m_colorPicker;
     delete m_baskets;
+    delete Global::tagModel;
 }
 
 void MainWindow::slotDebug()
 {
-    new DebugWindow();
+    Global::debugWindow = new DebugWindow();
     Global::debugWindow->show();
 }
 
@@ -360,17 +360,6 @@ void MainWindow::setupActions()
     m_actMoveNoteUp = m_noteMenu->addAction(QIcon::fromTheme("arrow-up"), tr("Move &Up"), m_baskets, SLOT(moveNoteUp()), QKeySequence("Ctrl+Shift+Up"));
     m_actMoveNoteDown = m_noteMenu->addAction(QIcon::fromTheme("arrow-down"), tr("Move &Down"), m_baskets, SLOT(moveNoteDown()), QKeySequence("Ctrl+Shift+Down"));
     m_actMoveOnBottom = m_noteMenu->addAction(QIcon::fromTheme("arrow-down-double"), tr("Move on &Bottom"), m_baskets, SLOT(moveOnBottom()), QKeySequence("Ctrl+Shift+End"));
-
-    /** Tags : ****************************************************************/
-    for (QList<Tag*>::iterator it = Global::tagManager->tagList().begin(); it != Global::tagManager->tagList().end(); ++it)
-    {
-        m_tagsMenu->addAction((*it));
-        connect((*it), SIGNAL(triggered()), this, SLOT(activatedTagShortcut()));
-    }
-    m_tagsMenu->addSeparator();
-    m_tagsMenu->addAction(tr("&Assign new Tag..."));
-    m_tagsMenu->addAction(QIcon::fromTheme("edit-delete"), tr("&Remove All"));
-    m_tagsMenu->addAction(QIcon::fromTheme("configure"), tr("&Customize..."));
 
     /** Insert : **************************************************************/
     m_actInsertHtml = m_insertMenu->addAction(QIcon::fromTheme("text-html"), tr("&Text"));
@@ -621,10 +610,10 @@ void MainWindow::enableActions()
     basket->decoration()->filterBar()->setEnabled(!basket->isLocked());
 }
 
-void MainWindow::activatedTagShortcut()
+void MainWindow::activatedTagShortcut(bool isActive)
 {
-    Tag *tag = Global::tagManager->tagForAction((QAction*)sender());
-    m_baskets->currentBasket()->activatedTagShortcut(tag);
+    TagModelItem *tag = Global::tagModel->tagForAction((QAction*)sender());
+    m_baskets->currentBasket()->activatedTagShortcut(tag, isActive);
 }
 
 void MainWindow::populateTagsMenu()
@@ -632,6 +621,7 @@ void MainWindow::populateTagsMenu()
     if (m_baskets->currentBasket() == 0)
         return;
 
+    m_tagsMenu->clear();
     Note *referenceNote;
     if (m_baskets->currentBasket()->focusedNote() && m_baskets->currentBasket()->focusedNote()->isSelected())
         referenceNote = m_baskets->currentBasket()->focusedNote();
@@ -640,9 +630,24 @@ void MainWindow::populateTagsMenu()
 
     m_baskets->currentBasket()->m_tagPopupNote = referenceNote;
 
-    for (QList<Tag*>::iterator it = Global::tagManager->tagList().begin(); it != Global::tagManager->tagList().end(); ++it)
-        if (referenceNote && referenceNote->hasTag(*it))
-            (*it)->setChecked(true);
+    for (int row = 0; row < Global::tagModel->rowCount(); ++row) {
+        QModelIndex tagIndex = Global::tagModel->index(row, 0);
+        TagModelItem *tag = Global::tagModel->getItem(tagIndex);
+        m_tagsMenu->addAction(tag->action());
+        disconnect(tag->action());
+        connect(tag->action(), SIGNAL(toggled(bool)), this, SLOT(activatedTagShortcut(bool)));
+        if (referenceNote && referenceNote->stateOfTag(tag))
+            tag->action()->setChecked(true);
+    }
+    m_tagsMenu->addSeparator();
+    m_tagsMenu->addAction(QIcon::fromTheme("edit-delete"), tr("&Remove All"));
+    m_tagsMenu->addAction(QIcon::fromTheme("configure"), tr("&Customize..."), this, SLOT(customiseTags()));
+}
+
+void MainWindow::customiseTags()
+{
+    TagsEditDialog s;
+    s.exec();
 }
 
 void MainWindow::showFilterBar(bool show)

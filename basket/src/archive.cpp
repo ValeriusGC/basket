@@ -78,25 +78,23 @@ void Archive::save(BasketScene *basket, bool withSubBaskets, const QString &dest
     Global::bnpView->saveSubHierarchy(Global::bnpView->listViewItemForBasket(basket), document, root, withSubBaskets);
     BasketScene::safelySaveToFile(tempFolder + "baskets/baskets.xml", "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n" + document.toString());
 
-    // Save a Small tags.xml Document:
-    QList<Tag*> tags;
-    listUsedTags(basket, withSubBaskets, tags);
-    Global::tagManager->saveTagsTo(tags, tempFolder + "tags.xml");
+    // Save a Small tags.xml Document: TODO
+//    QList<TagModelItem*> tags;
+//    listUsedTags(basket, withSubBaskets, tags);
+//    Global::tagModel->saveCustomTagSetTo(tags, tempFolder + "tags.xml");
 
-    // Save Tag Emblems (in case they are loaded on a computer that do not have those icons):
-    if (!QDir().exists(tempFolder + "tag-emblems/"))
-        dir.mkdir(tempFolder + "tag-emblems/");
-    for (QList<Tag*>::iterator it = tags.begin(); it != tags.end(); ++it) {
-        QList<State*> states = (*it)->states();
-        for (QList<State*>::iterator it2 = states.begin(); it2 != states.end(); ++it2) {
-            State *state = (*it2);
-            QIcon icon = QIcon(state->emblem());
-            if (!icon.isNull()) {
-                QString iconFileName = QFileInfo(state->emblem()).fileName();
-                icon.pixmap(16,16).save(tempFolder + "tag-emblems/" + iconFileName, "PNG");
-            }
-        }
-    }
+//    // Save Tag Emblems (in case they are loaded on a computer that do not have those icons):
+//    if (!QDir().exists(tempFolder + "tag-emblems/"))
+//        dir.mkdir(tempFolder + "tag-emblems/");
+//    for (QList<TagModelItem*>::iterator tagIt = tags.begin(); tagIt != tags.end(); ++tagIt) {
+//        for (int stateRow = 0; stateRow < (*tagIt)->childCount(); ++stateRow) {
+//            QIcon icon = QIcon("://tags/hi16-action-" + (*tagIt)->child(stateRow)->emblem() + ".png");
+//            if (!icon.isNull()) {
+//                QString iconFileName = (*tagIt)->child(stateRow)->emblem();
+//                icon.pixmap(16,16).save(tempFolder + "tag-emblems/" + iconFileName, "PNG");
+//            }
+//        }
+//    }
 
     // Compress Temporary dir:
     QString tempArchive = Global::savesFolder() + "temp.zip";
@@ -227,7 +225,7 @@ void Archive::saveBasketToArchive(BasketScene *basket, bool recursive, QStringLi
     }
 }
 
-void Archive::listUsedTags(BasketScene *basket, bool recursive, QList<Tag*> &list)
+void Archive::listUsedTags(BasketScene *basket, bool recursive, QList<TagModelItem*> &list)
 {
     basket->listUsedTags(list);
     BasketListViewItem *item = Global::bnpView->listViewItemForBasket(basket);
@@ -345,12 +343,12 @@ void Archive::open(const QString &path)
                     JlCompress::extractDir(tempArchive, extractionFolder);
 
 
-                    // Import the Tags:
-                    importTagEmblems(extractionFolder); // Import and rename tag emblems BEFORE loading them!
-                    QMap<QString, QString> mergedStates = Global::tagManager->importTags(extractionFolder + "tags.xml");
-                    if (mergedStates.count() > 0) {
-                        Global::tagManager->saveTags();
-                    }
+                    // Import the Tags: TODO
+//                    importTagEmblems(extractionFolder); // Import and rename tag emblems BEFORE loading them!
+                    QMap<QString, QString> mergedStates;// = Global::tagModel->importTags(extractionFolder + "tags.xml");
+//                    if (mergedStates.count() > 0) {
+//                        Global::tagModel->saveTags();
+//                    }
 
                     // Import the Background Images:
                     importArchivedBackgroundImages(extractionFolder);

@@ -20,13 +20,14 @@
 
 #include "tag.h"
 
-#include <QActionGroup>
 #include <QDir>
 #include <QList>
 #include <QTextStream>
 #include <QFont>
 #include <QtXml/QDomDocument>
 #include <QMenu>
+
+#include <QDebug>
 
 #include "xmlwork.h"
 #include "global.h"
@@ -36,50 +37,125 @@
 #include "basketscene.h"
 #include "mainwindow.h"
 
-/** class State: */
-
-State::State(const QString &id, Tag *tag)
-        : m_id(id), m_name(), m_emblem(), m_bold(false), m_italic(false), m_underline(false),
-        m_strikeOut(false), m_textColor(), m_fontName(), m_fontSize(-1), m_backgroundColor(),
-        m_textEquivalent(), m_onAllTextLines(false), m_allowCrossReferences(true), m_parentTag(tag)
+/** class TagModelItem */
+TagModelItem::TagModelItem(TagModelItem *parent) : TagItem()
 {
+    parentItem = parent;
+    itemName = "Name";
+
+    m_inheritedBySiblings = false;
+    m_action = 0;
 }
 
-State::~State()
+TagModelItem::~TagModelItem()
 {
+    qDeleteAll(childItems);
 }
 
-State* State::nextState(bool cycle /*= true*/)
+TagModelItem *TagModelItem::child(int row)
 {
-    if (!parentTag())
-        return 0;
+    return childItems.value(row);
+}
 
-    QList<State*> states = parentTag()->states();
-    // The tag contains only one state:
-    if (states.count() == 1)
-        return 0;
-    // Find the next state:
-    for (QList<State*>::iterator it = states.begin(); it != states.end(); ++it)
-        // Found the current state in the list:
-        if (*it == this) {
-            // Find the next state:
-            State *next = *(++it);
-            if (it == states.end())
-                return (cycle ? states.first() : 0);
-            return next;
-        }
-    // Should not happens:
+int TagModelItem::childCount() const
+{
+    return childItems.count();
+}
+
+QString TagModelItem::data() const
+{
+    return itemName;
+}
+
+TagModelItem *TagModelItem::parent()
+{
+    return parentItem;
+}
+
+int TagModelItem::row() const
+{
+    if (parentItem)
+        return parentItem->childItems.indexOf(const_cast<TagModelItem*>(this));
+
     return 0;
 }
 
-QString State::fullName()
+bool TagModelItem::insertChildren(int position, int count)
 {
-    if (!parentTag() || parentTag()->states().count() == 1)
-        return (name().isEmpty() && parentTag() ? parentTag()->name() : name());
-    return QString(tr("%1: %2").arg(parentTag()->name(), name()));
+    if (position < 0 || position > childItems.size())
+        return false;
+
+    for (int row = 0; row < count; ++row) {
+        TagModelItem *item = new TagModelItem(this);
+        childItems.insert(position, item);
+    }
+
+    return true;
 }
 
-QFont State::font(QFont base)
+bool TagModelItem::removeChildren(int position, int count)
+{
+    if (position < 0 || position + count > childItems.size())
+        return false;
+
+    for (int row = 0; row < count; ++row)
+        delete childItems.takeAt(position);
+
+    return true;
+}
+
+TagModelItem* TagModelItem::takeChild(int row)
+{
+    return childItems.takeAt(row);
+}
+
+void TagModelItem::insertChild(int row, TagModelItem *child)
+{
+    childItems.insert(row, child);
+}
+
+bool TagModelItem::setData(const QString &text)
+{
+    itemName = text;
+    return true;
+}
+
+void TagModelItem::updateAction(const QString &shortcut)
+{
+    if (childCount() == 0) // States don't have actions
+        return;
+
+    if (!m_action)
+        m_action = new QAction(Global::bnpView);
+
+    m_action->setText(itemName);
+    m_action->setCheckable(true);
+    m_action->setIcon(QIcon("://tags/hi16-action-" + child(0)->emblem() + ".png"));
+    m_action->setShortcut(QKeySequence(shortcut));
+    m_action->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+}
+
+TagModelItem* TagModelItem::nextState(bool cycle)
+{
+    if (!parent())
+        return 0;
+
+    if (parent()->childCount()-1 > row()) // If there is another child
+        return parent()->child(row()+1);
+    else if (cycle)
+        return parent()->child(0);
+    else
+        return 0;
+}
+
+QString TagModelItem::fullName()
+{
+    if (!parent() || parent()->childCount() == 1)
+        return (data().isEmpty() && parent() ? parent()->data() : data());
+    return QString(tr("%1: %2").arg(parent()->data(), data()));
+}
+
+QFont TagModelItem::font(QFont base)
 {
     if (bold())
         base.setBold(true);
@@ -96,7 +172,7 @@ QFont State::font(QFont base)
     return base;
 }
 
-QString State::toCSS(const QString &gradientFolderPath, const QString &gradientFolderName, const QFont &baseFont)
+QString TagModelItem::toCSS(const QString &gradientFolderPath, const QString &gradientFolderName, const QFont &baseFont)
 {
     QString css;
     if (bold())
@@ -135,314 +211,268 @@ QString State::toCSS(const QString &gradientFolderPath, const QString &gradientF
         return "   .tag_" + id() + " {" + css + " }\n";
 }
 
-void State::merge(const QList<State*> &states, State *result, int *emblemsCount, bool *haveInvisibleTags, const QColor &backgroundColor)
+/** class TagDisplay */
+TagDisplay::TagDisplay() : TagItem()
 {
-    *result            = State(); // Reset to default values.
-    *emblemsCount      = 0;
-    *haveInvisibleTags = false;
 
-    for (QList<State*>::const_iterator it = states.begin(); it != states.end(); ++it) {
-        State *state = *it;
+}
+
+TagDisplay::~TagDisplay()
+{
+
+}
+
+int TagDisplay::merge(const QList<TagModelItem*> &states, const QColor &backgroundColor)
+{
+    int emblemsCount = 0;
+    for (QList<TagModelItem*>::const_iterator it = states.begin(); it != states.end(); ++it) {
+        TagItem *state = *it;
         bool isVisible = false;
         // For each propertie, if that properties have a value (is not default) is the current state of the list,
         // and if it haven't been set to the result state by a previous state, then it's visible and we assign the propertie to the result state.
         if (!state->emblem().isEmpty()) {
-            ++*emblemsCount;
+            emblemsCount++;
             isVisible = true;
         }
-        if (state->bold() && !result->bold()) {
-            result->setBold(true);
+        if (state->bold() && !bold()) {
+            setBold(true);
             isVisible = true;
         }
-        if (state->italic() && !result->italic()) {
-            result->setItalic(true);
+        if (state->italic() && !italic()) {
+            setItalic(true);
             isVisible = true;
         }
-        if (state->underline() && !result->underline()) {
-            result->setUnderline(true);
+        if (state->underline() && !underline()) {
+            setUnderline(true);
             isVisible = true;
         }
-        if (state->strikeOut() && !result->strikeOut()) {
-            result->setStrikeOut(true);
+        if (state->strikeOut() && !strikeOut()) {
+            setStrikeOut(true);
             isVisible = true;
         }
-        if (state->textColor().isValid() && !result->textColor().isValid()) {
-            result->setTextColor(state->textColor());
+        if (state->textColor().isValid() && !textColor().isValid()) {
+            setTextColor(state->textColor());
             isVisible = true;
         }
-        if (!state->fontName().isEmpty() && result->fontName().isEmpty()) {
-            result->setFontName(state->fontName());
+        if (!state->fontName().isEmpty() && fontName().isEmpty()) {
+            setFontName(state->fontName());
             isVisible = true;
         }
-        if (state->fontSize() > 0 && result->fontSize() <= 0) {
-            result->setFontSize(state->fontSize());
+        if (state->fontSize() > 0 && fontSize() <= 0) {
+            setFontSize(state->fontSize());
             isVisible = true;
         }
-        if (state->backgroundColor().isValid() && !result->backgroundColor().isValid() && state->backgroundColor() != backgroundColor) { // vv
-            result->setBackgroundColor(state->backgroundColor()); // This is particular: if the note background color is the same as the basket one, don't use that.
+        if (state->backgroundColor().isValid() && !m_backgroundColor.isValid() && state->backgroundColor() != backgroundColor) { // vv
+            setBackgroundColor(state->backgroundColor()); // This is particular: if the note background color is the same as the basket one, don't use that.
             isVisible = true;
         }
         // If it's not visible, well, at least one tag is not visible: the note will display "..." at the tags arrow place to show that:
         if (!isVisible)
-            *haveInvisibleTags = true;
+            m_haveInvisibleTags = true;
     }
+    return emblemsCount;
 }
 
-void State::copyTo(State *other)
+/** class TagModel: */
+TagModel::TagModel(QObject *parent)
+    : QAbstractItemModel(parent)
 {
-    other->m_id              = m_id;
-    other->m_name            = m_name;
-    other->m_emblem          = m_emblem;
-    other->m_bold            = m_bold;
-    other->m_italic          = m_italic;
-    other->m_underline       = m_underline;
-    other->m_strikeOut       = m_strikeOut;
-    other->m_textColor       = m_textColor;
-    other->m_fontName        = m_fontName;
-    other->m_fontSize        = m_fontSize;
-    other->m_backgroundColor = m_backgroundColor;
-    other->m_textEquivalent  = m_textEquivalent;
-    other->m_onAllTextLines  = m_onAllTextLines; // TODO
-    other->m_allowCrossReferences = m_allowCrossReferences;
-    //TODO: other->m_parentTag;
-}
-
-/** class Tag: */
-
-Tag::Tag(int tagNumber, QWidget *parent):
-    QAction(parent)
-    , m_tagNumber(tagNumber)
-    , m_inheritedBySiblings(false)
-{
-    QString sAction = "tag_shortcut_number_" + QString::number(tagNumber);
-    setText(sAction);
-//    m_action = Global::mainWin->tagsMenu()->addAction(sAction);//, this, SLOT(activatedTagShortcut()), QKeySequence());
-    setCheckable(true);
-}
-
-Tag::~Tag()
-{
-}
-
-void Tag::appendState(State *state)
-{
-    m_states.append(state);
-    state->setParentTag(this);
-    if (m_states.count() == 1)
-        setIcon(QIcon("://tags/hi16-action-" + m_states[0]->emblem() + ".png"));
-}
-
-void Tag::setName(const QString &name)
-{
-    m_name = name;
-    setText(m_name);
-    //    setText(m_states[0]->name());
-}
-
-void Tag::copyTo(Tag *other)
-{
-    other->m_name = m_name;
-    other->setShortcut(shortcut());
-    other->m_inheritedBySiblings =  m_inheritedBySiblings;
-}
-
-/** class TagManager: */
-TagManager::TagManager():
-    m_nextStateUid(1)
-  , m_nextTagNumber(1)
-{
+    rootItem = new TagModelItem();
     loadTags();
 }
 
-Tag* TagManager::tagForAction(QAction *action)
+TagModel::~TagModel()
 {
-    for (QList<Tag*>::iterator it = m_tags.begin(); it != m_tags.end(); ++it)
-        if (static_cast<QAction*>(*it) == action)
-            return *it;
-    return 0;
+    delete rootItem;
 }
 
-Tag* TagManager::tagSimilarTo(Tag *tagToTest)
+QVariant TagModel::data(const QModelIndex &index, int role) const
 {
-    // Tags are considered similar if they have the same name, the same number of states, in the same order, and the same look.
-    // Keyboard shortcut, text equivalent and onEveryLines are user settings, and thus not considered during the comparison.
-    // Default tags (To Do, Important, Idea...) do not take into account the name of the tag and states during the comparison.
-    // Default tags are equal only if they have the same number of states, in the same order, and the same look.
-    // This is because default tag names are translated differently in every countries, but they are essentialy the same!
-    // User tags begins with "tag_state_" followed by a number. Default tags are the other ones.
+    if (!index.isValid())
+        return QVariant();
 
-    // Browse all tags:
-    for (QList<Tag*>::iterator it = m_tags.begin(); it != m_tags.end(); ++it) {
-        Tag *tag = *it;
-        bool same = true;
-        bool sameName;
-        bool defaultTag = true;
-        // We test only name and look. Shorcut and whenever it is inherited by sibling new notes are user settings only!
-        sameName = tag->name() == tagToTest->name();
-        if (tag->countStates() != tagToTest->countStates())
-            continue; // Tag is different!
-        // We found a tag with same name, check if every states/look are same too:
-        QList<State*>::iterator itTest = tagToTest->states().begin();
-        for (QList<State*>::iterator it2 = (*it)->states().begin(); it2 != (*it)->states().end(); ++it2, ++itTest) {
-            State *state       = *it2;
-            State *stateToTest = *itTest;
-            if (state->id().startsWith(QLatin1String("tag_state_")) || stateToTest->id().startsWith(QLatin1String("tag_state_"))) {
-                defaultTag = false;
-            }
-            if (state->name()            != stateToTest->name())            {
-                sameName = false;
-            }
-            if (state->emblem()          != stateToTest->emblem())          {
-                same = false; break;
-            }
-            if (state->bold()            != stateToTest->bold())            {
-                same = false; break;
-            }
-            if (state->italic()          != stateToTest->italic())          {
-                same = false; break;
-            }
-            if (state->underline()       != stateToTest->underline())       {
-                same = false; break;
-            }
-            if (state->strikeOut()       != stateToTest->strikeOut())       {
-                same = false; break;
-            }
-            if (state->textColor()       != stateToTest->textColor())       {
-                same = false; break;
-            }
-            if (state->fontName()        != stateToTest->fontName())        {
-                same = false; break;
-            }
-            if (state->fontSize()        != stateToTest->fontSize())        {
-                same = false; break;
-            }
-            if (state->backgroundColor() != stateToTest->backgroundColor()) {
-                same = false; break;
-            }
-            // Text equivalent (as well as onAllTextLines) is also a user setting!
+    TagModelItem *item = static_cast<TagModelItem*>(index.internalPointer());
+
+    if (role == Qt::DisplayRole || role == Qt::EditRole)
+        return item->data();
+
+    if (role == Qt::DecorationRole)
+        return QIcon("://tags/hi16-action-" + item->emblem() + ".png");
+
+    return QVariant();
+}
+
+QVariant TagModel::headerData(int section, Qt::Orientation orientation,
+                               int role) const
+{
+    Q_UNUSED(section)
+    if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
+        return rootItem->data();
+
+    return QVariant();
+}
+
+QModelIndex TagModel::index(int row, int column, const QModelIndex &parent)
+            const
+{
+    if (!hasIndex(row, column, parent))
+        return QModelIndex();
+
+    TagModelItem *parentItem;
+
+    if (!parent.isValid())
+        parentItem = rootItem;
+    else
+        parentItem = static_cast<TagModelItem*>(parent.internalPointer());
+
+    TagModelItem *childItem = parentItem->child(row);
+    if (childItem)
+        return createIndex(row, column, childItem);
+    else
+        return QModelIndex();
+}
+
+QModelIndex TagModel::parent(const QModelIndex &index) const
+{
+    if (!index.isValid())
+        return QModelIndex();
+
+    TagModelItem *childItem = static_cast<TagModelItem*>(index.internalPointer());
+    TagModelItem *parentItem = childItem->parent();
+
+    if (parentItem == rootItem)
+        return QModelIndex();
+
+    return createIndex(parentItem->row(), 0, parentItem);
+}
+
+int TagModel::rowCount(const QModelIndex &parent) const
+{
+    TagModelItem *parentItem;
+    if (parent.column() > 0)
+        return 0;
+
+    if (!parent.isValid())
+        parentItem = rootItem;
+    else
+        parentItem = static_cast<TagModelItem*>(parent.internalPointer());
+
+    return parentItem->childCount();
+}
+
+int TagModel::columnCount(const QModelIndex &parent) const
+{
+    return 1;
+}
+
+Qt::ItemFlags TagModel::flags(const QModelIndex &index) const
+{
+    if (!index.isValid())
+        return 0;
+
+    return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
+}
+
+bool TagModel::setData(const QModelIndex &index, const QVariant &value,
+                        int role)
+{
+    if (role != Qt::EditRole)
+        return false;
+
+    TagModelItem *item = getItem(index);
+    bool result = item->setData(value.toString());
+
+    if (result)
+        emit dataChanged(index, index);
+
+    return result;
+}
+
+bool TagModel::setHeaderData(int section, Qt::Orientation orientation,
+                               const QVariant &value, int role)
+{
+    if (role != Qt::EditRole || orientation != Qt::Horizontal)
+        return false;
+
+    bool result = rootItem->setData(value.toString());
+
+    if (result)
+        emit headerDataChanged(orientation, section, section);
+
+    return result;
+}
+
+bool TagModel::insertRows(int position, int rows, const QModelIndex &parent)
+{
+    TagModelItem *parentItem = getItem(parent);
+    bool success;
+
+    beginInsertRows(parent, position, position + rows - 1);
+    success = parentItem->insertChildren(position, rows);
+    endInsertRows();
+
+    return success;
+}
+
+bool TagModel::removeRows(int position, int rows, const QModelIndex &parent)
+{
+    TagModelItem *parentItem = getItem(parent);
+    bool success = true;
+
+    beginRemoveRows(parent, position, position + rows - 1);
+    success = parentItem->removeChildren(position, rows);
+    endRemoveRows();
+
+    return success;
+}
+
+bool TagModel::moveRows(const QModelIndex &sourceParent, int sourceRow, int count, const QModelIndex &destinationParent, int destinationChild)
+{
+    bool success = beginMoveRows(sourceParent, sourceRow, sourceRow+count-1, destinationParent, destinationChild > sourceRow ? destinationChild + 1 : destinationChild);
+    if (success) {
+        TagModelItem *parent = getItem(sourceParent);
+        TagModelItem *item = parent->takeChild(sourceRow);
+        parent->insertChild(destinationChild, item);
+        endMoveRows();
+    }
+    return success;
+}
+
+TagModelItem *TagModel::getItem(const QModelIndex &index) const
+{
+    if (index.isValid()) {
+        TagModelItem *item = static_cast<TagModelItem*>(index.internalPointer());
+        if (item) return item;
+    }
+    return rootItem;
+}
+
+TagModelItem *TagModel::stateForId(const QString &id) const
+{
+    for (int row = 0; row < rowCount(); ++row) {
+        QModelIndex tagIndex = index(row, 0);
+        for (int subrow = 0; subrow < rowCount(tagIndex); ++subrow) {
+            QModelIndex stateIndex;
+            stateIndex = index(subrow, 0, tagIndex);
+            TagModelItem *item = getItem(stateIndex);
+            if (item->id() == id)
+                return item;
         }
-        // We found an existing tag that is "exactly" the same:
-        if (same && (sameName || defaultTag))
-            return tag;
     }
-
-    // Not found:
     return 0;
 }
 
-State* TagManager::stateForId(const QString &id)
+TagModelItem *TagModel::tagForAction(QAction *action) const
 {
-    for (QList<Tag*>::iterator it = m_tags.begin(); it != m_tags.end(); ++it)
-        for (QList<State*>::iterator it2 = (*it)->states().begin(); it2 != (*it)->states().end(); ++it2)
-            if ((*it2)->id() == id)
-                return *it2;
+    for (int row = 0; row < rowCount(); ++row) {
+        QModelIndex tagIndex = index(row, 0);
+        if (getItem(tagIndex)->action() == action)
+            return getItem(tagIndex);
+    }
     return 0;
 }
 
-QMap<QString, QString> TagManager::importTags(const QString &path)
-{
-    QMap<QString, QString> mergedStates;
-
-    QString doctype  = "basketTags";
-
-    QDir dir;
-    if (!dir.exists(path)) {
-        return mergedStates;
-    }
-
-    QDomDocument *document = XMLWork::openFile(doctype, path);
-    if (!document) {
-        DEBUG_WIN << "<font color=red>FAILED to read the tags file</font>";
-        return mergedStates;
-    }
-
-    QDomElement docElem = document->documentElement();
-    QDomNode node = docElem.firstChild();
-    while (!node.isNull()) {
-        QDomElement element = node.toElement();
-        if ((!element.isNull()) && element.tagName() == "tag") {
-            Tag *tag = new Tag(getNextTagNumber(), Global::mainWin);
-            // Load properties:
-            QString name      = XMLWork::getElementText(element, "name");
-            QString shortcut  = XMLWork::getElementText(element, "shortcut");
-            QString inherited = XMLWork::getElementText(element, "inherited", "false");
-            tag->setName(name);
-            tag->setShortcut(QKeySequence(shortcut));
-            tag->setInheritedBySiblings(XMLWork::trueOrFalse(inherited));
-            // Load states:
-            QDomNode subNode = element.firstChild();
-            while (!subNode.isNull()) {
-                QDomElement subElement = subNode.toElement();
-                if ((!subElement.isNull()) && subElement.tagName() == "state") {
-                    State *state = new State(subElement.attribute("id"), tag);
-                    state->setName(XMLWork::getElementText(subElement, "name"));
-                    state->setEmblem(XMLWork::getElementText(subElement, "emblem"));
-                    QDomElement textElement = XMLWork::getElement(subElement, "text");
-                    state->setBold(XMLWork::trueOrFalse(textElement.attribute("bold",      "false")));
-                    state->setItalic(XMLWork::trueOrFalse(textElement.attribute("italic",    "false")));
-                    state->setUnderline(XMLWork::trueOrFalse(textElement.attribute("underline", "false")));
-                    state->setStrikeOut(XMLWork::trueOrFalse(textElement.attribute("strikeOut", "false")));
-                    QString textColor = textElement.attribute("color", "");
-                    state->setTextColor(textColor.isEmpty() ? QColor() : QColor(textColor));
-                    QDomElement fontElement = XMLWork::getElement(subElement, "font");
-                    state->setFontName(fontElement.attribute("name", ""));
-                    QString fontSize = fontElement.attribute("size", "");
-                    state->setFontSize(fontSize.isEmpty() ? -1 : fontSize.toInt());
-                    QString backgroundColor = XMLWork::getElementText(subElement, "backgroundColor", "");
-                    state->setBackgroundColor(backgroundColor.isEmpty() ? QColor() : QColor(backgroundColor));
-                    QDomElement textEquivalentElement = XMLWork::getElement(subElement, "textEquivalent");
-                    state->setTextEquivalent(textEquivalentElement.attribute("string", ""));
-                    state->setOnAllTextLines(XMLWork::trueOrFalse(textEquivalentElement.attribute("onAllTextLines", "false")));
-                    QString allowXRef = XMLWork::getElementText(subElement, "allowCrossReferences", "true");
-                    state->setAllowCrossReferences(XMLWork::trueOrFalse(allowXRef));
-                    tag->appendState(state);
-                }
-                subNode = subNode.nextSibling();
-            }
-            // If the Tag is Valid:
-            if (tag->countStates() > 0) {
-                // Rename Things if Needed:
-                State *firstState = tag->states().first();
-                if (tag->countStates() == 1 && firstState->name().isEmpty())
-                    firstState->setName(tag->name());
-                if (tag->name().isEmpty())
-                    tag->setName(firstState->name());
-                // Add or Merge the Tag:
-                Tag *similarTag = Global::tagManager->tagSimilarTo(tag);
-                // Tag does not exists, add it:
-                if (similarTag == 0) {
-                    // We are merging the new states, so we should choose new and unique (on that computer) ids for those states:
-                    for (QList<State*>::iterator it = tag->states().begin(); it != tag->states().end(); ++it) {
-                        State *state = *it;
-                        QString uid    = state->id();
-                        QString newUid = "tag_state_" + QString::number(getNextStateUid());
-                        state->setId(newUid);
-                        mergedStates[uid] = newUid;
-                    }
-                    // TODO: if shortcut is already assigned to a previous note, do not import it, keep the user settings!
-                    m_tags.append(tag);
-                    // Tag already exists, rename to theire ids:
-                } else {
-                    QList<State*>::iterator it2 = similarTag->states().begin();
-                    for (QList<State*>::iterator it = tag->states().begin(); it != tag->states().end(); ++it, ++it2) {
-                        State *state        = *it;
-                        State *similarState = *it2;
-                        QString uid    = state->id();
-                        QString newUid = similarState->id();
-                        if (uid != newUid)
-                            mergedStates[uid] = newUid;
-                    }
-                    delete tag; // Already exists, not to be merged. Delete the shortcut and all.
-                }
-            }
-        }
-        node = node.nextSibling();
-    }
-
-    return mergedStates;
-}
-
-void TagManager::loadTags()
+void TagModel::loadTags()
 {
     QString fullPath = Global::savesFolder() + "tags.xml";
     QString doctype  = "basketTags";
@@ -466,67 +496,63 @@ void TagManager::loadTags()
     while (!node.isNull()) {
         QDomElement element = node.toElement();
         if ((!element.isNull()) && element.tagName() == "tag") {
-            Tag *tag = new Tag(getNextTagNumber(), Global::mainWin);
+            rootItem->insertChildren(rootItem->childCount(), 1);
+            TagModelItem *tagItem = rootItem->child(rootItem->childCount()-1);
             // Load properties:
             QString name      = XMLWork::getElementText(element, "name");
             QString shortcut  = XMLWork::getElementText(element, "shortcut");
             QString inherited = XMLWork::getElementText(element, "inherited", "false");
-            tag->setName(name);
-            tag->setShortcut(QKeySequence(shortcut));
-            tag->setInheritedBySiblings(XMLWork::trueOrFalse(inherited));
             // Load states:
             QDomNode subNode = element.firstChild();
             while (!subNode.isNull()) {
                 QDomElement subElement = subNode.toElement();
                 if ((!subElement.isNull()) && subElement.tagName() == "state") {
-                    State *state = new State(subElement.attribute("id"), tag);
-                    state->setName(XMLWork::getElementText(subElement, "name"));
-                    state->setEmblem(XMLWork::getElementText(subElement, "emblem"));
+                    tagItem->insertChildren(tagItem->childCount(), 1);
+                    TagModelItem *stateItem = tagItem->child(tagItem->childCount()-1);
+
+                    stateItem->setId(subElement.attribute("id"));
+                    stateItem->setEmblem(XMLWork::getElementText(subElement, "emblem"));
                     QDomElement textElement = XMLWork::getElement(subElement, "text");
-                    state->setBold(XMLWork::trueOrFalse(textElement.attribute("bold",      "false")));
-                    state->setItalic(XMLWork::trueOrFalse(textElement.attribute("italic",    "false")));
-                    state->setUnderline(XMLWork::trueOrFalse(textElement.attribute("underline", "false")));
-                    state->setStrikeOut(XMLWork::trueOrFalse(textElement.attribute("strikeOut", "false")));
+                    stateItem->setBold(XMLWork::trueOrFalse(textElement.attribute("bold",      "false")));
+                    stateItem->setItalic(XMLWork::trueOrFalse(textElement.attribute("italic",    "false")));
+                    stateItem->setUnderline(XMLWork::trueOrFalse(textElement.attribute("underline", "false")));
+                    stateItem->setStrikeOut(XMLWork::trueOrFalse(textElement.attribute("strikeOut", "false")));
                     QString textColor = textElement.attribute("color", "");
-                    state->setTextColor(textColor.isEmpty() ? QColor() : QColor(textColor));
+                    stateItem->setTextColor(textColor.isEmpty() ? QColor() : QColor(textColor));
                     QDomElement fontElement = XMLWork::getElement(subElement, "font");
-                    state->setFontName(fontElement.attribute("name", ""));
+                    stateItem->setFontName(fontElement.attribute("name", ""));
                     QString fontSize = fontElement.attribute("size", "");
-                    state->setFontSize(fontSize.isEmpty() ? -1 : fontSize.toInt());
+                    stateItem->setFontSize(fontSize.isEmpty() ? -1 : fontSize.toInt());
                     QString backgroundColor = XMLWork::getElementText(subElement, "backgroundColor", "");
-                    state->setBackgroundColor(backgroundColor.isEmpty() ? QColor() : QColor(backgroundColor));
+                    stateItem->setBackgroundColor(backgroundColor.isEmpty() ? QColor() : QColor(backgroundColor));
                     QDomElement textEquivalentElement = XMLWork::getElement(subElement, "textEquivalent");
-                    state->setTextEquivalent(textEquivalentElement.attribute("string", ""));
-                    state->setOnAllTextLines(XMLWork::trueOrFalse(textEquivalentElement.attribute("onAllTextLines", "false")));
+                    stateItem->setTextEquivalent(textEquivalentElement.attribute("string", ""));
+                    stateItem->setOnAllTextLines(XMLWork::trueOrFalse(textEquivalentElement.attribute("onAllTextLines", "false")));
                     QString allowXRef = XMLWork::getElementText(subElement, "allowCrossReferences", "true");
-                    state->setAllowCrossReferences(XMLWork::trueOrFalse(allowXRef));
-                    tag->appendState(state);
+                    stateItem->setAllowCrossReferences(XMLWork::trueOrFalse(allowXRef));
+                    stateItem->setData(XMLWork::getElementText(subElement, "name"));
                 }
                 subNode = subNode.nextSibling();
             }
-            // If the Tag is Valid:
-            if (tag->countStates() > 0) {
-                // Rename Things if Needed:
-                State *firstState = tag->states().first();
-                if (tag->countStates() == 1 && firstState->name().isEmpty())
-                    firstState->setName(tag->name());
-                if (tag->name().isEmpty())
-                    tag->setName(firstState->name());
-                // Add the Tag:
-                m_tags.append(tag);
-            }
+            // Set the item data
+            tagItem->setData(name);
+            tagItem->setEmblem(tagItem->child(0)->emblem());
+            tagItem->setInheritedBySiblings(XMLWork::trueOrFalse(inherited));
+            if (tagItem->data() == "")
+                tagItem->setData(tagItem->child(0)->data());
+            tagItem->updateAction(shortcut);
         }
         node = node.nextSibling();
     }
 }
 
-void TagManager::saveTags()
+void TagModel::saveTags()
 {
     DEBUG_WIN << "Saving tags...";
-    saveTagsTo(m_tags, Global::savesFolder() + "tags.xml");
+    saveTagsTo(Global::savesFolder() + "tags.xml");
 }
 
-void TagManager::saveTagsTo(QList<Tag*> &list, const QString &fullPath)
+void TagModel::saveTagsTo(const QString &fullPath)
 {
     // Create Document:
     QDomDocument document(/*doctype=*/"basketTags");
@@ -535,24 +561,26 @@ void TagManager::saveTagsTo(QList<Tag*> &list, const QString &fullPath)
     document.appendChild(root);
 
     // Save all tags:
-    for (QList<Tag*>::iterator it = list.begin(); it != list.end(); ++it) {
-        Tag *tag = *it;
+    for (int row = 0; row < rootItem->childCount(); ++row) {
+        QModelIndex tagIndex = index(row, 0);
+        TagModelItem *tag = getItem(tagIndex);
         // Create tag node:
         QDomElement tagNode = document.createElement("tag");
         root.appendChild(tagNode);
         // Save tag properties:
-        XMLWork::addElement(document, tagNode, "name",      tag->name());
-        XMLWork::addElement(document, tagNode, "shortcut", tag->shortcut().toString());
+        XMLWork::addElement(document, tagNode, "name",      data(tagIndex, Qt::DisplayRole).toString());
+        XMLWork::addElement(document, tagNode, "shortcut",  tag->action()->shortcut().toString());
         XMLWork::addElement(document, tagNode, "inherited", XMLWork::trueOrFalse(tag->inheritedBySiblings()));
         // Save all states:
-        for (QList<State*>::iterator it2 = (*it)->states().begin(); it2 != (*it)->states().end(); ++it2) {
-            State *state = *it2;
+        for (int subrow = 0; subrow < tag->childCount(); ++subrow) {
+            QModelIndex stateIndex = index(subrow, 0, tagIndex);
+            TagModelItem *state = tag->child(subrow);
             // Create state node:
             QDomElement stateNode = document.createElement("state");
             tagNode.appendChild(stateNode);
             // Save state properties:
             stateNode.setAttribute("id", state->id());
-            XMLWork::addElement(document, stateNode, "name",   state->name());
+            XMLWork::addElement(document, stateNode, "name",   data(stateIndex, Qt::DisplayRole).toString());
             XMLWork::addElement(document, stateNode, "emblem", state->emblem());
             QDomElement textNode = document.createElement("text");
             stateNode.appendChild(textNode);
@@ -581,7 +609,7 @@ void TagManager::saveTagsTo(QList<Tag*> &list, const QString &fullPath)
         DEBUG_WIN << "<font color=red>FAILED to save tags</font>!";
 }
 
-void TagManager::createDefaultTagsSet(const QString &fullPath)
+void TagModel::createDefaultTagsSet(const QString &fullPath)
 {
     QString xml = QString(
                       "<!DOCTYPE basketTags>\n"

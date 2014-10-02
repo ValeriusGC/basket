@@ -211,9 +211,9 @@ public:
 
 /// VISIBLE AREAS COMPUTATION:
 private:
-    QList<QRectF> m_areas;
-    bool              m_computedAreas;
-    bool              m_onTop;
+    QList<QRectF>       m_areas;
+    bool                m_computedAreas;
+    bool                m_onTop;
     void recomputeAreas();
     bool recomputeAreas(Note *note, bool noteIsAfterThis);
 public:
@@ -283,35 +283,29 @@ private:
 
 /// TAGS:
 private:
-    QList<State*>   m_states;
-    State           m_computedState;
-    int             m_emblemsCount;
-    bool            m_haveInvisibleTags;
+    QList<TagModelItem*>    m_states;
+    TagDisplay              m_computedState;
+    int                     m_emblemsCount;
+    bool                    m_haveInvisibleTags;
 public:
-    /*const */QList<State*>& states() const;
+    /*const */QList<TagModelItem*>& states() const;
     inline int emblemsCount() {
         return m_emblemsCount;
     }
-    void addState(State *state, bool orReplace = true);
-    void addTag(Tag *tag);
-    void removeState(State *state);
-    void removeTag(Tag *tag);
-    void removeAllTags();
-    void addTagToSelectedNotes(Tag *tag);
-    void removeTagFromSelectedNotes(Tag *tag);
-    void removeAllTagsFromSelectedNotes();
-    void addStateToSelectedNotes(State *state, bool orReplace = true);
-    void changeStateOfSelectedNotes(State *state);
-    bool selectedNotesHaveTags();
+    void activatedTagShortcut(TagModelItem *tag, bool isActive);
+    void addState(TagModelItem *state);
+    void removeState(TagModelItem *state);
+    void removeAllStates();
+    void addStateToSelectedNotes(TagModelItem *state);
+    void removeStateFromSelectedNotes(TagModelItem *state);
+    void removeAllStatesFromSelectedNotes();
+    bool selectedNotesHaveStates();
     void inheritTagsOf(Note *note);
-    bool hasTag(Tag *tag);
-    bool hasState(State *state);
-    State* stateOfTag(Tag *tag);
-    State* stateForEmblemNumber(int number) const;
-    bool stateForTagFromSelectedNotes(Tag *tag, State **state);
+    bool hasState(TagModelItem *state);
+    TagModelItem* stateOfTag(TagModelItem *tag);
+    TagModelItem* stateForEmblemNumber(int number) const;
     void   recomputeStyle();
     void   recomputeAllStyles();
-    bool   removedStates(const QList<State*> &deletedStates);
     QFont  font(); // Computed!
     QColor backgroundColor(); // Computed!
     QColor textColor(); // Computed!
@@ -342,9 +336,9 @@ public:
     //void update();
     void linkLookChanged();
 
-    void usedStates(QList<State*> &states);
+    void usedStates(QList<TagModelItem*> &states);
 
-    void listUsedTags(QList<Tag*> &list);
+    void listUsedTags(QList<TagModelItem*> &list);
 
 
     Note* nextInStack();
